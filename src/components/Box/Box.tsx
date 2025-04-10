@@ -22,6 +22,8 @@ export interface BoxProps extends React.HTMLAttributes<HTMLDivElement> {
 
 	bevelHighlightSize?: number;
 	bevelShadowSize?: number;
+	embossHighlightSize?: number;
+	embossShadowSize?: number;
 }
 
 type SnapAdjustment = {
@@ -63,6 +65,8 @@ export const Box: React.FC<BoxProps> = ({
 	borderColor,
 	bevelHighlightSize: rawBevelHighlightSize,
 	bevelShadowSize: rawBevelShadowSize,
+	embossHighlightSize: rawEmbossHighlightSize,
+	embossShadowSize: rawEmbossShadowSize,
 	...rest
 }) => {
 	const clampValue = (value?: number) =>
@@ -71,6 +75,8 @@ export const Box: React.FC<BoxProps> = ({
 	const borderSize = clampValue(rawBorderSize);
 	const bevelHighlightSize = clampValue(rawBevelHighlightSize);
 	const bevelShadowSize = clampValue(rawBevelShadowSize);
+	const embossHighlightSize = clampValue(rawEmbossHighlightSize);
+	const embossShadowSize = clampValue(rawEmbossShadowSize);
 
 	const { blockSize, rootAncestor } = useChonkit();
 	const ref = useRef<HTMLDivElement>(null);
@@ -81,13 +87,17 @@ export const Box: React.FC<BoxProps> = ({
 		snap ||
 		borderRadius !== undefined ||
 		!!bevelHighlightSize ||
-		!!bevelShadowSize;
+		!!bevelShadowSize ||
+		!!embossHighlightSize ||
+		!!embossShadowSize;
 
 	const shouldFabricateBorder = borderSize && borderRadius;
 	const fabricatedBorder = useRef<HTMLDivElement>(null);
 
 	const bevelHighlight = useRef<HTMLDivElement>(null);
 	const bevelShadow = useRef<HTMLDivElement>(null);
+	const embossHighlight = useRef<HTMLDivElement>(null);
+	const embossShadow = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
 		if (!shouldMonitorItsSize) return;
@@ -219,6 +229,8 @@ export const Box: React.FC<BoxProps> = ({
 			...containerProps,
 			ref,
 			style: {
+				...containerProps?.style,
+
 				// if there's a border, but no rounded corner, we can use a box shadow for the border
 				boxShadow:
 					borderSize && !shouldFabricateBorder
@@ -226,32 +238,64 @@ export const Box: React.FC<BoxProps> = ({
 								blockSize * borderSize
 						  }px ${borderColor}`
 						: undefined,
-				...containerProps?.style,
+
+				// filter: [
+				// 	// ...containerProps?.style?.filter,
+				// 	embossShadowSize &&
+				// 		`drop-shadow(0px ${
+				// 			blockSize * -embossShadowSize
+				// 		}px 0 var(--chonkit-shadow-color))`,
+				// ]
+				// 	.filter((x) => !!x)
+				// 	.join(" "),
 			},
 			className: `${styles.container} ${containerProps?.className}`,
 		},
-		<div ref={innerRef} className={styles.inner} {...rest}>
-			{shouldFabricateBorder && (
+		<>
+			<div ref={innerRef} className={styles.inner} {...rest}>
+				{shouldFabricateBorder && (
+					<div
+						ref={fabricatedBorder}
+						style={{
+							position: "absolute",
+							top: 0,
+							left: 0,
+							right: 0,
+							bottom: 0,
+							background: borderColor,
+							pointerEvents: "none",
+						}}
+					></div>
+				)}
+				{!!bevelHighlightSize && (
+					<div
+						ref={bevelHighlight}
+						className={styles.highlight}
+					></div>
+				)}
+				{!!bevelShadowSize && (
+					<div ref={bevelShadow} className={styles.shadow}></div>
+				)}
+				{children}
+			</div>
+			{!!embossHighlightSize && (
 				<div
-					ref={fabricatedBorder}
+					ref={embossHighlight}
+					className={`${styles.highlight} ${styles.embossment}`}
 					style={{
-						position: "absolute",
-						top: 0,
-						left: 0,
-						right: 0,
-						bottom: 0,
-						background: borderColor,
-						pointerEvents: "none",
+						bottom: `${blockSize * -embossHighlightSize}px`,
 					}}
 				></div>
 			)}
-			{!!bevelHighlightSize && (
-				<div ref={bevelHighlight} className={styles.highlight}></div>
+			{!!embossShadowSize && (
+				<div
+					ref={embossShadow}
+					className={`${styles.shadow} ${styles.embossment}`}
+					style={{
+						top: `${blockSize * -embossShadowSize}px`,
+					}}
+				></div>
 			)}
-			{!!bevelShadowSize && (
-				<div ref={bevelShadow} className={styles.shadow}></div>
-			)}
-			{children}
-		</div>
+		</>
 	);
 };

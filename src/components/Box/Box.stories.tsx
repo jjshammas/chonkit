@@ -44,6 +44,26 @@ export const WithBevel: Story = {
 	},
 };
 
+export const Embossed: Story = {
+	args: {
+		borderRadius: 12,
+		embossHighlightSize: 2,
+		embossShadowSize: 4,
+	},
+	decorators: [
+		(Story) => (
+			<div
+				style={{
+					backgroundColor: "pink",
+					padding: "20px",
+				}}
+			>
+				<Story />
+			</div>
+		),
+	],
+};
+
 export const InsideFlexContainer: Story = {
 	args: {
 		borderRadius: 10,

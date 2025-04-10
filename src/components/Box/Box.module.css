@@ -10,6 +10,8 @@
 	height: 100%;
 	box-sizing: border-box;
 	flex: 1 1 auto;
+	z-index: 5;
+	position: relative;
 }
 
 .highlight {
@@ -26,4 +28,13 @@
 	background: var(--chonkit-shadow-color);
 	mix-blend-mode: var(--chonkit-shadow-blend-mode);
 	pointer-events: none;
+}
+
+.embossment {
+	top: auto;
+	bottom: auto;
+	left: 0;
+	right: 0;
+	height: 100%;
+	z-index: 1;
 }
