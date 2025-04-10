@@ -1,0 +1,29 @@
+.container {
+	position: relative;
+	display: block;
+	transform-origin: top left;
+}
+
+.inner {
+	display: block;
+	width: 100%;
+	height: 100%;
+	box-sizing: border-box;
+	flex: 1 1 auto;
+}
+
+.highlight {
+	position: absolute;
+	inset: 0;
+	background: var(--chonkit-highlight-color);
+	mix-blend-mode: var(--chonkit-highlight-blend-mode);
+	pointer-events: none;
+}
+
+.shadow {
+	position: absolute;
+	inset: 0;
+	background: var(--chonkit-shadow-color);
+	mix-blend-mode: var(--chonkit-shadow-blend-mode);
+	pointer-events: none;
+}

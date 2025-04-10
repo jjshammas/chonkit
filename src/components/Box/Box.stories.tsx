@@ -1,0 +1,82 @@
+import type { Meta, StoryObj } from "@storybook/react";
+
+import { Box } from "./Box";
+
+/**
+ * This is just an example
+ */
+const meta = {
+	component: Box,
+	tags: ["autodocs"],
+	args: {
+		children: (
+			<div
+				style={{
+					padding: "40px",
+					backgroundColor: "#ddd",
+				}}
+			>
+				Hello World
+			</div>
+		),
+	},
+	parameters: {
+		controls: {
+			exclude: "children",
+		},
+	},
+} satisfies Meta<typeof Box>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {
+	args: {
+		borderRadius: 12,
+	},
+};
+
+export const WithBevel: Story = {
+	args: {
+		borderRadius: 12,
+		bevelHighlightSize: 2,
+		bevelShadowSize: 4,
+	},
+};
+
+export const InsideFlexContainer: Story = {
+	args: {
+		borderRadius: 10,
+		containerProps: {
+			style: {
+				flex: 1,
+				height: "100%",
+			},
+		},
+		style: {
+			backgroundColor: "#fff",
+		},
+		children: <span>"Hello World"</span>,
+	},
+	decorators: [
+		(Story) => (
+			<div
+				style={{
+					display: "flex",
+					flexDirection: "row",
+					alignItems: "center",
+					justifyContent: "center",
+					height: "300px",
+					backgroundColor: "#ddd",
+					gap: "20px",
+					padding: "20px",
+				}}
+			>
+				<Story />
+				<div style={{ width: "100px", backgroundColor: "#bbb" }}>
+					Adjacent fixed-width element
+				</div>
+			</div>
+		),
+	],
+};

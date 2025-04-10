@@ -1,0 +1,17 @@
+@import url("https://fonts.googleapis.com/css2?family=Jersey+10&family=Tiny5&display=swap");
+
+@import "./reset.css";
+@import "./variables.css";
+
+.chonkit-root {
+	/* font-family: "Jersey 10", monospace;
+	font-weight: 400;
+	font-style: normal;
+	font-size: 37.32px; */
+
+	font-family: "Tiny5", monospace;
+	font-weight: 400;
+	font-style: normal;
+	font-size: 16px;
+	line-height: 22px;
+}

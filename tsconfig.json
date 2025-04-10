@@ -1,0 +1,30 @@
+{
+	"compilerOptions": {
+		"target": "ESNext", // Modern target; adjust if you need older environments.
+		"module": "ESNext", // Use ESNext modules; Vite will handle bundling.
+		"lib": ["DOM", "ESNext"], // Include DOM and modern ECMAScript APIs.
+		"jsx": "react-jsx", // Use the new JSX transform (React 17+).
+		"declaration": true, // Emit .d.ts files for consumers.
+		"declarationDir": "dist/types", // Output directory for declaration files.
+		"sourceMap": true, // Generate source maps.
+		"outDir": "dist", // Output directory for compiled code.
+		"strict": true, // Enable strict type checking options.
+		"moduleResolution": "node", // Use Node's module resolution.
+		"resolveJsonModule": true, // Allow importing JSON files.
+		"isolatedModules": true, // Ensure each file can be transpiled independently.
+		"esModuleInterop": true, // Smooth interoperability with CommonJS modules.
+		"skipLibCheck": true, // Skip type checking of declaration files for faster builds.
+		"forceConsistentCasingInFileNames": true, // Enforce consistent file naming.
+		"baseUrl": ".", // Set the base URL for module resolution.
+		"paths": {
+			"@/*": ["./src/*"] // Map "@/..." to "src/..."
+		}
+	},
+	"include": [
+		"src" // Include your source files.
+	],
+	"exclude": [
+		"node_modules",
+		"dist" // Exclude examples or test directories.
+	]
+}

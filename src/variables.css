@@ -1,0 +1,10 @@
+:where(.chonkit-root) {
+	--chonkit-brand-primary: #007bff;
+	--chonkit-brand-primary-hover: #2c92ff;
+	--chonkit-brand-primary-foreground: #ffffff;
+
+	--chonkit-highlight-color: rgba(255, 255, 255, 0.5);
+	--chonkit-highlight-blend-mode: soft-light;
+	--chonkit-shadow-color: rgba(0, 0, 0, 0.2);
+	--chonkit-shadow-blend-mode: multiply;
+}

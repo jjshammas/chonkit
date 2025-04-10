@@ -1,0 +1,41 @@
+{
+	"name": "chonkit",
+	"version": "1.0.0",
+	"description": "",
+	"license": "ISC",
+	"author": "",
+	"type": "module",
+	"main": "index.js",
+	"scripts": {
+		"test": "vitest",
+		"dev": "vite",
+		"build": "vite build",
+		"preview": "vite preview",
+		"storybook": "storybook dev -p 6006",
+		"build-storybook": "storybook build"
+	},
+	"devDependencies": {
+		"@storybook/addon-a11y": "^8.6.12",
+		"@storybook/addon-essentials": "^8.6.12",
+		"@storybook/addon-interactions": "^8.6.12",
+		"@storybook/addon-onboarding": "^8.6.12",
+		"@storybook/blocks": "^8.6.12",
+		"@storybook/react": "^8.6.12",
+		"@storybook/react-vite": "^8.6.12",
+		"@storybook/test": "^8.6.12",
+		"@types/node": "^22.14.0",
+		"@types/react": "^19.1.0",
+		"@types/react-dom": "^19.1.1",
+		"@vitejs/plugin-react": "^4.3.4",
+		"postcss-nested": "^7.0.2",
+		"postcss-preset-chonkit": "file:../postcss-preset-chonkit",
+		"storybook": "^8.6.12",
+		"typescript": "^5.8.3",
+		"vite": "^6.2.5",
+		"vitest": "^3.1.1"
+	},
+	"peerDependencies": {
+		"react": "^19.1.0",
+		"react-dom": "^19.1.0"
+	}
+}

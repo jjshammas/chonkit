@@ -1,0 +1,22 @@
+.buttonContainer {
+	display: inline-block;
+}
+
+.button {
+	background-color: var(--chonkit-brand-primary);
+	color: var(--chonkit-brand-primary-foreground);
+	padding: snap(6px) snap(16px);
+	text-shadow: 0 var(--chonkit-block-size) 0 rgba(0, 0, 0, 0.2);
+	cursor: pointer;
+	user-select: none;
+	-webkit-user-select: none;
+
+	&:hover {
+		background-color: var(--chonkit-brand-primary-hover);
+	}
+
+	&:active {
+		padding-top: calc(snap(6px) + var(--chonkit-block-size));
+		padding-bottom: calc(snap(6px) - var(--chonkit-block-size));
+	}
+}
