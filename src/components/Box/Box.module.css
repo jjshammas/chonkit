@@ -17,24 +17,19 @@
 .highlight {
 	position: absolute;
 	inset: 0;
-	background: var(--chonkit-highlight-color);
-	mix-blend-mode: var(--chonkit-highlight-blend-mode);
+	background: var(--chonkit-current-highlight-color);
+	mix-blend-mode: var(--chonkit-current-highlight-blend-mode);
 	pointer-events: none;
 }
 
 .shadow {
 	position: absolute;
 	inset: 0;
-	background: var(--chonkit-shadow-color);
-	mix-blend-mode: var(--chonkit-shadow-blend-mode);
+	background: var(--chonkit-current-shadow-color);
+	mix-blend-mode: var(--chonkit-current-shadow-blend-mode);
 	pointer-events: none;
 }
 
 .embossment {
-	top: auto;
-	bottom: auto;
-	left: 0;
-	right: 0;
-	height: 100%;
 	z-index: 1;
 }

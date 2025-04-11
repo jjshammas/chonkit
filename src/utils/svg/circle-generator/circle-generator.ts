@@ -1,3 +1,5 @@
+import type { LightingDirection } from "@/core/LightingProvider/LightingProvider";
+
 // Based on https://observablehq.com/@jheeffer/pixelated-circle
 export function generatePixelOval(radius: number) {
 	if (radius < 1) return [];
@@ -136,8 +138,6 @@ export function generateRoundedCornerPoints(
 		? radius.map((r) => Math.min(r, maxRadius))
 		: Array(4).fill(Math.min(radius, maxRadius));
 
-	console.log(radii);
-
 	const generateCornerArc = (radius: number) => {
 		const path: [number, number][] = [];
 		const arcGrid = generatePixelCornerArc(radius);
@@ -249,16 +249,20 @@ export function generateHighlightPoints(
 	borderSize: number,
 	blockSize: number,
 	effectSize: number,
-	direction: "top" | "bottom",
+	direction: LightingDirection,
 	width: number,
 	height: number
 ): [number, number][] {
 	const innerPoints = nudgePoints(
 		generateRoundedCornerPoints(radius, blockSize, width, height),
-		0,
 		(effectSize + borderSize) *
 			blockSize *
-			(direction === "bottom" ? -1 : 1)
+			(direction !== 90 && direction !== 270 ? 1 : 0) *
+			(direction < 90 || direction > 270 ? 1 : -1),
+		(effectSize + borderSize) *
+			blockSize *
+			(direction !== 0 && direction !== 180 ? 1 : 0) *
+			(direction < 180 ? 1 : -1)
 	);
 
 	innerPoints.push(

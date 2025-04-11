@@ -7,4 +7,9 @@
 	--chonkit-highlight-blend-mode: soft-light;
 	--chonkit-shadow-color: rgba(0, 0, 0, 0.2);
 	--chonkit-shadow-blend-mode: multiply;
+
+	--chonkit-current-highlight-color: var(--chonkit-highlight-color);
+	--chonkit-current-highlight-blend-mode: var(--chonkit-highlight-blend-mode);
+	--chonkit-current-shadow-color: var(--chonkit-shadow-color);
+	--chonkit-current-shadow-blend-mode: var(--chonkit-shadow-blend-mode);
 }

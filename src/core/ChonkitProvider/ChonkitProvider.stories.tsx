@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
 import { ChonkitProvider } from "./ChonkitProvider";
-import { Box } from "../Box/Box";
+import { Box } from "@/components/Box/Box";
 
 /**
  * The wrapping component for the Chonkit library. It provides the context for the

@@ -4,8 +4,9 @@ import {
 	convertPointsToPathString,
 } from "@/utils/svg/circle-generator/circle-generator";
 import type { GeometryObserver } from "./useGeometryObserver";
-import { useChonkit } from "../ChonkitProvider/ChonkitProvider";
+import { useChonkit } from "@/core/ChonkitProvider/ChonkitProvider";
 import type { RoundedCornerClipProps } from "./useRoundedCornerClip";
+import { useLighting } from "@/core/LightingProvider/LightingProvider";
 import styles from "./Box.module.css";
 
 export function useEmboss(
@@ -19,6 +20,7 @@ export function useEmboss(
 	geometry: GeometryObserver
 ) {
 	const { blockSize } = useChonkit();
+	const { direction } = useLighting();
 	const elementHighlight = useRef<HTMLDivElement>(null);
 	const elementShadow = useRef<HTMLDivElement>(null);
 
@@ -29,8 +31,14 @@ export function useEmboss(
 					generateRoundedCornerPoints(
 						options.borderRadius || 0,
 						blockSize,
-						width,
-						height
+						width +
+							(direction !== 90 && direction !== 270
+								? options.highlightSize * blockSize
+								: 0),
+						height +
+							(direction !== 0 && direction !== 180
+								? options.highlightSize * blockSize
+								: 0)
 					)
 				)}')`;
 				elementHighlight.current!.style.clipPath = highlightPath;
@@ -40,8 +48,14 @@ export function useEmboss(
 					generateRoundedCornerPoints(
 						options.borderRadius || 0,
 						blockSize,
-						width,
-						height
+						width +
+							(direction !== 90 && direction !== 270
+								? options.shadowSize * blockSize
+								: 0),
+						height +
+							(direction !== 0 && direction !== 180
+								? options.shadowSize * blockSize
+								: 0)
 					)
 				)}')`;
 				elementShadow.current!.style.clipPath = shadowPath;
@@ -58,6 +72,7 @@ export function useEmboss(
 		element,
 		elementHighlight,
 		elementShadow,
+		direction,
 	]);
 
 	const embossHighlightEl = options.highlightSize ? (
@@ -65,7 +80,30 @@ export function useEmboss(
 			ref={elementHighlight}
 			className={`${styles.highlight} ${styles.embossment}`}
 			style={{
-				bottom: `${blockSize * -options.highlightSize}px`,
+				bottom:
+					direction !== 0 && direction !== 180
+						? direction < 180
+							? `${blockSize * -options.highlightSize}px`
+							: 0
+						: 0,
+				top:
+					direction !== 0 && direction !== 180
+						? direction > 180
+							? `${blockSize * -options.highlightSize}px`
+							: 0
+						: 0,
+				left:
+					direction !== 90 && direction !== 270
+						? direction > 90 && direction < 270
+							? `${blockSize * -options.highlightSize}px`
+							: 0
+						: 0,
+				right:
+					direction !== 90 && direction !== 270
+						? direction < 90 || direction > 270
+							? `${blockSize * -options.highlightSize}px`
+							: 0
+						: 0,
 			}}
 		></div>
 	) : null;
@@ -75,7 +113,30 @@ export function useEmboss(
 			ref={elementShadow}
 			className={`${styles.shadow} ${styles.embossment}`}
 			style={{
-				top: `${blockSize * -options.shadowSize}px`,
+				top:
+					direction !== 0 && direction !== 180
+						? direction < 180
+							? `${blockSize * -options.shadowSize}px`
+							: 0
+						: 0,
+				bottom:
+					direction !== 0 && direction !== 180
+						? direction > 180
+							? `${blockSize * -options.shadowSize}px`
+							: 0
+						: 0,
+				right:
+					direction !== 90 && direction !== 270
+						? direction > 90 && direction < 270
+							? `${blockSize * -options.shadowSize}px`
+							: 0
+						: 0,
+				left:
+					direction !== 90 && direction !== 270
+						? direction < 90 || direction > 270
+							? `${blockSize * -options.shadowSize}px`
+							: 0
+						: 0,
 			}}
 		></div>
 	) : null;

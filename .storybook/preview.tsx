@@ -1,6 +1,10 @@
 import React from "react";
 import type { Preview } from "@storybook/react";
-import { ChonkitProvider } from "../src/components/ChonkitProvider/ChonkitProvider";
+import { ChonkitProvider } from "../src/core/ChonkitProvider/ChonkitProvider";
+import {
+	LightingDirection,
+	LightingProvider,
+} from "../src/core/LightingProvider/LightingProvider";
 import "../src/index.css";
 
 const preview: Preview = {
@@ -25,6 +29,12 @@ const preview: Preview = {
 				items: ["1", "1.5", "2", "3", "5", "10"],
 			},
 		},
+		lightingDirection: {
+			toolbar: {
+				title: "Lighting",
+				items: ["0", "45", "90", "135", "180", "225", "270", "315"],
+			},
+		},
 	},
 	initialGlobals: {
 		gridVisible: "off",
@@ -47,7 +57,17 @@ const preview: Preview = {
 						padding: "calc(2 * var(--chonkit-block-size))",
 					}}
 				>
-					<Story />
+					<LightingProvider
+						direction={
+							context.globals.lightingDirection
+								? (Number(
+										context.globals.lightingDirection
+								  ) as LightingDirection)
+								: 90
+						}
+					>
+						<Story />
+					</LightingProvider>
 				</ChonkitProvider>
 			);
 		},

@@ -4,7 +4,7 @@ import {
 	generateRoundedCornerPoints,
 } from "@/utils/svg/circle-generator/circle-generator";
 import type { GeometryObserver } from "./useGeometryObserver";
-import { useChonkit } from "../ChonkitProvider/ChonkitProvider";
+import { useChonkit } from "@/core/ChonkitProvider/ChonkitProvider";
 
 export type RoundedCornerClipProps = {
 	borderRadius?: number | [number, number, number, number];

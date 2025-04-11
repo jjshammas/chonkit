@@ -5,7 +5,7 @@ import {
 } from "@/utils/svg/circle-generator/circle-generator";
 import type { GeometryObserver } from "./useGeometryObserver";
 import type { RoundedCornerClipProps } from "./useRoundedCornerClip";
-import { useChonkit } from "../ChonkitProvider/ChonkitProvider";
+import { useChonkit } from "@/core/ChonkitProvider/ChonkitProvider";
 
 export function useFabricatedBorder(
 	element: React.RefObject<HTMLElement | null>,

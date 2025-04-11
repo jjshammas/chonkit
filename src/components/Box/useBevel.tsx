@@ -4,7 +4,11 @@ import {
 	convertPointsToPathString,
 } from "@/utils/svg/circle-generator/circle-generator";
 import type { GeometryObserver } from "./useGeometryObserver";
-import { useChonkit } from "../ChonkitProvider/ChonkitProvider";
+import { useChonkit } from "@/core/ChonkitProvider/ChonkitProvider";
+import {
+	useLighting,
+	rotateDirection,
+} from "@/core/LightingProvider/LightingProvider";
 import type { RoundedCornerClipProps } from "./useRoundedCornerClip";
 import styles from "./Box.module.css";
 
@@ -19,6 +23,7 @@ export function useBevel(
 	geometry: GeometryObserver
 ) {
 	const { blockSize } = useChonkit();
+	const { direction } = useLighting();
 	const elementHighlight = useRef<HTMLDivElement>(null);
 	const elementShadow = useRef<HTMLDivElement>(null);
 
@@ -31,7 +36,7 @@ export function useBevel(
 						options.borderSize || 0,
 						blockSize,
 						options.highlightSize,
-						"top",
+						direction,
 						width,
 						height
 					)
@@ -45,7 +50,7 @@ export function useBevel(
 						options.borderSize || 0,
 						blockSize,
 						options.shadowSize,
-						"bottom",
+						rotateDirection(direction, 180),
 						width,
 						height
 					)
@@ -64,6 +69,7 @@ export function useBevel(
 		element,
 		elementHighlight,
 		elementShadow,
+		direction,
 	]);
 
 	const bevelHighlightEl = options.highlightSize ? (

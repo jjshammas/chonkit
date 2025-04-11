@@ -3,6 +3,11 @@
 }
 
 .button {
+	--chonkit-current-highlight-color: var(--chonkit-highlight-color);
+	--chonkit-current-highlight-blend-mode: var(--chonkit-highlight-blend-mode);
+	--chonkit-current-shadow-color: var(--chonkit-shadow-color);
+	--chonkit-current-shadow-blend-mode: var(--chonkit-shadow-blend-mode);
+
 	background-color: var(--chonkit-brand-primary);
 	color: var(--chonkit-brand-primary-foreground);
 	padding: snap(6px) snap(16px);
@@ -16,7 +21,13 @@
 	}
 
 	&:active {
-		padding-top: calc(snap(6px) + var(--chonkit-block-size));
-		padding-bottom: calc(snap(6px) - var(--chonkit-block-size));
+		--chonkit-current-highlight-color: var(--chonkit-shadow-color);
+		--chonkit-current-highlight-blend-mode: var(
+			--chonkit-shadow-blend-mode
+		);
+		--chonkit-current-shadow-color: var(--chonkit-highlight-color);
+		--chonkit-current-shadow-blend-mode: var(
+			--chonkit-highlight-blend-mode
+		);
 	}
 }

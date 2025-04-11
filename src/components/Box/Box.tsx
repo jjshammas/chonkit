@@ -1,5 +1,5 @@
 import React, { ReactNode, useRef } from "react";
-import { useChonkit } from "../ChonkitProvider/ChonkitProvider";
+import { useChonkit } from "@/core/ChonkitProvider/ChonkitProvider";
 import { useGeometryObserver } from "./useGeometryObserver";
 import { useFabricatedBorder } from "./useFabricatedBorder";
 import {

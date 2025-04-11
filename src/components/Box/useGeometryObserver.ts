@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { useChonkit } from "../ChonkitProvider/ChonkitProvider";
+import { useChonkit } from "@/core/ChonkitProvider/ChonkitProvider";
 
 export type Geometry = { width: number; height: number; x: number; y: number };
 export type GeometryCallback = (geometry: Geometry) => void;

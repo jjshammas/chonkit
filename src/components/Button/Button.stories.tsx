@@ -8,6 +8,9 @@ import { Button } from "./Button";
 const meta = {
 	component: Button,
 	tags: ["autodocs"],
+	parameters: {
+		layout: "centered",
+	},
 	args: {
 		children: "Click me",
 	},

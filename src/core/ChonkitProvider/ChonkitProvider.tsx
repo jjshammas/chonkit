@@ -1,10 +1,4 @@
-import React, {
-	createContext,
-	ReactNode,
-	useContext,
-	useRef,
-	useState,
-} from "react";
+import React, { createContext, ReactNode, useContext, useRef } from "react";
 
 interface ChonkitContextValue {
 	blockSize: number;
