@@ -1,7 +1,11 @@
 import { useEffect, useRef } from "react";
-import { generateHighlightPath } from "@/utils/svg/circle-generator/circle-generator";
+import {
+	generateHighlightPoints,
+	convertPointsToPathString,
+} from "@/utils/svg/circle-generator/circle-generator";
 import type { GeometryObserver } from "./useGeometryObserver";
 import { useChonkit } from "../ChonkitProvider/ChonkitProvider";
+import type { RoundedCornerClipProps } from "./useRoundedCornerClip";
 import styles from "./Box.module.css";
 
 export function useBevel(
@@ -9,7 +13,7 @@ export function useBevel(
 	options: {
 		highlightSize?: number;
 		shadowSize?: number;
-		borderRadius?: number;
+		borderRadius?: RoundedCornerClipProps["borderRadius"];
 		borderSize?: number;
 	},
 	geometry: GeometryObserver
@@ -21,26 +25,30 @@ export function useBevel(
 	useEffect(() => {
 		const unsubscribe = geometry.subscribe(({ width, height }) => {
 			if (options.highlightSize) {
-				const highlightPath = `path('${generateHighlightPath(
-					options.borderRadius || 0,
-					options.borderSize || 0,
-					blockSize,
-					options.highlightSize,
-					"top",
-					width,
-					height
+				const highlightPath = `path('${convertPointsToPathString(
+					generateHighlightPoints(
+						options.borderRadius || 0,
+						options.borderSize || 0,
+						blockSize,
+						options.highlightSize,
+						"top",
+						width,
+						height
+					)
 				)}')`;
 				elementHighlight.current!.style.clipPath = highlightPath;
 			}
 			if (options.shadowSize) {
-				const shadowPath = `path('${generateHighlightPath(
-					options.borderRadius || 0,
-					options.borderSize || 0,
-					blockSize,
-					options.shadowSize,
-					"bottom",
-					width,
-					height
+				const shadowPath = `path('${convertPointsToPathString(
+					generateHighlightPoints(
+						options.borderRadius || 0,
+						options.borderSize || 0,
+						blockSize,
+						options.shadowSize,
+						"bottom",
+						width,
+						height
+					)
 				)}')`;
 				elementShadow.current!.style.clipPath = shadowPath;
 			}

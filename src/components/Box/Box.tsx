@@ -2,16 +2,19 @@ import React, { ReactNode, useRef } from "react";
 import { useChonkit } from "../ChonkitProvider/ChonkitProvider";
 import { useGeometryObserver } from "./useGeometryObserver";
 import { useFabricatedBorder } from "./useFabricatedBorder";
-import { useRoundedCornerClip } from "./useRoundedCornerClip";
+import {
+	useRoundedCornerClip,
+	RoundedCornerClipProps,
+} from "./useRoundedCornerClip";
 import { useBevel } from "./useBevel";
 import styles from "./Box.module.css";
 
-export interface BoxProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface BoxProps
+	extends React.HTMLAttributes<HTMLDivElement>,
+		RoundedCornerClipProps {
 	as?: React.ElementType;
 	children?: ReactNode;
 	containerProps?: React.HTMLAttributes<HTMLDivElement>;
-
-	borderRadius?: number;
 
 	snap?: boolean;
 	snapMethod?: "transform" | "padding";
@@ -29,7 +32,7 @@ export const Box: React.FC<BoxProps> = ({
 	as,
 	children,
 	containerProps,
-	borderRadius: rawBorderRadius,
+	borderRadius,
 	snap,
 	snapMethod = "transform",
 	borderSize: rawBorderSize,
@@ -42,7 +45,6 @@ export const Box: React.FC<BoxProps> = ({
 }) => {
 	const clampValue = (value?: number) =>
 		value !== undefined ? Math.max(value, 0) : undefined;
-	const borderRadius = clampValue(rawBorderRadius);
 	const borderSize = clampValue(rawBorderSize);
 	const bevelHighlightSize = clampValue(rawBevelHighlightSize);
 	const bevelShadowSize = clampValue(rawBevelShadowSize);
@@ -81,31 +83,25 @@ export const Box: React.FC<BoxProps> = ({
 		{
 			...containerProps,
 			ref,
-			style: {
-				...containerProps?.style,
-
-				// if there's a border, but no rounded corner, we can use a box shadow for the border
-				boxShadow:
-					borderSize && !shouldFabricateBorder
-						? `inset 0 0 0 ${
-								blockSize * borderSize
-						  }px ${borderColor}`
-						: undefined,
-
-				// filter: [
-				// 	// ...containerProps?.style?.filter,
-				// 	embossShadowSize &&
-				// 		`drop-shadow(0px ${
-				// 			blockSize * -embossShadowSize
-				// 		}px 0 var(--chonkit-shadow-color))`,
-				// ]
-				// 	.filter((x) => !!x)
-				// 	.join(" "),
-			},
 			className: `${styles.container} ${containerProps?.className}`,
 		},
 		<>
-			<div ref={innerRef} className={styles.inner} {...rest}>
+			<div
+				ref={innerRef}
+				className={styles.inner}
+				{...rest}
+				style={{
+					...rest.style,
+
+					// if there's a border, but no rounded corner, we can use a box shadow for the border
+					boxShadow:
+						borderSize && !shouldFabricateBorder
+							? `inset 0 0 0 ${
+									blockSize * borderSize
+							  }px ${borderColor}`
+							: undefined,
+				}}
+			>
 				{fabricatedBorderEl}
 				{bevelHighlightEl}
 				{bevelShadowEl}

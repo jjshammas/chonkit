@@ -1,13 +1,18 @@
 import { useEffect } from "react";
-import { generateRoundedCornerPath } from "@/utils/svg/circle-generator/circle-generator";
+import {
+	convertPointsToPathString,
+	generateRoundedCornerPoints,
+} from "@/utils/svg/circle-generator/circle-generator";
 import type { GeometryObserver } from "./useGeometryObserver";
 import { useChonkit } from "../ChonkitProvider/ChonkitProvider";
 
+export type RoundedCornerClipProps = {
+	borderRadius?: number | [number, number, number, number];
+};
+
 export function useRoundedCornerClip(
 	element: React.RefObject<HTMLElement | null>,
-	options: {
-		borderRadius?: number;
-	},
+	options: RoundedCornerClipProps,
 	geometry: GeometryObserver
 ) {
 	const { blockSize } = useChonkit();
@@ -23,12 +28,14 @@ export function useRoundedCornerClip(
 			height: number;
 		}) => {
 			if (!element.current) return;
-			if (options.borderRadius && options.borderRadius > 0) {
-				element.current.style.clipPath = `path('${generateRoundedCornerPath(
-					options.borderRadius!,
-					blockSize,
-					width,
-					height
+			if (options.borderRadius) {
+				element.current.style.clipPath = `path('${convertPointsToPathString(
+					generateRoundedCornerPoints(
+						options.borderRadius!,
+						blockSize,
+						width,
+						height
+					)
 				)}')`;
 			} else {
 				element.current.style.clipPath = "none";

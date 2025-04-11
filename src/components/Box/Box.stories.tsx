@@ -36,6 +36,12 @@ export const Default: Story = {
 	},
 };
 
+export const WithRoundedCorners: Story = {
+	args: {
+		borderRadius: [12, 8, 0, 5],
+	},
+};
+
 export const WithBevel: Story = {
 	args: {
 		borderRadius: 12,

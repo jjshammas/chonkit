@@ -1,12 +1,16 @@
 import { useEffect, useRef } from "react";
-import { generateBorderPath } from "@/utils/svg/circle-generator/circle-generator";
+import {
+	generateBorderPoints,
+	convertPointsToPathString,
+} from "@/utils/svg/circle-generator/circle-generator";
 import type { GeometryObserver } from "./useGeometryObserver";
+import type { RoundedCornerClipProps } from "./useRoundedCornerClip";
 import { useChonkit } from "../ChonkitProvider/ChonkitProvider";
 
 export function useFabricatedBorder(
 	element: React.RefObject<HTMLElement | null>,
 	options: {
-		borderRadius?: number;
+		borderRadius?: RoundedCornerClipProps["borderRadius"];
 		borderSize?: number;
 		borderColor?: string;
 	},
@@ -20,14 +24,16 @@ export function useFabricatedBorder(
 		if (!fabricatedBorder.current) return;
 
 		const unsubscribe = geometry.subscribe(({ width, height }) => {
-			const path = generateBorderPath(
+			const path = generateBorderPoints(
 				options.borderRadius!,
 				options.borderSize!,
 				blockSize,
 				width,
 				height
 			);
-			fabricatedBorder.current!.style.clipPath = `path('${path}')`;
+			fabricatedBorder.current!.style.clipPath = `path('${convertPointsToPathString(
+				path
+			)}')`;
 		});
 
 		return unsubscribe;

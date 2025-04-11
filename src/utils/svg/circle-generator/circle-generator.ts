@@ -1,5 +1,7 @@
 // Based on https://observablehq.com/@jheeffer/pixelated-circle
 export function generatePixelOval(radius: number) {
+	if (radius < 1) return [];
+
 	type Step = {
 		x: number;
 		y: number;
@@ -81,7 +83,7 @@ export function generatePixelOval(radius: number) {
 }
 
 // generates only the top-left corner of the oval
-export function generatePixelCornerArc(radius: number) {
+export function generatePixelCornerArc(radius: number): number[][] {
 	return generatePixelOval(radius)
 		.slice(0, radius)
 		.map((row) => row.slice(0, radius));
@@ -119,85 +121,107 @@ export function convertPointsToPathString(path: [number, number][]): string {
 	return pathStr.join(" ");
 }
 
+type RadiiAllCorners = [number, number, number, number];
 export function generateRoundedCornerPoints(
-	radius: number,
+	radius: number | RadiiAllCorners,
 	blockSize: number,
 	width: number,
 	height: number
 ): [number, number][] {
-	const arcGrid = generatePixelCornerArc(radius);
+	const maxRadius = Math.ceil(
+		Math.min(width / blockSize / 2, height / blockSize / 2)
+	);
+
+	const radii = Array.isArray(radius)
+		? radius.map((r) => Math.min(r, maxRadius))
+		: Array(4).fill(Math.min(radius, maxRadius));
+
+	console.log(radii);
+
+	const generateCornerArc = (radius: number) => {
+		const path: [number, number][] = [];
+		const arcGrid = generatePixelCornerArc(radius);
+		// in each arc, there are always radius * 2 + 1 points
+		// the first point is the left, bottom point of the arc
+		let currentXBlock = 0;
+		let currentYBlock = radius - 1;
+		path.push([0, radius]);
+		path.push([0, radius - 1]);
+		for (let i = 0; i < radius * 2; i++) {
+			// check if block exists above
+			if (
+				arcGrid[currentYBlock - 1] &&
+				arcGrid[currentYBlock - 1][currentXBlock]
+			) {
+				currentYBlock--;
+				path.push([currentXBlock, currentYBlock]);
+			} else if (
+				arcGrid[currentYBlock - 1] &&
+				arcGrid[currentYBlock - 1][currentXBlock + 1]
+			) {
+				currentYBlock--;
+				currentXBlock++;
+				path.push([currentXBlock, currentYBlock + 1]);
+				path.push([currentXBlock, currentYBlock]);
+			} else if (
+				arcGrid[currentYBlock] &&
+				arcGrid[currentYBlock][currentXBlock + 1]
+			) {
+				currentXBlock++;
+				path.push([currentXBlock, currentYBlock]);
+			}
+		}
+		path.push([radius, 0]);
+
+		// scale all the points based on the block size
+		path.forEach((point) => {
+			point[0] = point[0] * blockSize;
+			point[1] = point[1] * blockSize;
+		});
+
+		return path;
+	};
 
 	const path: [number, number][] = [];
 
-	// in each arc, there are always radius * 2 + 1 points
-	// the first point is the left, bottom point of the arc
-	let currentXBlock = 0;
-	let currentYBlock = radius - 1;
-	path.push([0, radius]);
-	path.push([0, radius - 1]);
-	for (let i = 0; i < radius * 2; i++) {
-		// check if block exists above
-		if (
-			arcGrid[currentYBlock - 1] &&
-			arcGrid[currentYBlock - 1][currentXBlock]
-		) {
-			currentYBlock--;
-			path.push([currentXBlock, currentYBlock]);
-		} else if (
-			arcGrid[currentYBlock - 1] &&
-			arcGrid[currentYBlock - 1][currentXBlock + 1]
-		) {
-			currentYBlock--;
-			currentXBlock++;
-			path.push([currentXBlock, currentYBlock + 1]);
-			path.push([currentXBlock, currentYBlock]);
-		} else if (
-			arcGrid[currentYBlock] &&
-			arcGrid[currentYBlock][currentXBlock + 1]
-		) {
-			currentXBlock++;
-			path.push([currentXBlock, currentYBlock]);
-		}
-	}
-	path.push([radius, 0]);
+	const topLeftCorner = generateCornerArc(radii[0]);
+	path.push(...topLeftCorner);
+	const topRightCorner = flipPointsAboutHorizontalAxis(
+		generateCornerArc(radii[1]),
+		width
+	);
+	path.push(...topRightCorner.reverse());
 
-	// scale all the points based on the block size
-	path.forEach((point) => {
-		point[0] = point[0] * blockSize;
-		point[1] = point[1] * blockSize;
-	});
+	const bottomRightCorner = flipPointsAboutVerticalAxis(
+		flipPointsAboutHorizontalAxis(generateCornerArc(radii[2]), width),
+		height
+	);
+	path.push(...bottomRightCorner);
 
-	// reverse the order so that we start with the top-left point of the top-right corner
-	const topRightCorner = flipPointsAboutHorizontalAxis(path, width).reverse();
-	path.push(...topRightCorner);
-
-	const bottomCorners = flipPointsAboutVerticalAxis(path, height).reverse();
-	path.push(...bottomCorners);
+	const bottomLeftCorner = flipPointsAboutVerticalAxis(
+		generateCornerArc(radii[3]),
+		height
+	).reverse();
+	path.push(...bottomLeftCorner);
 
 	return path;
 }
 
-export function generateRoundedCornerPath(
-	radius: number,
-	blockSize: number,
-	width: number,
-	height: number
-): string {
-	return convertPointsToPathString(
-		generateRoundedCornerPoints(radius, blockSize, width, height)
-	);
-}
-
-export function generateBorderPath(
-	radius: number,
+export function generateBorderPoints(
+	radius: number | RadiiAllCorners,
 	borderSize: number,
 	blockSize: number,
 	width: number,
 	height: number
-): string {
+): [number, number][] {
 	let innerPoints = nudgePoints(
 		generateRoundedCornerPoints(
-			radius - borderSize,
+			Array.isArray(radius)
+				? ((radius.map((r) => r - borderSize) as number[])
+						.slice(0, 4)
+						.concat(Array(4).fill(0).slice(radius.length))
+						.slice(0, 4) as RadiiAllCorners)
+				: radius - borderSize,
 			blockSize,
 			width - borderSize * blockSize * 2,
 			height - borderSize * blockSize * 2
@@ -217,18 +241,18 @@ export function generateBorderPath(
 		innerPoints[innerPoints.length - 1]
 	);
 
-	return convertPointsToPathString(innerPoints);
+	return innerPoints;
 }
 
-export function generateHighlightPath(
-	radius: number,
+export function generateHighlightPoints(
+	radius: number | RadiiAllCorners,
 	borderSize: number,
 	blockSize: number,
 	effectSize: number,
 	direction: "top" | "bottom",
 	width: number,
 	height: number
-): string {
+): [number, number][] {
 	const innerPoints = nudgePoints(
 		generateRoundedCornerPoints(radius, blockSize, width, height),
 		0,
@@ -247,5 +271,5 @@ export function generateHighlightPath(
 		innerPoints[innerPoints.length - 1]
 	);
 
-	return convertPointsToPathString(innerPoints);
+	return innerPoints;
 }
