@@ -49,7 +49,7 @@ export const Box: React.FC<BoxProps> = ({
 	const embossHighlightSize = clampValue(rawEmbossHighlightSize);
 	const embossShadowSize = clampValue(rawEmbossShadowSize);
 
-	const { blockSize, rootAncestor } = useChonkit();
+	const { blockSize } = useChonkit();
 	const ref = useRef<HTMLDivElement>(null);
 	const innerRef = useRef<HTMLDivElement>(null);
 
@@ -58,11 +58,11 @@ export const Box: React.FC<BoxProps> = ({
 	const embossHighlight = useRef<HTMLDivElement>(null);
 	const embossShadow = useRef<HTMLDivElement>(null);
 
-	const geometry = useGeometryObserver(ref, rootAncestor);
-	useRoundedCornerClip(ref, innerRef, { borderRadius, blockSize }, geometry);
+	const geometry = useGeometryObserver(ref);
+	useRoundedCornerClip(innerRef, { borderRadius }, geometry);
 	const { fabricatedBorderEl } = useFabricatedBorder(
 		ref,
-		{ borderRadius, borderSize, blockSize, borderColor },
+		{ borderRadius, borderSize, borderColor },
 		geometry
 	);
 	const { bevelHighlightEl, bevelShadowEl } = useBevel(
@@ -70,7 +70,6 @@ export const Box: React.FC<BoxProps> = ({
 		{
 			borderRadius,
 			borderSize,
-			blockSize,
 			highlightSize: bevelHighlightSize,
 			shadowSize: bevelShadowSize,
 		},

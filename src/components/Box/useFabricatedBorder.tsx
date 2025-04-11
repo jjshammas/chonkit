@@ -1,17 +1,18 @@
 import { useEffect, useRef } from "react";
 import { generateBorderPath } from "@/utils/svg/circle-generator/circle-generator";
 import type { GeometryObserver } from "./useGeometryObserver";
+import { useChonkit } from "../ChonkitProvider/ChonkitProvider";
 
 export function useFabricatedBorder(
 	element: React.RefObject<HTMLElement | null>,
 	options: {
 		borderRadius?: number;
 		borderSize?: number;
-		blockSize: number;
 		borderColor?: string;
 	},
 	geometry: GeometryObserver
 ) {
+	const { blockSize } = useChonkit();
 	const fabricatedBorder = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
@@ -22,7 +23,7 @@ export function useFabricatedBorder(
 			const path = generateBorderPath(
 				options.borderRadius!,
 				options.borderSize!,
-				options.blockSize,
+				blockSize,
 				width,
 				height
 			);
@@ -33,7 +34,7 @@ export function useFabricatedBorder(
 	}, [
 		options.borderRadius,
 		options.borderSize,
-		options.blockSize,
+		blockSize,
 		element,
 		fabricatedBorder,
 	]);

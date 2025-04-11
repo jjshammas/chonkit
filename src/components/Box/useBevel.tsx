@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { generateHighlightPath } from "@/utils/svg/circle-generator/circle-generator";
 import type { GeometryObserver } from "./useGeometryObserver";
+import { useChonkit } from "../ChonkitProvider/ChonkitProvider";
 import styles from "./Box.module.css";
 
 export function useBevel(
@@ -10,10 +11,10 @@ export function useBevel(
 		shadowSize?: number;
 		borderRadius?: number;
 		borderSize?: number;
-		blockSize: number;
 	},
 	geometry: GeometryObserver
 ) {
+	const { blockSize } = useChonkit();
 	const elementHighlight = useRef<HTMLDivElement>(null);
 	const elementShadow = useRef<HTMLDivElement>(null);
 
@@ -23,7 +24,7 @@ export function useBevel(
 				const highlightPath = `path('${generateHighlightPath(
 					options.borderRadius || 0,
 					options.borderSize || 0,
-					options.blockSize,
+					blockSize,
 					options.highlightSize,
 					"top",
 					width,
@@ -35,7 +36,7 @@ export function useBevel(
 				const shadowPath = `path('${generateHighlightPath(
 					options.borderRadius || 0,
 					options.borderSize || 0,
-					options.blockSize,
+					blockSize,
 					options.shadowSize,
 					"bottom",
 					width,
@@ -49,7 +50,7 @@ export function useBevel(
 	}, [
 		options.borderRadius,
 		options.borderSize,
-		options.blockSize,
+		blockSize,
 		options.highlightSize,
 		options.shadowSize,
 		element,

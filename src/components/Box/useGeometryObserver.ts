@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useChonkit } from "../ChonkitProvider/ChonkitProvider";
 
 export type Geometry = { width: number; height: number; x: number; y: number };
 export type GeometryCallback = (geometry: Geometry) => void;
@@ -10,10 +11,10 @@ export type GeometryObserver = {
 };
 
 export function useGeometryObserver(
-	ref: React.RefObject<HTMLElement | null>,
-	rootAncestor: React.RefObject<HTMLElement | null>
+	ref: React.RefObject<HTMLElement | null>
 ): GeometryObserver {
 	const subscribers = useRef<Set<GeometryCallback>>(new Set());
+	const { rootAncestor } = useChonkit();
 
 	const notify = () => {
 		const el = ref.current;
