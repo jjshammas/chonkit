@@ -1,11 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { generateHighlightPath } from "@/utils/svg/circle-generator/circle-generator";
 import type { GeometryObserver } from "./useGeometryObserver";
+import styles from "./Box.module.css";
 
 export function useBevel(
 	element: React.RefObject<HTMLElement | null>,
-	elementHighlight: React.RefObject<HTMLElement | null>,
-	elementShadow: React.RefObject<HTMLElement | null>,
 	options: {
 		highlightSize?: number;
 		shadowSize?: number;
@@ -15,9 +14,10 @@ export function useBevel(
 	},
 	geometry: GeometryObserver
 ) {
-	useEffect(() => {
-		if (!elementHighlight || !elementShadow) return;
+	const elementHighlight = useRef<HTMLDivElement>(null);
+	const elementShadow = useRef<HTMLDivElement>(null);
 
+	useEffect(() => {
 		const unsubscribe = geometry.subscribe(({ width, height }) => {
 			if (options.highlightSize) {
 				const highlightPath = `path('${generateHighlightPath(
@@ -56,4 +56,17 @@ export function useBevel(
 		elementHighlight,
 		elementShadow,
 	]);
+
+	const bevelHighlightEl = options.highlightSize ? (
+		<div ref={elementHighlight} className={styles.highlight} />
+	) : null;
+
+	const bevelShadowEl = options.shadowSize ? (
+		<div ref={elementShadow} className={styles.shadow} />
+	) : null;
+
+	return {
+		bevelHighlightEl,
+		bevelShadowEl,
+	};
 }

@@ -54,25 +54,19 @@ export const Box: React.FC<BoxProps> = ({
 	const innerRef = useRef<HTMLDivElement>(null);
 
 	const shouldFabricateBorder = borderSize && borderRadius;
-	const fabricatedBorder = useRef<HTMLDivElement>(null);
 
-	const bevelHighlight = useRef<HTMLDivElement>(null);
-	const bevelShadow = useRef<HTMLDivElement>(null);
 	const embossHighlight = useRef<HTMLDivElement>(null);
 	const embossShadow = useRef<HTMLDivElement>(null);
 
 	const geometry = useGeometryObserver(ref, rootAncestor);
 	useRoundedCornerClip(ref, innerRef, { borderRadius, blockSize }, geometry);
-	useFabricatedBorder(
+	const { fabricatedBorderEl } = useFabricatedBorder(
 		ref,
-		fabricatedBorder,
-		{ borderRadius, borderSize, blockSize },
+		{ borderRadius, borderSize, blockSize, borderColor },
 		geometry
 	);
-	useBevel(
+	const { bevelHighlightEl, bevelShadowEl } = useBevel(
 		ref,
-		bevelHighlight,
-		bevelShadow,
 		{
 			borderRadius,
 			borderSize,
@@ -113,29 +107,9 @@ export const Box: React.FC<BoxProps> = ({
 		},
 		<>
 			<div ref={innerRef} className={styles.inner} {...rest}>
-				{shouldFabricateBorder && (
-					<div
-						ref={fabricatedBorder}
-						style={{
-							position: "absolute",
-							top: 0,
-							left: 0,
-							right: 0,
-							bottom: 0,
-							background: borderColor,
-							pointerEvents: "none",
-						}}
-					></div>
-				)}
-				{!!bevelHighlightSize && (
-					<div
-						ref={bevelHighlight}
-						className={styles.highlight}
-					></div>
-				)}
-				{!!bevelShadowSize && (
-					<div ref={bevelShadow} className={styles.shadow}></div>
-				)}
+				{fabricatedBorderEl}
+				{bevelHighlightEl}
+				{bevelShadowEl}
 				{children}
 			</div>
 			{!!embossHighlightSize && (
