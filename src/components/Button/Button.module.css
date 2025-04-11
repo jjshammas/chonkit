@@ -1,5 +1,9 @@
 .buttonContainer {
 	display: inline-block;
+
+	&:active {
+		--chonkit-current-drop-shadow-opacity-multiplier: 0;
+	}
 }
 
 .button {

@@ -5,15 +5,18 @@ import { LightingProvider } from "./LightingProvider";
 import { Button } from "@/components/Button/Button";
 
 /**
- * The wrapping component for the Chonkit library. It provides the context for the
- * library and allows you to set the block size for the grid system.
- * You must wrap your application with this component when using Chonkit components.
+ * A wrapping component that allows you to define the lighting direction for effects like emboss and bevels.<br />
+ * If this component is not found, a default direction of 90 degrees is used.<br />
+ * This component can be nested.
  */
 const meta = {
 	component: LightingProvider,
 	tags: ["autodocs"],
 	parameters: {
 		disableWrapper: true,
+		controls: {
+			exclude: "children",
+		},
 	},
 	decorators: [
 		(Story, context) => (
@@ -29,6 +32,9 @@ const meta = {
 			</ChonkitProvider>
 		),
 	],
+	args: {
+		direction: 45,
+	},
 } satisfies Meta<typeof LightingProvider>;
 
 export default meta;
@@ -36,7 +42,6 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
 	args: {
-		direction: 0,
 		children: (
 			<>
 				<div
@@ -86,6 +91,39 @@ export const Default: Story = {
 						Shadow 3
 					</Button>
 				</div>
+			</>
+		),
+	},
+};
+
+export const Nested: Story = {
+	args: {
+		children: (
+			<>
+				<Button
+					borderRadius={2}
+					bevelHighlightSize={2}
+					bevelShadowSize={2}
+				>
+					Controlled by provider 1
+				</Button>
+				<LightingProvider direction={225}>
+					<div
+						style={{
+							background: "pink",
+							padding: "10px",
+							marginTop: "20px",
+						}}
+					>
+						<Button
+							borderRadius={2}
+							bevelHighlightSize={2}
+							bevelShadowSize={2}
+						>
+							Controlled by provider 2 (static 225 degrees)
+						</Button>
+					</div>
+				</LightingProvider>
 			</>
 		),
 	},

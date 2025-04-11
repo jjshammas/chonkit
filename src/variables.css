@@ -12,4 +12,5 @@
 	--chonkit-current-highlight-blend-mode: var(--chonkit-highlight-blend-mode);
 	--chonkit-current-shadow-color: var(--chonkit-shadow-color);
 	--chonkit-current-shadow-blend-mode: var(--chonkit-shadow-blend-mode);
+	--chonkit-current-drop-shadow-opacity-multiplier: 1;
 }

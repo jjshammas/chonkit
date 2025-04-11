@@ -9,10 +9,12 @@ import {
 import { useBevel } from "./useBevel";
 import styles from "./Box.module.css";
 import { useEmboss } from "./useEmboss";
+import { useShadow, ShadowProps } from "./useShadow";
 
 export interface BoxProps
 	extends React.HTMLAttributes<HTMLDivElement>,
-		RoundedCornerClipProps {
+		RoundedCornerClipProps,
+		ShadowProps {
 	as?: React.ElementType;
 	children?: ReactNode;
 	containerProps?: React.HTMLAttributes<HTMLDivElement>;
@@ -42,6 +44,7 @@ export const Box: React.FC<BoxProps> = ({
 	bevelShadowSize: rawBevelShadowSize,
 	embossHighlightSize: rawEmbossHighlightSize,
 	embossShadowSize: rawEmbossShadowSize,
+	dropShadow,
 	...rest
 }) => {
 	const clampValue = (value?: number) =>
@@ -85,6 +88,14 @@ export const Box: React.FC<BoxProps> = ({
 		},
 		geometry
 	);
+	const { shadow } = useShadow(
+		ref,
+		{
+			borderRadius,
+			dropShadow,
+		},
+		geometry
+	);
 
 	return React.createElement(
 		as || "div",
@@ -117,6 +128,7 @@ export const Box: React.FC<BoxProps> = ({
 			</div>
 			{embossHighlightEl}
 			{embossShadowEl}
+			{shadow}
 		</>
 	);
 };

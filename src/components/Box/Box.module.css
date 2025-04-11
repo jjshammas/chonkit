@@ -33,3 +33,9 @@
 .embossment {
 	z-index: 1;
 }
+
+.dropShadow {
+	z-index: 3;
+	position: absolute;
+	background-size: 100% 100%;
+}

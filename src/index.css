@@ -4,6 +4,9 @@
 @import "./variables.css";
 
 .chonkit-root {
+	image-rendering: pixelated;
+	image-rendering: crisp-edges;
+
 	/* font-family: "Jersey 10", monospace;
 	font-weight: 400;
 	font-style: normal;
