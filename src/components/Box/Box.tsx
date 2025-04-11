@@ -8,6 +8,7 @@ import {
 } from "./useRoundedCornerClip";
 import { useBevel } from "./useBevel";
 import styles from "./Box.module.css";
+import { useEmboss } from "./useEmboss";
 
 export interface BoxProps
 	extends React.HTMLAttributes<HTMLDivElement>,
@@ -57,9 +58,6 @@ export const Box: React.FC<BoxProps> = ({
 
 	const shouldFabricateBorder = borderSize && borderRadius;
 
-	const embossHighlight = useRef<HTMLDivElement>(null);
-	const embossShadow = useRef<HTMLDivElement>(null);
-
 	const geometry = useGeometryObserver(ref);
 	useRoundedCornerClip(innerRef, { borderRadius }, geometry);
 	const { fabricatedBorderEl } = useFabricatedBorder(
@@ -77,6 +75,16 @@ export const Box: React.FC<BoxProps> = ({
 		},
 		geometry
 	);
+	const { embossHighlightEl, embossShadowEl } = useEmboss(
+		ref,
+		{
+			borderRadius,
+			borderSize,
+			highlightSize: embossHighlightSize,
+			shadowSize: embossShadowSize,
+		},
+		geometry
+	);
 
 	return React.createElement(
 		as || "div",
@@ -88,8 +96,8 @@ export const Box: React.FC<BoxProps> = ({
 		<>
 			<div
 				ref={innerRef}
-				className={styles.inner}
 				{...rest}
+				className={`${styles.inner} ${rest.className}`}
 				style={{
 					...rest.style,
 
@@ -107,24 +115,8 @@ export const Box: React.FC<BoxProps> = ({
 				{bevelShadowEl}
 				{children}
 			</div>
-			{!!embossHighlightSize && (
-				<div
-					ref={embossHighlight}
-					className={`${styles.highlight} ${styles.embossment}`}
-					style={{
-						bottom: `${blockSize * -embossHighlightSize}px`,
-					}}
-				></div>
-			)}
-			{!!embossShadowSize && (
-				<div
-					ref={embossShadow}
-					className={`${styles.shadow} ${styles.embossment}`}
-					style={{
-						top: `${blockSize * -embossShadowSize}px`,
-					}}
-				></div>
-			)}
+			{embossHighlightEl}
+			{embossShadowEl}
 		</>
 	);
 };
