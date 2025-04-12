@@ -1,16 +1,7 @@
 :where(.chonkit-root) {
-	--chonkit-brand-primary: #007bff;
-	--chonkit-brand-primary-hover: #2c92ff;
-	--chonkit-brand-primary-foreground: #ffffff;
-
-	--chonkit-highlight-color: rgba(255, 255, 255, 0.5);
-	--chonkit-highlight-blend-mode: soft-light;
-	--chonkit-shadow-color: rgba(0, 0, 0, 0.2);
-	--chonkit-shadow-blend-mode: multiply;
-
-	--chonkit-current-highlight-color: var(--chonkit-highlight-color);
-	--chonkit-current-highlight-blend-mode: var(--chonkit-highlight-blend-mode);
-	--chonkit-current-shadow-color: var(--chonkit-shadow-color);
-	--chonkit-current-shadow-blend-mode: var(--chonkit-shadow-blend-mode);
-	--chonkit-current-drop-shadow-opacity-multiplier: 1;
+	--ck-current-highlight-color: var(--ck-highlight-color);
+	--ck-current-highlight-blend-mode: var(--ck-highlight-blend-mode);
+	--ck-current-shadow-color: var(--ck-shadow-color);
+	--ck-current-shadow-blend-mode: var(--ck-shadow-blend-mode);
+	--ck-current-drop-shadow-opacity-multiplier: 1;
 }

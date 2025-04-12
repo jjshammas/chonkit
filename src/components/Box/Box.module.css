@@ -17,16 +17,16 @@
 .highlight {
 	position: absolute;
 	inset: 0;
-	background: var(--chonkit-current-highlight-color);
-	mix-blend-mode: var(--chonkit-current-highlight-blend-mode);
+	background: var(--ck-current-highlight-color);
+	mix-blend-mode: var(--ck-current-highlight-blend-mode);
 	pointer-events: none;
 }
 
 .shadow {
 	position: absolute;
 	inset: 0;
-	background: var(--chonkit-current-shadow-color);
-	mix-blend-mode: var(--chonkit-current-shadow-blend-mode);
+	background: var(--ck-current-shadow-color);
+	mix-blend-mode: var(--ck-current-shadow-blend-mode);
 	pointer-events: none;
 }
 
@@ -38,4 +38,5 @@
 	z-index: 3;
 	position: absolute;
 	background-size: 100% 100%;
+	pointer-events: none;
 }

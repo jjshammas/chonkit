@@ -10,6 +10,7 @@ import { useBevel } from "./useBevel";
 import styles from "./Box.module.css";
 import { useEmboss } from "./useEmboss";
 import { useShadow, ShadowProps } from "./useShadow";
+import { useResolvedColorProps } from "@/hooks/useResolvedColor";
 
 export interface BoxProps
 	extends React.HTMLAttributes<HTMLDivElement>,
@@ -17,7 +18,9 @@ export interface BoxProps
 		ShadowProps {
 	as?: React.ElementType;
 	children?: ReactNode;
-	containerProps?: React.HTMLAttributes<HTMLDivElement>;
+	containerProps?: React.HTMLAttributes<HTMLDivElement> & {
+		[key: `data-${string}`]: any;
+	};
 
 	snap?: boolean;
 	snapMethod?: "transform" | "padding";
@@ -29,24 +32,28 @@ export interface BoxProps
 	bevelShadowSize?: number;
 	embossHighlightSize?: number;
 	embossShadowSize?: number;
+
+	[key: `data-${string}`]: any;
 }
 
-export const Box: React.FC<BoxProps> = ({
-	as,
-	children,
-	containerProps,
-	borderRadius,
-	snap,
-	snapMethod = "transform",
-	borderSize: rawBorderSize,
-	borderColor,
-	bevelHighlightSize: rawBevelHighlightSize,
-	bevelShadowSize: rawBevelShadowSize,
-	embossHighlightSize: rawEmbossHighlightSize,
-	embossShadowSize: rawEmbossShadowSize,
-	dropShadow,
-	...rest
-}) => {
+export const Box: React.FC<BoxProps> = (props) => {
+	const {
+		as,
+		children,
+		containerProps,
+		borderRadius,
+		snap,
+		snapMethod = "transform",
+		borderSize: rawBorderSize,
+		borderColor,
+		bevelHighlightSize: rawBevelHighlightSize,
+		bevelShadowSize: rawBevelShadowSize,
+		embossHighlightSize: rawEmbossHighlightSize,
+		embossShadowSize: rawEmbossShadowSize,
+		dropShadow,
+		...rest
+	} = useResolvedColorProps(props);
+
 	const clampValue = (value?: number) =>
 		value !== undefined ? Math.max(value, 0) : undefined;
 	const borderSize = clampValue(rawBorderSize);

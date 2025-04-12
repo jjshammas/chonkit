@@ -1,8 +1,16 @@
 import React, { createContext, ReactNode, useContext, useRef } from "react";
+import clsx from "clsx";
+import themes, {
+	Theme,
+	ThemePartial,
+	createCSSVariables,
+	mergeThemes,
+} from "@/core/themes";
 
 interface ChonkitContextValue {
 	blockSize: number;
 	rootAncestor: React.RefObject<HTMLDivElement | null>;
+	theme: Theme;
 }
 
 const ChonkitContext = createContext<ChonkitContextValue | undefined>(
@@ -14,6 +22,7 @@ export interface ChonkitProviderProps
 	children: ReactNode;
 	blockSize: number;
 	showGrid?: boolean;
+	theme?: Theme | ThemePartial | keyof typeof themes;
 }
 
 const Grid = ({ blockSize }: { blockSize: number }) => {
@@ -39,12 +48,21 @@ export const ChonkitProvider: React.FC<ChonkitProviderProps> = ({
 	blockSize = 2,
 	showGrid,
 	style,
+	theme: rawTheme,
 	...rest
 }) => {
 	const rootAncestor = useRef<HTMLDivElement>(null);
 
+	const theme =
+		typeof rawTheme === "string"
+			? themes[rawTheme as keyof typeof themes]
+			: typeof rawTheme === "object"
+			? mergeThemes(themes.default, rawTheme)
+			: themes.default;
+
 	const addlStyle = {
-		"--chonkit-block-size": `${blockSize}px`,
+		"--ck-block-size": `${blockSize}px`,
+		...createCSSVariables(theme),
 	} as React.CSSProperties;
 
 	if (showGrid) {
@@ -53,7 +71,11 @@ export const ChonkitProvider: React.FC<ChonkitProviderProps> = ({
 
 	return (
 		<ChonkitContext.Provider
-			value={{ blockSize, rootAncestor: rootAncestor }}
+			value={{
+				blockSize,
+				rootAncestor: rootAncestor,
+				theme,
+			}}
 		>
 			<div
 				ref={rootAncestor}
@@ -61,7 +83,7 @@ export const ChonkitProvider: React.FC<ChonkitProviderProps> = ({
 					...style,
 					...addlStyle,
 				}}
-				className={`chonkit-root ${rest.className}`}
+				className={clsx("chonkit-root", rest.className)}
 				{...rest}
 			>
 				{children}

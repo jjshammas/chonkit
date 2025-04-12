@@ -21,10 +21,13 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
 	args: {
-		borderRadius: 6,
-		borderSize: 1,
-		borderColor: "rgba(0,0,0,0.3)",
-		bevelHighlightSize: 1,
-		bevelShadowSize: 1,
+		variant: "primary",
+	},
+};
+
+export const Disabled: Story = {
+	args: {
+		variant: "disabled",
+		disabled: true,
 	},
 };

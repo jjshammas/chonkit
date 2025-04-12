@@ -54,7 +54,7 @@ const preview: Preview = {
 					}
 					showGrid={context.globals.gridVisible === "on"}
 					style={{
-						padding: "calc(2 * var(--chonkit-block-size))",
+						padding: "calc(2 * var(--ck-block-size))",
 					}}
 				>
 					<LightingProvider

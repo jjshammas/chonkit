@@ -142,7 +142,7 @@ export function useShadow(
 				shadow.current.style.backgroundImage = `url(${miniCanvas.toDataURL()})`;
 				shadow.current.style.opacity = `calc(${
 					getAlphaFromColor(options.dropShadow.color) * 100 + "%"
-				} * var(--chonkit-current-drop-shadow-opacity-multiplier))`;
+				} * var(--ck-current-drop-shadow-opacity-multiplier))`;
 			} else {
 				// remove the drop shadow
 			}
