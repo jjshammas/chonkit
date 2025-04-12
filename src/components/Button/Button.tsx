@@ -9,7 +9,6 @@ import styles from "./Button.module.css";
 
 export type ButtonTheme = VariantComponentTheme<
 	BoxVisualStyle & {
-		borderRadius?: BoxProps["borderRadius"];
 		borderSize?: BoxProps["borderSize"];
 		borderColor?: BoxProps["borderColor"];
 		bevelHighlightSize?: BoxProps["bevelHighlightSize"];

@@ -4,7 +4,10 @@ import { mergeThemes, Theme, DeepPartial } from "@/core/themes";
 export function useComponentTheme<
 	Key extends keyof Theme,
 	ResolvedTheme extends Theme[Key],
-	Props extends Record<string, any> = Omit<ResolvedTheme, "variants"> & {
+	Props extends Record<string, any> = Omit<
+		ResolvedTheme,
+		"variants" | "defaultVariant"
+	> & {
 		variant?: string;
 	}
 >(componentKey: Key, userProps: Props, defaultTheme?: ResolvedTheme): Props {
@@ -28,9 +31,12 @@ export function useComponentTheme<
 		variantProps = (resolvedTheme as any).variants?.[selectedVariant] ?? {};
 	}
 
-	return {
+	const mergedProps = {
 		...resolvedTheme,
 		...variantProps,
 		...userProps,
 	} as Props;
+	delete mergedProps.defaultVariant;
+	delete mergedProps.variants;
+	return mergedProps;
 }

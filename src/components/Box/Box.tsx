@@ -17,17 +17,20 @@ import {
 	defineVisualKeys,
 } from "./createVisualStyle";
 
-export type BoxVisualStyle = {
+export type BoxVisualStyle = RoundedCornerClipProps & {
 	backgroundColor?: string;
 	color?: string;
 };
 
-const BOX_VISUAL_KEYS = defineVisualKeys(["backgroundColor", "color"]);
+const BOX_VISUAL_KEYS = defineVisualKeys([
+	"backgroundColor",
+	"color",
+	"borderRadius",
+]);
 
 export interface BoxProps
 	extends React.HTMLAttributes<HTMLDivElement>,
 		ComponentVisualProps<BoxVisualStyle>,
-		RoundedCornerClipProps,
 		ShadowProps {
 	as?: React.ElementType;
 	children?: ReactNode;
@@ -51,10 +54,10 @@ export interface BoxProps
 
 export const Box: React.FC<BoxProps> = (props) => {
 	const {
-		renderValues,
+		renderValues: { borderRadius },
 		cssVariables,
 		rest: nonVisualRest,
-	} = resolveComponentVisualStyle({
+	} = resolveComponentVisualStyle<BoxVisualStyle>({
 		props,
 		keys: BOX_VISUAL_KEYS,
 		palette: useChonkit().theme.palette,
@@ -64,7 +67,6 @@ export const Box: React.FC<BoxProps> = (props) => {
 		as,
 		children,
 		containerProps,
-		borderRadius,
 		snap,
 		snapMethod = "transform",
 		borderSize: rawBorderSize,

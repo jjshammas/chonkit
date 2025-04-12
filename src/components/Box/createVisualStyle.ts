@@ -9,60 +9,55 @@ export type ComponentVisualProps<T> = T & {
 	[state in (typeof STATE_KEYS)[number]]?: Partial<T>;
 };
 
-type CustomVisualProps = {};
-
-type VisualStyle = React.CSSProperties &
-	CustomVisualProps & {
-		[state in InteractionState]?: Partial<
-			React.CSSProperties & CustomVisualProps
-		>;
-	};
-
-type VisualStyleOutput = {
-	renderValues: Record<string, string>; // For JS renderers
-	cssVariables: Record<string, string>; // For inline vars
-	cssBaseStyle: React.CSSProperties; // For actual CSS usage
+type VisualStyle<T extends Record<string, VisualValue>> = T & {
+	[state in InteractionState]?: Partial<T>;
 };
 
-export function createVisualStyle(
-	style: VisualStyle,
+type VisualStyleOutput<T> = {
+	renderValues: T;
+	cssVariables: Record<string, string>;
+	cssBaseStyle: React.CSSProperties;
+};
+
+export function createVisualStyle<T extends Record<string, VisualValue>>(
+	style: VisualStyle<T>,
 	palette: Theme["palette"]
-): VisualStyleOutput {
-	const renderValues: Record<string, string> = {};
+): VisualStyleOutput<T> {
+	const renderValues = {} as T;
 	const cssVariables: Record<string, string> = {};
 	const cssBaseStyle: React.CSSProperties = {};
 
 	for (const key in style) {
-		// Skip state keys
-		if ((STATE_KEYS as readonly string[]).includes(key)) continue;
+		if (STATE_KEYS.includes(key as InteractionState)) continue;
 
-		const rawValue = style[key as keyof VisualStyle];
-
+		const rawValue = style[key];
 		if (rawValue === undefined) continue;
 
-		const valueStr = String(rawValue);
-		const resolved = resolveColor(valueStr, palette);
+		const normalized = normalizeVisualValue(rawValue);
+		const resolved = resolveColor(normalized, palette);
 		const varName = convertJSVariableNameToCSSVariableName(`${key}`);
 
-		renderValues[key] = resolved!;
+		renderValues[key as keyof T] = rawValue as T[keyof T];
 		cssVariables[varName] = resolved!;
-		(cssBaseStyle as Record<string, any>)[key] = `var(${varName})`;
+		if (key in document.documentElement.style) {
+			cssBaseStyle[key as keyof React.CSSProperties] =
+				`var(${varName})` as any;
+		}
 	}
 
-	// Handle interaction states (_hover, _active, etc.)
-	for (const stateKey of STATE_KEYS) {
-		const stateValues = style[stateKey];
-		if (!stateValues) continue;
+	// Handle interaction states
+	for (const state of STATE_KEYS) {
+		const nested = style[state];
+		if (!nested) continue;
 
-		for (const key in stateValues) {
-			const rawValue = stateValues[key as keyof typeof stateValues];
+		for (const key in nested) {
+			const rawValue = nested[key];
+			if (rawValue == null) continue;
 
-			if (rawValue === undefined) continue;
-
-			const valueStr = String(rawValue);
-			const resolved = resolveColor(valueStr, palette);
+			const normalized = normalizeVisualValue(rawValue as VisualValue);
+			const resolved = resolveColor(normalized, palette);
 			const varName = convertJSVariableNameToCSSVariableName(
-				`${key}-${stateKey.slice(1)}`
+				`${key}-${state.slice(1)}`
 			);
 
 			cssVariables[varName] = resolved!;
@@ -82,18 +77,24 @@ export function defineVisualKeys<const Keys extends readonly string[]>(
 	return keys;
 }
 
+// type VisualValue = string | number | (string | number)[];
+type VisualValue = any;
+
+function normalizeVisualValue(value: VisualValue): string {
+	if (Array.isArray(value)) return value.map(normalizeVisualValue).join(" ");
+	if (typeof value === "number") return `${value}px`;
+	return String(value);
+}
+
 export function resolveComponentVisualStyle<
-	T extends Record<string, any>
+	T extends Record<string, VisualValue>
 >(args: {
 	props: Record<string, any>;
 	keys: readonly (keyof T)[];
 	palette: Theme["palette"];
-}): {
+}): VisualStyleOutput<T> & {
 	visualStyle: T & Partial<Record<InteractionState, Partial<T>>>;
 	rest: Record<string, any>;
-	renderValues: Record<string, string>;
-	cssVariables: Record<string, string>;
-	cssBaseStyle: React.CSSProperties;
 } {
 	const { props, keys, palette } = args;
 
@@ -111,7 +112,7 @@ export function resolveComponentVisualStyle<
 	}
 
 	const { renderValues, cssVariables, cssBaseStyle } = createVisualStyle(
-		visualStyle,
+		visualStyle as VisualStyle<T>,
 		palette
 	);
 
