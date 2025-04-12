@@ -1,5 +1,6 @@
 import type { ButtonTheme } from "@/components/Button/Button";
 import { convertJSVariableNameToCSSVariableName } from "@/utils/cssVar";
+import type { InteractionState } from "@/components/Box/createVisualStyle";
 
 export type ColorDefinition = {
 	main: string;
@@ -31,11 +32,20 @@ export type DeepPartial<T> = T extends object
 	: T;
 export type ThemePartial = DeepPartial<Theme>;
 
-export type ComponentTheme<T> = Object;
+export type InteractionStates<T> = Partial<
+	Record<`${InteractionState}`, Partial<T>>
+>;
+export type WithInteractionStates<T> = T & InteractionStates<T>;
+export type WithoutInteractionStates<T> = Omit<T, keyof InteractionStates<T>>;
+
+export type ComponentTheme<T> = WithInteractionStates<T>;
 export type ComponentThemeProps<T> = T;
 
-export type VariantComponentTheme<T, Variants extends string = string> = T & {
-	variants: Record<Variants, Partial<T>>;
+export type VariantComponentTheme<
+	T,
+	Variants extends string = string
+> = WithInteractionStates<T> & {
+	variants: Record<Variants, Partial<WithInteractionStates<T>>>;
 	defaultVariant: Variants;
 };
 export type VariantComponentThemeProps<

@@ -34,10 +34,31 @@ const defaultTheme: Theme = {
 		shadowBlendMode: "multiply",
 	},
 	Button: {
+		defaultVariant: "primary",
+		borderSize: 1,
+		borderRadius: 6,
+		borderColor: "rgba(0,0,0,0.3)",
+		bevelHighlightSize: 1,
+		bevelShadowSize: 1,
+		backgroundColor: "secondary",
+		color: "secondary.fg",
+
+		_hover: {
+			backgroundColor: "black",
+		},
+
 		variants: {
 			primary: {
 				backgroundColor: "primary",
 				color: "primary.fg",
+
+				_hover: {
+					backgroundColor: "green",
+				},
+
+				_active: {
+					backgroundColor: "yellow",
+				},
 			},
 			secondary: {},
 			positive: {
@@ -50,14 +71,6 @@ const defaultTheme: Theme = {
 			},
 			disabled: {},
 		},
-		defaultVariant: "primary",
-		borderSize: 1,
-		borderRadius: 6,
-		borderColor: "rgba(0,0,0,0.3)",
-		bevelHighlightSize: 1,
-		bevelShadowSize: 1,
-		backgroundColor: "secondary",
-		color: "secondary.fg",
 	},
 };
 

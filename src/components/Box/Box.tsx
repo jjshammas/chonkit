@@ -12,10 +12,10 @@ import { useEmboss } from "./useEmboss";
 import { useShadow, ShadowProps } from "./useShadow";
 import { useResolvedColorProps } from "@/hooks/useResolvedColor";
 import {
-	ComponentVisualProps,
 	resolveComponentVisualStyle,
 	defineVisualKeys,
 } from "./createVisualStyle";
+import type { WithInteractionStates } from "@/core/themes";
 
 export type BoxVisualStyle = RoundedCornerClipProps & {
 	backgroundColor?: string;
@@ -30,7 +30,7 @@ const BOX_VISUAL_KEYS = defineVisualKeys([
 
 export interface BoxProps
 	extends React.HTMLAttributes<HTMLDivElement>,
-		ComponentVisualProps<BoxVisualStyle>,
+		WithInteractionStates<BoxVisualStyle>,
 		ShadowProps {
 	as?: React.ElementType;
 	children?: ReactNode;
@@ -59,7 +59,7 @@ export const Box: React.FC<BoxProps> = (props) => {
 		rest: nonVisualRest,
 	} = resolveComponentVisualStyle<BoxVisualStyle>({
 		props,
-		keys: BOX_VISUAL_KEYS,
+		keys: BOX_VISUAL_KEYS.baseKeys,
 		palette: useChonkit().theme.palette,
 	});
 

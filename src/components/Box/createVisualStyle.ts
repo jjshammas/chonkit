@@ -3,11 +3,7 @@ import { convertJSVariableNameToCSSVariableName } from "@/utils/cssVar";
 import type { Theme } from "@/core/themes";
 
 const STATE_KEYS = ["_hover", "_active", "_focus", "_disabled"] as const;
-type InteractionState = (typeof STATE_KEYS)[number];
-
-export type ComponentVisualProps<T> = T & {
-	[state in (typeof STATE_KEYS)[number]]?: Partial<T>;
-};
+export type InteractionState = (typeof STATE_KEYS)[number];
 
 type VisualStyle<T extends Record<string, VisualValue>> = T & {
 	[state in InteractionState]?: Partial<T>;
@@ -71,10 +67,30 @@ export function createVisualStyle<T extends Record<string, VisualValue>>(
 	};
 }
 
+type WithStateKeys<K extends string> =
+	| K
+	| `${K}-${Exclude<InteractionState, ""> extends `_${infer S}` ? S : never}`;
+
+function generateAllKeys<const Keys extends readonly string[]>(
+	keys: Keys
+): WithStateKeys<Keys[number]>[] {
+	const result: WithStateKeys<Keys[number]>[] = [...keys];
+	for (const key of keys) {
+		for (const state of STATE_KEYS) {
+			const cleanState = state.slice(1); // "_hover" → "hover"
+			result.push(`${key}-${cleanState}` as WithStateKeys<Keys[number]>);
+		}
+	}
+	return result;
+}
+
 export function defineVisualKeys<const Keys extends readonly string[]>(
 	keys: Keys
-): Keys {
-	return keys;
+) {
+	return {
+		baseKeys: keys,
+		allKeys: generateAllKeys(keys),
+	};
 }
 
 // type VisualValue = string | number | (string | number)[];

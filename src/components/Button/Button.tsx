@@ -6,22 +6,28 @@ import type {
 } from "@/core/themes";
 import { useComponentTheme } from "@/hooks/useComponentTheme";
 import styles from "./Button.module.css";
+import type {
+	WithInteractionStates,
+	WithoutInteractionStates,
+} from "@/core/themes";
+
+type ButtonVisualStyle = BoxVisualStyle & {
+	borderSize?: BoxProps["borderSize"];
+	borderColor?: BoxProps["borderColor"];
+	bevelHighlightSize?: BoxProps["bevelHighlightSize"];
+	bevelShadowSize?: BoxProps["bevelShadowSize"];
+	embossHighlightSize?: BoxProps["embossHighlightSize"];
+	embossShadowSize?: BoxProps["embossShadowSize"];
+	dropShadow?: BoxProps["dropShadow"];
+};
 
 export type ButtonTheme = VariantComponentTheme<
-	BoxVisualStyle & {
-		borderSize?: BoxProps["borderSize"];
-		borderColor?: BoxProps["borderColor"];
-		bevelHighlightSize?: BoxProps["bevelHighlightSize"];
-		bevelShadowSize?: BoxProps["bevelShadowSize"];
-		embossHighlightSize?: BoxProps["embossHighlightSize"];
-		embossShadowSize?: BoxProps["embossShadowSize"];
-		dropShadow?: BoxProps["dropShadow"];
-	},
+	WithInteractionStates<ButtonVisualStyle>,
 	"primary" | "secondary" | "positive" | "negative" | "disabled"
 >;
 
 export interface ButtonProps
-	extends BoxProps,
+	extends WithoutInteractionStates<BoxProps>,
 		VariantComponentThemeProps<ButtonTheme> {
 	as?: React.ElementType;
 	children?: ReactNode;

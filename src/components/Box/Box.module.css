@@ -12,6 +12,16 @@
 			color: var(--ck-color-hover, var(--ck-color));
 		}
 	}
+
+	&:active {
+		.inner {
+			background-color: var(
+				--ck-background-color-active,
+				var(--ck-background-color)
+			);
+			color: var(--ck-color-active, var(--ck-color));
+		}
+	}
 }
 
 .inner {
