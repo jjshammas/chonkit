@@ -5,7 +5,7 @@
 		--ck-current-drop-shadow-opacity-multiplier: 0;
 	}
 
-	&[data-disabled] {
+	&[aria-disabled] {
 		pointer-events: none;
 	}
 }
@@ -16,17 +16,11 @@
 	--ck-current-shadow-color: var(--ck-shadow-color);
 	--ck-current-shadow-blend-mode: var(--ck-shadow-blend-mode);
 
-	background-color: var(--ck-brand-primary);
-	color: var(--ck-brand-primary-foreground);
 	padding: snap(6px) snap(16px);
 	text-shadow: 0 var(--ck-block-size) 0 rgba(0, 0, 0, 0.2);
 	cursor: pointer;
 	user-select: none;
 	-webkit-user-select: none;
-
-	&:hover {
-		background-color: var(--ck-brand-primary-hover);
-	}
 
 	&:active {
 		--ck-current-highlight-color: var(--ck-shadow-color);

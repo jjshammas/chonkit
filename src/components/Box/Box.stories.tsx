@@ -9,11 +9,15 @@ const meta = {
 	component: Box,
 	tags: ["autodocs"],
 	args: {
+		backgroundColor: "#ddd",
+		_hover: {
+			backgroundColor: "red",
+		},
 		children: (
 			<div
 				style={{
 					padding: "40px",
-					backgroundColor: "#ddd",
+					// backgroundColor: "#ddd",
 				}}
 			>
 				Hello World

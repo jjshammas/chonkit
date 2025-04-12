@@ -35,10 +35,19 @@ const defaultTheme: Theme = {
 	},
 	Button: {
 		variants: {
-			primary: {},
+			primary: {
+				backgroundColor: "primary",
+				color: "primary.fg",
+			},
 			secondary: {},
-			positive: {},
-			negative: {},
+			positive: {
+				backgroundColor: "positive",
+				color: "positive.fg",
+			},
+			negative: {
+				backgroundColor: "negative",
+				color: "negative.fg",
+			},
 			disabled: {},
 		},
 		defaultVariant: "primary",
@@ -48,6 +57,7 @@ const defaultTheme: Theme = {
 		bevelHighlightSize: 1,
 		bevelShadowSize: 1,
 		backgroundColor: "secondary",
+		color: "secondary.fg",
 	},
 };
 

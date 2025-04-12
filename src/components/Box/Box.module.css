@@ -2,6 +2,16 @@
 	position: relative;
 	display: block;
 	transform-origin: top left;
+
+	&:hover {
+		.inner {
+			background-color: var(
+				--ck-background-color-hover,
+				var(--ck-background-color)
+			);
+			color: var(--ck-color-hover, var(--ck-color));
+		}
+	}
 }
 
 .inner {
@@ -12,6 +22,8 @@
 	flex: 1 1 auto;
 	z-index: 5;
 	position: relative;
+	background-color: var(--ck-background-color, transparent);
+	color: var(--ck-color, inherit);
 }
 
 .highlight {

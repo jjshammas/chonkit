@@ -1,5 +1,5 @@
 import React, { ReactNode } from "react";
-import { Box, BoxProps } from "../Box/Box";
+import { Box, BoxProps, BoxVisualStyle } from "../Box/Box";
 import type {
 	VariantComponentTheme,
 	VariantComponentThemeProps,
@@ -8,7 +8,7 @@ import { useComponentTheme } from "@/hooks/useComponentTheme";
 import styles from "./Button.module.css";
 
 export type ButtonTheme = VariantComponentTheme<
-	{
+	BoxVisualStyle & {
 		borderRadius?: BoxProps["borderRadius"];
 		borderSize?: BoxProps["borderSize"];
 		borderColor?: BoxProps["borderColor"];
@@ -17,9 +17,6 @@ export type ButtonTheme = VariantComponentTheme<
 		embossHighlightSize?: BoxProps["embossHighlightSize"];
 		embossShadowSize?: BoxProps["embossShadowSize"];
 		dropShadow?: BoxProps["dropShadow"];
-		backgroundColor?: string;
-		backgroundColorHover?: string;
-		backgroundColorActive?: string;
 	},
 	"primary" | "secondary" | "positive" | "negative" | "disabled"
 >;
@@ -45,7 +42,6 @@ export const Button: React.FC<ButtonProps> = (props) => {
 			containerProps={{
 				className: styles.buttonContainer,
 				"aria-disabled": disabled ? "true" : undefined,
-				"data-disabled": disabled ? "true" : undefined,
 			}}
 			dropShadow={{
 				blur: 1,

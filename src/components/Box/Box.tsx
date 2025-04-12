@@ -11,9 +11,22 @@ import styles from "./Box.module.css";
 import { useEmboss } from "./useEmboss";
 import { useShadow, ShadowProps } from "./useShadow";
 import { useResolvedColorProps } from "@/hooks/useResolvedColor";
+import {
+	ComponentVisualProps,
+	resolveComponentVisualStyle,
+	defineVisualKeys,
+} from "./createVisualStyle";
+
+export type BoxVisualStyle = {
+	backgroundColor?: string;
+	color?: string;
+};
+
+const BOX_VISUAL_KEYS = defineVisualKeys(["backgroundColor", "color"]);
 
 export interface BoxProps
 	extends React.HTMLAttributes<HTMLDivElement>,
+		ComponentVisualProps<BoxVisualStyle>,
 		RoundedCornerClipProps,
 		ShadowProps {
 	as?: React.ElementType;
@@ -38,6 +51,16 @@ export interface BoxProps
 
 export const Box: React.FC<BoxProps> = (props) => {
 	const {
+		renderValues,
+		cssVariables,
+		rest: nonVisualRest,
+	} = resolveComponentVisualStyle({
+		props,
+		keys: BOX_VISUAL_KEYS,
+		palette: useChonkit().theme.palette,
+	});
+
+	const {
 		as,
 		children,
 		containerProps,
@@ -52,7 +75,7 @@ export const Box: React.FC<BoxProps> = (props) => {
 		embossShadowSize: rawEmbossShadowSize,
 		dropShadow,
 		...rest
-	} = useResolvedColorProps(props);
+	} = useResolvedColorProps(nonVisualRest);
 
 	const clampValue = (value?: number) =>
 		value !== undefined ? Math.max(value, 0) : undefined;
@@ -110,6 +133,7 @@ export const Box: React.FC<BoxProps> = (props) => {
 			...containerProps,
 			ref,
 			className: `${styles.container} ${containerProps?.className}`,
+			style: cssVariables,
 		},
 		<>
 			<div
