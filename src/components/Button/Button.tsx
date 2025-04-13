@@ -1,34 +1,38 @@
 import React, { ReactNode } from "react";
-import { Box, BoxProps, BoxVisualStyle } from "../Box/Box";
-import type {
-	VariantComponentTheme,
-	VariantComponentThemeProps,
-} from "@/core/themes";
+import { Box, BoxProps, boxVisual } from "../Box/Box";
 import { useComponentTheme } from "@/hooks/useComponentTheme";
 import styles from "./Button.module.css";
-import type {
-	WithInteractionStates,
-	WithoutInteractionStates,
-} from "@/core/themes";
+import type { WithoutInteractionStates } from "@/core/themes";
+import { createComponentVisualTypes } from "@/core/themes/createComponentVisualTypes";
+import { createComponentVariantThemeTypes } from "@/core/themes/createComponentThemeTypes";
 
-type ButtonVisualStyle = BoxVisualStyle & {
-	borderSize?: BoxProps["borderSize"];
-	borderColor?: BoxProps["borderColor"];
-	bevelHighlightSize?: BoxProps["bevelHighlightSize"];
-	bevelShadowSize?: BoxProps["bevelShadowSize"];
-	embossHighlightSize?: BoxProps["embossHighlightSize"];
-	embossShadowSize?: BoxProps["embossShadowSize"];
-	dropShadow?: BoxProps["dropShadow"];
-};
+const buttonVisual = createComponentVisualTypes({
+	style: {
+		...boxVisual.style,
+		borderSize: undefined as BoxProps["borderSize"],
+		borderColor: undefined as BoxProps["borderColor"],
+		bevelHighlightSize: undefined as BoxProps["bevelHighlightSize"],
+		bevelShadowSize: undefined as BoxProps["bevelShadowSize"],
+		embossHighlightSize: undefined as BoxProps["embossHighlightSize"],
+		embossShadowSize: undefined as BoxProps["embossShadowSize"],
+		dropShadow: undefined as BoxProps["dropShadow"],
+	},
+	interactionAllowedKeys: [...boxVisual.interactionAllowedKeys] as const,
+});
 
-export type ButtonTheme = VariantComponentTheme<
-	WithInteractionStates<ButtonVisualStyle>,
-	"primary" | "secondary" | "positive" | "negative" | "disabled"
->;
+const buttonThemeTypes = createComponentVariantThemeTypes({
+	base: buttonVisual.types.VisualStyle,
+	interactionAllowedKeys: buttonVisual.interactionAllowedKeys,
+});
+
+export type ButtonVisualStyle = typeof buttonVisual.types.VisualStyle;
+export type ButtonVisualProps = typeof buttonVisual.types.Props;
+export type ButtonTheme = typeof buttonThemeTypes.types.Theme;
+export type ButtonThemeProps = typeof buttonThemeTypes.types.Props;
 
 export interface ButtonProps
 	extends WithoutInteractionStates<BoxProps>,
-		VariantComponentThemeProps<ButtonTheme> {
+		ButtonThemeProps {
 	as?: React.ElementType;
 	children?: ReactNode;
 	disabled?: boolean;
@@ -56,6 +60,7 @@ export const Button: React.FC<ButtonProps> = (props) => {
 			{...rest}
 		>
 			{children}
+			<Box></Box>
 		</Box>
 	);
 };

@@ -38,22 +38,6 @@ export type InteractionStates<T> = Partial<
 export type WithInteractionStates<T> = T & InteractionStates<T>;
 export type WithoutInteractionStates<T> = Omit<T, keyof InteractionStates<T>>;
 
-export type ComponentTheme<T> = WithInteractionStates<T>;
-export type ComponentThemeProps<T> = T;
-
-export type VariantComponentTheme<
-	T,
-	Variants extends string = string
-> = WithInteractionStates<T> & {
-	variants: Record<Variants, Partial<WithInteractionStates<T>>>;
-	defaultVariant: Variants;
-};
-export type VariantComponentThemeProps<
-	T extends { variants: Record<string, any> }
-> = Omit<T, "variants" | "defaultVariant"> & {
-	variant?: keyof T["variants"];
-};
-
 export const mergeThemes = <T>(base: T, partial: DeepPartial<T>): T => {
 	if (
 		typeof base !== "object" ||

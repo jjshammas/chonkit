@@ -11,27 +11,27 @@ import styles from "./Box.module.css";
 import { useEmboss } from "./useEmboss";
 import { useShadow, ShadowProps } from "./useShadow";
 import { useResolvedColorProps } from "@/hooks/useResolvedColor";
-import {
-	resolveComponentVisualStyle,
-	defineVisualKeys,
-} from "./createVisualStyle";
-import type { WithInteractionStates } from "@/core/themes";
+import { resolveComponentVisualStyle } from "./createVisualStyle";
+import { createComponentVisualTypes } from "@/core/themes/createComponentVisualTypes";
 
-export type BoxVisualStyle = RoundedCornerClipProps & {
-	backgroundColor?: string;
-	color?: string;
-};
+export const boxVisual = createComponentVisualTypes({
+	style: {
+		backgroundColor: undefined as string | undefined,
+		color: undefined as string | undefined,
+		borderRadius: undefined as
+			| RoundedCornerClipProps["borderRadius"]
+			| undefined,
+	},
+	interactionAllowedKeys: ["backgroundColor", "color"] as const,
+});
 
-const BOX_VISUAL_KEYS = defineVisualKeys([
-	"backgroundColor",
-	"color",
-	"borderRadius",
-]);
+export type BoxVisualStyle = typeof boxVisual.types.VisualStyle;
+export type BoxVisualProps = typeof boxVisual.types.Props;
 
 export interface BoxProps
-	extends React.HTMLAttributes<HTMLDivElement>,
-		WithInteractionStates<BoxVisualStyle>,
-		ShadowProps {
+	extends Omit<React.HTMLAttributes<HTMLDivElement>, keyof BoxVisualProps>,
+		BoxVisualProps,
+		Omit<ShadowProps, "borderRadius"> {
 	as?: React.ElementType;
 	children?: ReactNode;
 	containerProps?: React.HTMLAttributes<HTMLDivElement> & {
@@ -59,7 +59,7 @@ export const Box: React.FC<BoxProps> = (props) => {
 		rest: nonVisualRest,
 	} = resolveComponentVisualStyle<BoxVisualStyle>({
 		props,
-		keys: BOX_VISUAL_KEYS.baseKeys,
+		keys: boxVisual.baseKeys,
 		palette: useChonkit().theme.palette,
 	});
 
