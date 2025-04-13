@@ -6,14 +6,17 @@ import {
 import type { GeometryObserver } from "./useGeometryObserver";
 import type { RoundedCornerClipProps } from "./useRoundedCornerClip";
 import { useChonkit } from "@/core/ChonkitProvider/ChonkitProvider";
+import styles from "./Box.module.css";
+
+export type FabricatedBorderProps = {
+	borderRadius?: RoundedCornerClipProps["borderRadius"];
+	borderSize?: number;
+	borderColor?: string;
+};
 
 export function useFabricatedBorder(
 	element: React.RefObject<HTMLElement | null>,
-	options: {
-		borderRadius?: RoundedCornerClipProps["borderRadius"];
-		borderSize?: number;
-		borderColor?: string;
-	},
+	options: FabricatedBorderProps,
 	geometry: GeometryObserver
 ) {
 	const { blockSize } = useChonkit();
@@ -26,7 +29,7 @@ export function useFabricatedBorder(
 		const unsubscribe = geometry.subscribe(({ width, height }) => {
 			const path = generateBorderPoints(
 				options.borderRadius!,
-				options.borderSize!,
+				Math.max(options.borderSize || 0, 0),
 				blockSize,
 				width,
 				height
@@ -46,19 +49,8 @@ export function useFabricatedBorder(
 	]);
 
 	return {
-		fabricatedBorderEl: options.borderRadius ? (
-			<div
-				ref={fabricatedBorder}
-				style={{
-					position: "absolute",
-					top: 0,
-					left: 0,
-					right: 0,
-					bottom: 0,
-					background: options.borderColor,
-					pointerEvents: "none",
-				}}
-			/>
+		fabricatedBorderEl: options.borderSize ? (
+			<div ref={fabricatedBorder} className={styles.fabricatedBorder} />
 		) : null,
 	};
 }

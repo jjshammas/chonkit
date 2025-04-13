@@ -1,27 +1,56 @@
 import { useEffect, useRef } from "react";
-import {
-	convertPointsToPathString,
-	generateRoundedCornerPoints,
-} from "@/utils/svg/circle-generator/circle-generator";
-import type { GeometryObserver } from "./useGeometryObserver";
+import { generateRoundedCornerPoints } from "@/utils/svg/circle-generator/circle-generator";
 import { useChonkit } from "@/core/ChonkitProvider/ChonkitProvider";
-import styles from "./Box.module.css";
 import { useLighting } from "@/core/LightingProvider/LightingProvider";
+import type { GeometryObserver } from "./useGeometryObserver";
+import type { RoundedCornerClipProps } from "./useRoundedCornerClip";
+import { resolveColor } from "@/hooks/useResolvedColor";
+import styles from "./Box.module.css";
+
+type DropShadow =
+	| {
+			blur?: number;
+			offsetX?: number;
+			offsetY?: number;
+			color: string;
+	  }
+	| {
+			blur?: number;
+			distance?: number;
+			color: string;
+	  };
+
+export const parseCSSShadowString = (shadow: string): DropShadow => {
+	const matches = shadow.match(/((\d+(px)?\s+){1,3})(.+)/);
+	if (!matches) {
+		throw new Error("Invalid shadow string format. Shadow: " + shadow);
+	}
+	const shadowColor = matches[matches.length - 1];
+	const args = shadow.replace(shadowColor, "").trim().split(/\s+/);
+	args.push(shadowColor);
+	if (args.length === 4) {
+		const [offsetX, offsetY, blur, color] = args;
+		return {
+			offsetX: parseFloat(offsetX),
+			offsetY: parseFloat(offsetY),
+			blur: parseFloat(blur),
+			color,
+		};
+	} else if (args.length === 3) {
+		const [distance, blur, color] = args;
+		return {
+			distance: parseFloat(distance),
+			blur: parseFloat(blur),
+			color,
+		};
+	} else {
+		throw new Error("Invalid shadow string format. Shadow: " + shadow);
+	}
+};
 
 export type ShadowProps = {
-	borderRadius?: number | [number, number, number, number];
-	dropShadow?:
-		| {
-				blur?: number;
-				offsetX?: number;
-				offsetY?: number;
-				color: string;
-		  }
-		| {
-				blur?: number;
-				distance?: number;
-				color: string;
-		  };
+	borderRadius?: RoundedCornerClipProps["borderRadius"];
+	dropShadow?: string;
 };
 
 const SHADOW_REDRAW_COUNT = 3;
@@ -51,10 +80,15 @@ export function useShadow(
 ) {
 	const { blockSize } = useChonkit();
 	const { direction } = useLighting();
+	const { theme } = useChonkit();
 	const shadow = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
 		if (!shadow.current || !options.dropShadow) return;
+
+		const dropShadow: DropShadow = parseCSSShadowString(options.dropShadow);
+		dropShadow.color =
+			resolveColor(dropShadow.color, theme.palette) || dropShadow.color;
 
 		const apply = ({
 			width,
@@ -63,7 +97,7 @@ export function useShadow(
 			width: number;
 			height: number;
 		}) => {
-			if (options.dropShadow) {
+			if (dropShadow) {
 				if (!shadow.current) return;
 
 				const shape = generateRoundedCornerPoints(
@@ -75,14 +109,11 @@ export function useShadow(
 
 				let offsetX = 0,
 					offsetY = 0;
-				if (
-					"offsetX" in options.dropShadow &&
-					"offsetY" in options.dropShadow
-				) {
-					offsetX = options.dropShadow.offsetX || 0;
-					offsetY = options.dropShadow.offsetY || 0;
-				} else if ("distance" in options.dropShadow) {
-					const distance = options.dropShadow.distance;
+				if ("offsetX" in dropShadow && "offsetY" in dropShadow) {
+					offsetX = dropShadow.offsetX || 0;
+					offsetY = dropShadow.offsetY || 0;
+				} else if ("distance" in dropShadow) {
+					const distance = dropShadow.distance;
 					const angle = (direction * Math.PI) / 180;
 					const safeDistance = distance ?? 0;
 					offsetX = Math.round(Math.cos(angle) * safeDistance);
@@ -101,11 +132,11 @@ export function useShadow(
 				for (let i = 1; i < shape.length; i++) {
 					ctx.lineTo(shape[i][0], shape[i][1]);
 				}
-				ctx.fillStyle = removeAlphaFromColor(options.dropShadow.color);
+				ctx.fillStyle = removeAlphaFromColor(dropShadow.color);
 				ctx.fill();
 				ctx.closePath();
 
-				const blurRadius = options.dropShadow.blur || 0;
+				const blurRadius = dropShadow.blur || 0;
 				const miniCanvas = document.createElement("canvas");
 				const miniCtx = miniCanvas.getContext("2d");
 				if (!miniCtx)
@@ -114,9 +145,7 @@ export function useShadow(
 				miniCanvas.height = height / blockSize + blurRadius * 2;
 				miniCtx.imageSmoothingEnabled = false;
 
-				miniCtx.shadowColor = removeAlphaFromColor(
-					options.dropShadow.color
-				);
+				miniCtx.shadowColor = removeAlphaFromColor(dropShadow.color);
 				miniCtx.shadowBlur = blurRadius;
 				for (let i = 0; i < SHADOW_REDRAW_COUNT; i++) {
 					miniCtx.drawImage(
@@ -141,7 +170,7 @@ export function useShadow(
 				}px ${bottom * blockSize}px ${left * blockSize}px`;
 				shadow.current.style.backgroundImage = `url(${miniCanvas.toDataURL()})`;
 				shadow.current.style.opacity = `calc(${
-					getAlphaFromColor(options.dropShadow.color) * 100 + "%"
+					getAlphaFromColor(dropShadow.color) * 100 + "%"
 				} * var(--ck-current-drop-shadow-opacity-multiplier))`;
 			} else {
 				// remove the drop shadow
@@ -153,17 +182,6 @@ export function useShadow(
 		return unsubscribe;
 	}, [
 		options.dropShadow,
-		options.dropShadow?.blur,
-		options.dropShadow?.color,
-		options.dropShadow && "offsetX" in options.dropShadow
-			? options.dropShadow.offsetX
-			: undefined,
-		options.dropShadow && "offsetY" in options.dropShadow
-			? options.dropShadow.offsetY
-			: undefined,
-		options.dropShadow && "distance" in options.dropShadow
-			? options.dropShadow.distance
-			: undefined,
 		options.borderRadius,
 		blockSize,
 		element,

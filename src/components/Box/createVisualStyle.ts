@@ -77,19 +77,20 @@ function normalizeVisualValue(value: VisualValue): string {
 }
 
 export function resolveComponentVisualStyle<
-	T extends Record<string, VisualValue>
+	T extends Record<string, VisualValue>,
+	AllProps extends Record<string, any> = T & Record<string, any>
 >(args: {
-	props: Record<string, any>;
+	props: AllProps;
 	keys: readonly (keyof T)[];
 	palette: Theme["palette"];
 }): VisualStyleOutput<T> & {
 	visualStyle: T & Partial<Record<InteractionState, Partial<T>>>;
-	rest: Record<string, any>;
+	rest: Omit<AllProps, keyof T | InteractionState>;
 } {
 	const { props, keys, palette } = args;
 
 	const visualStyle: Partial<T & Record<InteractionState, Partial<T>>> = {};
-	const rest: Record<string, any> = {};
+	const rest = {} as Omit<AllProps, keyof T | InteractionState>;
 
 	for (const key in props) {
 		if ((keys as readonly string[]).includes(key)) {
@@ -97,7 +98,7 @@ export function resolveComponentVisualStyle<
 		} else if (STATE_KEYS.includes(key as InteractionState)) {
 			visualStyle[key as InteractionState] = props[key];
 		} else {
-			rest[key] = props[key];
+			(rest as any)[key] = props[key];
 		}
 	}
 

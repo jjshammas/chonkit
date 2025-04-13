@@ -1,6 +1,20 @@
 import { useChonkit } from "@/core/ChonkitProvider/ChonkitProvider";
 import { mergeThemes, Theme, DeepPartial } from "@/core/themes";
 
+const deepMerge = (...objects: DeepPartial<any>[]): DeepPartial<any> => {
+	return objects.reduce((prev, obj) => {
+		obj &&
+			Object.keys(obj).forEach((key) => {
+				if (obj[key] instanceof Object && !Array.isArray(obj[key])) {
+					prev[key] = deepMerge(prev[key], obj[key]);
+				} else {
+					prev[key] = obj[key];
+				}
+			});
+		return prev;
+	}, {});
+};
+
 export function useComponentTheme<
 	Key extends keyof Theme,
 	ResolvedTheme extends Theme[Key],
@@ -31,11 +45,17 @@ export function useComponentTheme<
 		variantProps = (resolvedTheme as any).variants?.[selectedVariant] ?? {};
 	}
 
-	const mergedProps = {
-		...resolvedTheme,
-		...variantProps,
-		...userProps,
-	} as Props;
+	// const mergedProps = {
+	// 	...resolvedTheme,
+	// 	...variantProps,
+	// 	...userProps,
+	// } as Props;
+
+	const mergedProps = deepMerge(
+		resolvedTheme,
+		variantProps,
+		userProps
+	) as Props;
 	delete mergedProps.defaultVariant;
 	delete mergedProps.variants;
 	return mergedProps;

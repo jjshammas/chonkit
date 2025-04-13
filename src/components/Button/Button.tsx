@@ -9,13 +9,6 @@ import { createComponentVariantThemeTypes } from "@/core/themes/createComponentT
 const buttonVisual = createComponentVisualTypes({
 	style: {
 		...boxVisual.style,
-		borderSize: undefined as BoxProps["borderSize"],
-		borderColor: undefined as BoxProps["borderColor"],
-		bevelHighlightSize: undefined as BoxProps["bevelHighlightSize"],
-		bevelShadowSize: undefined as BoxProps["bevelShadowSize"],
-		embossHighlightSize: undefined as BoxProps["embossHighlightSize"],
-		embossShadowSize: undefined as BoxProps["embossShadowSize"],
-		dropShadow: undefined as BoxProps["dropShadow"],
 	},
 	interactionAllowedKeys: [...boxVisual.interactionAllowedKeys] as const,
 });
@@ -52,15 +45,9 @@ export const Button: React.FC<ButtonProps> = (props) => {
 				className: styles.buttonContainer,
 				"aria-disabled": disabled ? "true" : undefined,
 			}}
-			dropShadow={{
-				blur: 1,
-				distance: 1,
-				color: "rgba(0,0,0,0.2)",
-			}}
 			{...rest}
 		>
 			{children}
-			<Box></Box>
 		</Box>
 	);
 };

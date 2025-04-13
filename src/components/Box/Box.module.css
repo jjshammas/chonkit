@@ -11,6 +11,13 @@
 			);
 			color: var(--ck-color-hover, var(--ck-color));
 		}
+
+		.fabricatedBorder {
+			background-color: var(
+				--ck-border-color-hover,
+				var(--ck-border-color)
+			);
+		}
 	}
 
 	&:active {
@@ -20,6 +27,13 @@
 				var(--ck-background-color)
 			);
 			color: var(--ck-color-active, var(--ck-color));
+		}
+
+		.fabricatedBorder {
+			background-color: var(
+				--ck-border-color-active,
+				var(--ck-border-color)
+			);
 		}
 	}
 }
@@ -60,5 +74,12 @@
 	z-index: 3;
 	position: absolute;
 	background-size: 100% 100%;
+	pointer-events: none;
+}
+
+.fabricatedBorder {
+	position: absolute;
+	inset: 0;
+	background: var(--ck-border-color);
 	pointer-events: none;
 }

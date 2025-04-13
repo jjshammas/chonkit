@@ -6,19 +6,25 @@ import {
 import type { GeometryObserver } from "./useGeometryObserver";
 import { useChonkit } from "@/core/ChonkitProvider/ChonkitProvider";
 import type { RoundedCornerClipProps } from "./useRoundedCornerClip";
+import type { FabricatedBorderProps } from "./useFabricatedBorder";
 import { useLighting } from "@/core/LightingProvider/LightingProvider";
 import styles from "./Box.module.css";
 
+export type EmbossProps = {
+	highlightSize?: number;
+	shadowSize?: number;
+	borderRadius?: RoundedCornerClipProps["borderRadius"];
+	borderSize?: FabricatedBorderProps["borderSize"];
+};
+
 export function useEmboss(
 	element: React.RefObject<HTMLElement | null>,
-	options: {
-		highlightSize?: number;
-		shadowSize?: number;
-		borderRadius?: RoundedCornerClipProps["borderRadius"];
-		borderSize?: number;
-	},
+	options: EmbossProps,
 	geometry: GeometryObserver
 ) {
+	const highlightSize = Math.max(options.highlightSize || 0, 0);
+	const shadowSize = Math.max(options.shadowSize || 0, 0);
+
 	const { blockSize } = useChonkit();
 	const { direction } = useLighting();
 	const elementHighlight = useRef<HTMLDivElement>(null);
@@ -26,35 +32,35 @@ export function useEmboss(
 
 	useEffect(() => {
 		const unsubscribe = geometry.subscribe(({ width, height }) => {
-			if (options.highlightSize) {
+			if (highlightSize) {
 				const highlightPath = `path('${convertPointsToPathString(
 					generateRoundedCornerPoints(
 						options.borderRadius || 0,
 						blockSize,
 						width +
 							(direction !== 90 && direction !== 270
-								? options.highlightSize * blockSize
+								? highlightSize * blockSize
 								: 0),
 						height +
 							(direction !== 0 && direction !== 180
-								? options.highlightSize * blockSize
+								? highlightSize * blockSize
 								: 0)
 					)
 				)}')`;
 				elementHighlight.current!.style.clipPath = highlightPath;
 			}
-			if (options.shadowSize) {
+			if (shadowSize) {
 				const shadowPath = `path('${convertPointsToPathString(
 					generateRoundedCornerPoints(
 						options.borderRadius || 0,
 						blockSize,
 						width +
 							(direction !== 90 && direction !== 270
-								? options.shadowSize * blockSize
+								? shadowSize * blockSize
 								: 0),
 						height +
 							(direction !== 0 && direction !== 180
-								? options.shadowSize * blockSize
+								? shadowSize * blockSize
 								: 0)
 					)
 				)}')`;
@@ -67,15 +73,15 @@ export function useEmboss(
 		options.borderRadius,
 		options.borderSize,
 		blockSize,
-		options.highlightSize,
-		options.shadowSize,
+		highlightSize,
+		shadowSize,
 		element,
 		elementHighlight,
 		elementShadow,
 		direction,
 	]);
 
-	const embossHighlightEl = options.highlightSize ? (
+	const embossHighlightEl = highlightSize ? (
 		<div
 			ref={elementHighlight}
 			className={`${styles.highlight} ${styles.embossment}`}
@@ -83,32 +89,32 @@ export function useEmboss(
 				bottom:
 					direction !== 0 && direction !== 180
 						? direction < 180
-							? `${blockSize * -options.highlightSize}px`
+							? `${blockSize * -highlightSize}px`
 							: 0
 						: 0,
 				top:
 					direction !== 0 && direction !== 180
 						? direction > 180
-							? `${blockSize * -options.highlightSize}px`
+							? `${blockSize * -highlightSize}px`
 							: 0
 						: 0,
 				left:
 					direction !== 90 && direction !== 270
 						? direction > 90 && direction < 270
-							? `${blockSize * -options.highlightSize}px`
+							? `${blockSize * -highlightSize}px`
 							: 0
 						: 0,
 				right:
 					direction !== 90 && direction !== 270
 						? direction < 90 || direction > 270
-							? `${blockSize * -options.highlightSize}px`
+							? `${blockSize * -highlightSize}px`
 							: 0
 						: 0,
 			}}
 		></div>
 	) : null;
 
-	const embossShadowEl = options.shadowSize ? (
+	const embossShadowEl = shadowSize ? (
 		<div
 			ref={elementShadow}
 			className={`${styles.shadow} ${styles.embossment}`}
@@ -116,25 +122,25 @@ export function useEmboss(
 				top:
 					direction !== 0 && direction !== 180
 						? direction < 180
-							? `${blockSize * -options.shadowSize}px`
+							? `${blockSize * -shadowSize}px`
 							: 0
 						: 0,
 				bottom:
 					direction !== 0 && direction !== 180
 						? direction > 180
-							? `${blockSize * -options.shadowSize}px`
+							? `${blockSize * -shadowSize}px`
 							: 0
 						: 0,
 				right:
 					direction !== 90 && direction !== 270
 						? direction > 90 && direction < 270
-							? `${blockSize * -options.shadowSize}px`
+							? `${blockSize * -shadowSize}px`
 							: 0
 						: 0,
 				left:
 					direction !== 90 && direction !== 270
 						? direction < 90 || direction > 270
-							? `${blockSize * -options.shadowSize}px`
+							? `${blockSize * -shadowSize}px`
 							: 0
 						: 0,
 			}}

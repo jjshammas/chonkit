@@ -1,18 +1,21 @@
 import React, { ReactNode, useRef } from "react";
 import { useChonkit } from "@/core/ChonkitProvider/ChonkitProvider";
 import { useGeometryObserver } from "./useGeometryObserver";
-import { useFabricatedBorder } from "./useFabricatedBorder";
+import {
+	useFabricatedBorder,
+	FabricatedBorderProps,
+} from "./useFabricatedBorder";
 import {
 	useRoundedCornerClip,
 	RoundedCornerClipProps,
 } from "./useRoundedCornerClip";
-import { useBevel } from "./useBevel";
-import styles from "./Box.module.css";
-import { useEmboss } from "./useEmboss";
+import { useBevel, BevelProps } from "./useBevel";
+import { useEmboss, EmbossProps } from "./useEmboss";
 import { useShadow, ShadowProps } from "./useShadow";
 import { useResolvedColorProps } from "@/hooks/useResolvedColor";
 import { resolveComponentVisualStyle } from "./createVisualStyle";
 import { createComponentVisualTypes } from "@/core/themes/createComponentVisualTypes";
+import styles from "./Box.module.css";
 
 export const boxVisual = createComponentVisualTypes({
 	style: {
@@ -21,8 +24,27 @@ export const boxVisual = createComponentVisualTypes({
 		borderRadius: undefined as
 			| RoundedCornerClipProps["borderRadius"]
 			| undefined,
+		borderSize: undefined as
+			| FabricatedBorderProps["borderSize"]
+			| undefined,
+		borderColor: undefined as
+			| FabricatedBorderProps["borderColor"]
+			| undefined,
+		embossHighlightSize: undefined as
+			| EmbossProps["highlightSize"]
+			| undefined,
+		embossShadowSize: undefined as EmbossProps["shadowSize"] | undefined,
+		bevelHighlightSize: undefined as
+			| BevelProps["highlightSize"]
+			| undefined,
+		bevelShadowSize: undefined as BevelProps["shadowSize"] | undefined,
+		dropShadow: undefined as ShadowProps["dropShadow"] | undefined,
 	},
-	interactionAllowedKeys: ["backgroundColor", "color"] as const,
+	interactionAllowedKeys: [
+		"backgroundColor",
+		"color",
+		"borderColor",
+	] as const,
 });
 
 export type BoxVisualStyle = typeof boxVisual.types.VisualStyle;
@@ -41,23 +63,24 @@ export interface BoxProps
 	snap?: boolean;
 	snapMethod?: "transform" | "padding";
 
-	borderSize?: number;
-	borderColor?: string;
-
-	bevelHighlightSize?: number;
-	bevelShadowSize?: number;
-	embossHighlightSize?: number;
-	embossShadowSize?: number;
-
 	[key: `data-${string}`]: any;
 }
 
 export const Box: React.FC<BoxProps> = (props) => {
 	const {
-		renderValues: { borderRadius },
+		renderValues: {
+			borderRadius,
+			borderSize,
+			borderColor,
+			bevelHighlightSize,
+			bevelShadowSize,
+			embossHighlightSize,
+			embossShadowSize,
+			dropShadow,
+		},
 		cssVariables,
 		rest: nonVisualRest,
-	} = resolveComponentVisualStyle<BoxVisualStyle>({
+	} = resolveComponentVisualStyle<BoxVisualStyle, BoxProps>({
 		props,
 		keys: boxVisual.baseKeys,
 		palette: useChonkit().theme.palette,
@@ -69,23 +92,8 @@ export const Box: React.FC<BoxProps> = (props) => {
 		containerProps,
 		snap,
 		snapMethod = "transform",
-		borderSize: rawBorderSize,
-		borderColor,
-		bevelHighlightSize: rawBevelHighlightSize,
-		bevelShadowSize: rawBevelShadowSize,
-		embossHighlightSize: rawEmbossHighlightSize,
-		embossShadowSize: rawEmbossShadowSize,
-		dropShadow,
 		...rest
 	} = useResolvedColorProps(nonVisualRest);
-
-	const clampValue = (value?: number) =>
-		value !== undefined ? Math.max(value, 0) : undefined;
-	const borderSize = clampValue(rawBorderSize);
-	const bevelHighlightSize = clampValue(rawBevelHighlightSize);
-	const bevelShadowSize = clampValue(rawBevelShadowSize);
-	const embossHighlightSize = clampValue(rawEmbossHighlightSize);
-	const embossShadowSize = clampValue(rawEmbossShadowSize);
 
 	const { blockSize } = useChonkit();
 	const ref = useRef<HTMLDivElement>(null);
@@ -135,7 +143,10 @@ export const Box: React.FC<BoxProps> = (props) => {
 			...containerProps,
 			ref,
 			className: `${styles.container} ${containerProps?.className}`,
-			style: cssVariables,
+			style: {
+				...cssVariables,
+				...containerProps?.style,
+			},
 		},
 		<>
 			<div

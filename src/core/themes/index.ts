@@ -83,7 +83,9 @@ export const createCSSVariables = (theme: Theme): React.CSSProperties => {
 	return cssVariables;
 };
 
-import defaultTheme from "./default";
+import defaultTheme from "./config/default";
+import flatTheme from "./config/flat";
 export default {
 	default: defaultTheme,
+	flat: mergeThemes(defaultTheme, flatTheme),
 };

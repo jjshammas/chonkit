@@ -1,16 +1,9 @@
 import { test, assert, expect } from "vitest";
 import {
 	generatePixelCornerArc,
-	generateRoundedCornerPath,
+	generateRoundedCornerPoints,
 	flipPointsAboutHorizontalAxis,
 } from "./circle-generator";
-
-test("generates a circle", () => {
-	const grid = generatePixelCornerArc(5);
-	console.log(grid.map((row) => row.join(" ")).join("\n"));
-
-	console.log(generateRoundedCornerPath(3, 0, 0, 0));
-});
 
 test("can flip points horizontally", () => {
 	const flippedPoints = flipPointsAboutHorizontalAxis(

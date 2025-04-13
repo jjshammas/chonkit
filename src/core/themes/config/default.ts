@@ -1,4 +1,4 @@
-import type { Theme } from "./";
+import type { Theme } from "..";
 
 const defaultTheme: Theme = {
 	palette: {
@@ -42,9 +42,11 @@ const defaultTheme: Theme = {
 		bevelShadowSize: 1,
 		backgroundColor: "secondary",
 		color: "secondary.fg",
+		dropShadow: "3 1 rgba(0,0,0,0.2)",
 
 		_hover: {
 			backgroundColor: "black",
+			borderColor: "black",
 		},
 
 		variants: {

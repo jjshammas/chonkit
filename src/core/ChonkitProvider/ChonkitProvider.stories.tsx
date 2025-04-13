@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 
 import { ChonkitProvider } from "./ChonkitProvider";
 import { Box } from "@/components/Box/Box";
+import { Button } from "@/components/Button/Button";
 
 /**
  * The wrapping component for the Chonkit library. It provides the context for the
@@ -54,5 +55,38 @@ export const Default: Story = {
 		style: {
 			border: "1px dashed black",
 		},
+	},
+};
+
+export const Themed: Story = {
+	decorators: [
+		(Story) => (
+			<div
+				style={{
+					backgroundColor: "#eee",
+					display: "flex",
+					flexDirection: "row",
+					gap: "20px",
+				}}
+			>
+				<Story />
+				<ChonkitProvider
+					style={{
+						padding: "20px",
+					}}
+					blockSize={2}
+					theme="flat"
+				>
+					<Button variant="primary">Flat</Button>
+				</ChonkitProvider>
+			</div>
+		),
+	],
+	args: {
+		blockSize: 2,
+		style: {
+			padding: "20px",
+		},
+		children: <Button variant="primary">Default</Button>,
 	},
 };

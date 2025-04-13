@@ -9,19 +9,25 @@ import {
 	useLighting,
 	rotateDirection,
 } from "@/core/LightingProvider/LightingProvider";
+import type { FabricatedBorderProps } from "./useFabricatedBorder";
 import type { RoundedCornerClipProps } from "./useRoundedCornerClip";
 import styles from "./Box.module.css";
 
+export type BevelProps = {
+	highlightSize?: number;
+	shadowSize?: number;
+	borderRadius?: RoundedCornerClipProps["borderRadius"];
+	borderSize?: FabricatedBorderProps["borderSize"];
+};
+
 export function useBevel(
 	element: React.RefObject<HTMLElement | null>,
-	options: {
-		highlightSize?: number;
-		shadowSize?: number;
-		borderRadius?: RoundedCornerClipProps["borderRadius"];
-		borderSize?: number;
-	},
+	options: BevelProps,
 	geometry: GeometryObserver
 ) {
+	const highlightSize = Math.max(options.highlightSize || 0, 0);
+	const shadowSize = Math.max(options.shadowSize || 0, 0);
+
 	const { blockSize } = useChonkit();
 	const { direction } = useLighting();
 	const elementHighlight = useRef<HTMLDivElement>(null);
@@ -29,13 +35,13 @@ export function useBevel(
 
 	useEffect(() => {
 		const unsubscribe = geometry.subscribe(({ width, height }) => {
-			if (options.highlightSize) {
+			if (highlightSize) {
 				const highlightPath = `path('${convertPointsToPathString(
 					generateHighlightPoints(
 						options.borderRadius || 0,
 						options.borderSize || 0,
 						blockSize,
-						options.highlightSize,
+						highlightSize,
 						direction,
 						width,
 						height
@@ -43,13 +49,13 @@ export function useBevel(
 				)}')`;
 				elementHighlight.current!.style.clipPath = highlightPath;
 			}
-			if (options.shadowSize) {
+			if (shadowSize) {
 				const shadowPath = `path('${convertPointsToPathString(
 					generateHighlightPoints(
 						options.borderRadius || 0,
 						options.borderSize || 0,
 						blockSize,
-						options.shadowSize,
+						shadowSize,
 						rotateDirection(direction, 180),
 						width,
 						height
@@ -64,19 +70,19 @@ export function useBevel(
 		options.borderRadius,
 		options.borderSize,
 		blockSize,
-		options.highlightSize,
-		options.shadowSize,
+		highlightSize,
+		shadowSize,
 		element,
 		elementHighlight,
 		elementShadow,
 		direction,
 	]);
 
-	const bevelHighlightEl = options.highlightSize ? (
+	const bevelHighlightEl = highlightSize ? (
 		<div ref={elementHighlight} className={styles.highlight} />
 	) : null;
 
-	const bevelShadowEl = options.shadowSize ? (
+	const bevelShadowEl = shadowSize ? (
 		<div ref={elementShadow} className={styles.shadow} />
 	) : null;
 
