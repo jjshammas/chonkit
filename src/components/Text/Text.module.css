@@ -1,0 +1,15 @@
+.text {
+	position: relative;
+	left: var(--ck-text-adjustment-left, 0);
+	top: var(--ck-text-adjustment-top, 0);
+}
+
+.sm {
+	left: var(--ck-text-adjustment-left-sm, 0);
+	top: var(--ck-text-adjustment-top-sm, 0);
+	font-size: var(--ck-text-font-size-sm);
+	font-family: var(--ck-text-font-family-sm);
+}
+
+.lg {
+}

@@ -38,11 +38,11 @@ const defaultTheme: Theme = {
 		borderSize: 1,
 		borderRadius: 6,
 		borderColor: "rgba(0,0,0,0.3)",
-		bevelHighlightSize: 1,
+		bevelHighlightSize: 2,
 		bevelShadowSize: 1,
 		backgroundColor: "secondary",
 		color: "secondary.fg",
-		dropShadow: "3 1 rgba(0,0,0,0.2)",
+		dropShadow: "1 1 rgba(0,0,0,0.2)",
 
 		_hover: {
 			backgroundColor: "black",

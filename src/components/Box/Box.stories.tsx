@@ -74,6 +74,23 @@ export const Embossed: Story = {
 	],
 };
 
+export const WithDropShadow: Story = {
+	args: {
+		dropShadow: "3 4 rgba(0, 0, 0, 0.3)",
+	},
+	decorators: [
+		(Story) => (
+			<div
+				style={{
+					padding: "20px",
+				}}
+			>
+				<Story />
+			</div>
+		),
+	],
+};
+
 export const InsideFlexContainer: Story = {
 	args: {
 		borderRadius: 10,

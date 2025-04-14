@@ -9,7 +9,7 @@ const meta = {
 	component: Button,
 	tags: ["autodocs"],
 	parameters: {
-		layout: "centered",
+		// layout: "centered",
 	},
 	args: {
 		children: "Click me",

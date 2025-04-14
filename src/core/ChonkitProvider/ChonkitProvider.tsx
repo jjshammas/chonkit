@@ -38,6 +38,7 @@ const Grid = ({ blockSize }: { blockSize: number }) => {
 				background: `repeating-conic-gradient(rgba(0,0,0,0.1) 0% 25%, transparent 0% 50%) 50% / 20px 20px`,
 				backgroundPosition: "0 0",
 				backgroundSize: `${blockSize * 2}px ${blockSize * 2}px`,
+				zIndex: 1000,
 			}}
 		/>
 	);

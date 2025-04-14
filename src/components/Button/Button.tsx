@@ -1,10 +1,12 @@
 import React, { ReactNode } from "react";
 import { Box, BoxProps, boxVisual } from "../Box/Box";
+import { Text } from "../Text/Text";
 import { useComponentTheme } from "@/hooks/useComponentTheme";
 import styles from "./Button.module.css";
 import type { WithoutInteractionStates } from "@/core/themes";
 import { createComponentVisualTypes } from "@/core/themes/createComponentVisualTypes";
 import { createComponentVariantThemeTypes } from "@/core/themes/createComponentThemeTypes";
+import clsx from "clsx";
 
 const buttonVisual = createComponentVisualTypes({
 	style: {
@@ -29,10 +31,11 @@ export interface ButtonProps
 	as?: React.ElementType;
 	children?: ReactNode;
 	disabled?: boolean;
+	size?: "sm" | "base" | "lg";
 }
 
 export const Button: React.FC<ButtonProps> = (props) => {
-	const { as, children, disabled, ...rest } = useComponentTheme(
+	const { as, children, disabled, size, ...rest } = useComponentTheme(
 		"Button",
 		props
 	);
@@ -40,14 +43,14 @@ export const Button: React.FC<ButtonProps> = (props) => {
 	return (
 		<Box
 			as="a"
-			className={styles.button}
+			className={clsx(styles.button, size && styles[size])}
 			containerProps={{
 				className: styles.buttonContainer,
 				"aria-disabled": disabled ? "true" : undefined,
 			}}
 			{...rest}
 		>
-			{children}
+			<Text size={size}>{children}</Text>
 		</Box>
 	);
 };

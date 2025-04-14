@@ -53,7 +53,7 @@ export type ShadowProps = {
 	dropShadow?: string;
 };
 
-const SHADOW_REDRAW_COUNT = 3;
+const SHADOW_REDRAW_COUNT = 5;
 
 const getAlphaFromColor = (color: string) => {
 	const rgba = color.match(

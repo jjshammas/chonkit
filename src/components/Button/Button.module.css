@@ -16,7 +16,7 @@
 	--ck-current-shadow-color: var(--ck-shadow-color);
 	--ck-current-shadow-blend-mode: var(--ck-shadow-blend-mode);
 
-	padding: snap(6px) snap(16px);
+	padding: snap(8px) snap(16px) snap(6px);
 	text-shadow: 0 var(--ck-block-size) 0 rgba(0, 0, 0, 0.2);
 	cursor: pointer;
 	user-select: none;
@@ -28,4 +28,8 @@
 		--ck-current-shadow-color: var(--ck-highlight-color);
 		--ck-current-shadow-blend-mode: var(--ck-highlight-blend-mode);
 	}
+}
+
+.sm {
+	line-height: var(--ck-text-line-height-sm);
 }
