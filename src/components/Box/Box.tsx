@@ -12,6 +12,7 @@ import {
 import { useBevel, BevelProps } from "./useBevel";
 import { useEmboss, EmbossProps } from "./useEmboss";
 import { useShadow, ShadowProps } from "./useShadow";
+import { useGradient, GradientProps } from "./useGradient";
 import { useResolvedColorProps } from "@/hooks/useResolvedColor";
 import { resolveComponentVisualStyle } from "./createVisualStyle";
 import { createComponentVisualTypes } from "@/core/themes/createComponentVisualTypes";
@@ -39,6 +40,7 @@ export const boxVisual = createComponentVisualTypes({
 			| undefined,
 		bevelShadowSize: undefined as BevelProps["shadowSize"] | undefined,
 		dropShadow: undefined as ShadowProps["dropShadow"] | undefined,
+		backgroundGradient: undefined as GradientProps["gradient"] | undefined,
 	},
 	interactionAllowedKeys: [
 		"backgroundColor",
@@ -136,6 +138,11 @@ export const Box: React.FC<BoxProps> = (props) => {
 		},
 		geometry
 	);
+	const { gradientEl } = useGradient(
+		ref,
+		{ gradient: props.backgroundGradient },
+		geometry
+	);
 
 	return React.createElement(
 		as || "div",
@@ -165,6 +172,7 @@ export const Box: React.FC<BoxProps> = (props) => {
 							: undefined,
 				}}
 			>
+				{gradientEl}
 				{fabricatedBorderEl}
 				{bevelHighlightEl}
 				{bevelShadowEl}

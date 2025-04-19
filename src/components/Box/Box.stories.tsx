@@ -23,6 +23,7 @@ const meta = {
 				Hello World
 			</div>
 		),
+		backgroundGradient: "90deg, #666, #888 10%, #888 70%, #aaa 90%",
 	},
 	parameters: {
 		controls: {
@@ -59,6 +60,26 @@ export const Embossed: Story = {
 		borderRadius: 12,
 		embossHighlightSize: 2,
 		embossShadowSize: 4,
+	},
+	decorators: [
+		(Story) => (
+			<div
+				style={{
+					backgroundColor: "pink",
+					padding: "20px",
+				}}
+			>
+				<Story />
+			</div>
+		),
+	],
+};
+
+export const WithGradientBackground: Story = {
+	args: {
+		// backgroundGradient: "0deg, #666, #888 20, #aaa 75%",
+		// backgroundGradient: "90deg, #666, #888 50%, #aaa 75%",
+		backgroundGradient: "90deg, #666, #888 10%, #888 70%, #aaa 90%",
 	},
 	decorators: [
 		(Story) => (
