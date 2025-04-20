@@ -142,10 +142,17 @@ export const createGradientSVG = (
 	svg.setAttribute("shape-rendering", "crispEdges");
 
 	const gradientParts = gradientString.split(",").map((part) => part.trim());
-	const direction = parseFloat(gradientParts[0].replace("deg", ""));
-	if (direction !== 90) {
-		throw new Error("Unsupported gradient direction: " + direction);
+	let direction = parseFloat(gradientParts[0].replace("deg", ""));
+	if (
+		direction !== 0 &&
+		direction !== 90 &&
+		direction !== 180 &&
+		direction !== 270
+	) {
+		console.warn("Unsupported gradient direction: " + direction);
+		direction = 90;
 	}
+	const isHorizontal = direction === 0 || direction === 180;
 
 	// svg.setAttribute("width", width.toString());
 	svg.setAttribute("width", width + "px");
@@ -153,19 +160,30 @@ export const createGradientSVG = (
 
 	const gradientSteps = calculateCenters(
 		gradientParts.slice(1),
-		height,
+		isHorizontal ? width : height,
 		blockSize
 	);
 
 	const g = document.createElementNS(SVG_URL, "g");
-	// g.setAttribute("transform", "rotate(90 16 16)");
+	g.setAttribute("transform-origin", "0 0");
+	if (direction === 0) {
+		g.setAttribute("transform", "rotate(-90) translate(-" + height + ",0)");
+	} else if (direction === 180) {
+		g.setAttribute("transform", "rotate(90) translate(0,-" + width + ")");
+	} else if (direction === 270) {
+		g.setAttribute(
+			"transform",
+			"rotate(180) translate(-" + width + ",-" + height + ")"
+		);
+	}
 
-	const patternWidth = width;
+	const patternWidth = isHorizontal ? height : width;
+	const patternHeight = isHorizontal ? width : height;
 	const rect = document.createElementNS(SVG_URL, "rect");
 	rect.setAttribute("x", "0");
 	rect.setAttribute("y", "0");
 	rect.setAttribute("width", patternWidth + "px");
-	rect.setAttribute("height", height + "px");
+	rect.setAttribute("height", patternHeight + "px");
 	rect.setAttribute("fill", gradientSteps[0].color);
 	g.appendChild(rect);
 
@@ -214,7 +232,7 @@ export const createGradientSVG = (
 		rect.setAttribute("x", "0");
 		rect.setAttribute("y", transitionStartY + "px");
 		rect.setAttribute("width", patternWidth + "px");
-		rect.setAttribute("height", height - transitionStartY + "px");
+		rect.setAttribute("height", patternHeight - transitionStartY + "px");
 		rect.setAttribute("fill", step.color);
 		g.appendChild(rect);
 

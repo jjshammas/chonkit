@@ -11,7 +11,7 @@ const resolveGradientColors = (
 	palette: Theme["palette"]
 ): string => {
 	let newString = gradient;
-	const tokens = gradient
+	gradient
 		.split(",")
 		.map((group) => group.trim().split(" "))
 		.flat()
@@ -41,7 +41,6 @@ export function useGradient(
 
 	useEffect(() => {
 		if (!options.gradient) return;
-		// if (!gradientEl.current) return;
 
 		const gradientString = resolveGradientColors(options.gradient, palette);
 		const unsubscribe = geometry.subscribe(({ width, height }) => {

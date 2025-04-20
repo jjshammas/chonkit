@@ -23,7 +23,7 @@ const meta = {
 				Hello World
 			</div>
 		),
-		backgroundGradient: "90deg, #666, #888 10%, #888 70%, #aaa 90%",
+		backgroundGradient: "270deg, #666, #888 10%, #888 70%, #aaa 90%",
 	},
 	parameters: {
 		controls: {
