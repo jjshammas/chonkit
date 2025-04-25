@@ -1,10 +1,25 @@
 .container {
+	/* reset variables so that they are not inherited */
+	--ck-background-color: transparent;
+	--ck-background-color-hover: var(--ck-background-color);
+	--ck-background-color-active: var(--ck-background-color);
+	--ck-background-color-focus: var(--ck-background-color);
+	--ck-background-color-disabled: var(--ck-background-color);
+	--ck-color: inherit;
+	--ck-color-hover: var(--ck-color);
+	--ck-color-active: var(--ck-color);
+	--ck-color-focus: var(--ck-color);
+	--ck-color-disabled: var(--ck-color);
+	--ck-margin: 0;
+	--ck-padding: 0;
+
 	position: relative;
 	display: block;
 	transform-origin: top left;
+	margin: var(--ck-margin, 0);
 
 	&:hover {
-		.inner {
+		> .inner {
 			background-color: var(
 				--ck-background-color-hover,
 				var(--ck-background-color)
@@ -12,7 +27,7 @@
 			color: var(--ck-color-hover, var(--ck-color));
 		}
 
-		.fabricatedBorder {
+		> .inner > .fabricatedBorder {
 			background-color: var(
 				--ck-border-color-hover,
 				var(--ck-border-color)
@@ -21,7 +36,7 @@
 	}
 
 	&:active {
-		.inner {
+		> .inner {
 			background-color: var(
 				--ck-background-color-active,
 				var(--ck-background-color)
@@ -29,7 +44,7 @@
 			color: var(--ck-color-active, var(--ck-color));
 		}
 
-		.fabricatedBorder {
+		> .inner > .fabricatedBorder {
 			background-color: var(
 				--ck-border-color-active,
 				var(--ck-border-color)
@@ -48,6 +63,7 @@
 	position: relative;
 	background-color: var(--ck-background-color, transparent);
 	color: var(--ck-color, inherit);
+	padding: var(--ck-padding, 0);
 }
 
 .highlight {
@@ -56,6 +72,7 @@
 	background: var(--ck-current-highlight-color);
 	mix-blend-mode: var(--ck-current-highlight-blend-mode);
 	pointer-events: none;
+	z-index: 15;
 }
 
 .shadow {
@@ -64,6 +81,7 @@
 	background: var(--ck-current-shadow-color);
 	mix-blend-mode: var(--ck-current-shadow-blend-mode);
 	pointer-events: none;
+	z-index: 15;
 }
 
 .gradient {
@@ -89,4 +107,5 @@
 	inset: 0;
 	background: var(--ck-border-color);
 	pointer-events: none;
+	z-index: 10;
 }

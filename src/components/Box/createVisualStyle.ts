@@ -72,7 +72,15 @@ type VisualValue = any;
 
 function normalizeVisualValue(value: VisualValue): string {
 	if (Array.isArray(value)) return value.map(normalizeVisualValue).join(" ");
-	if (typeof value === "number") return `${value}px`;
+	if (typeof value === "number")
+		return `calc(${value} * var(--ck-block-size))`;
+	if (/^\d+px$/.test(value.trim()))
+		return `round(${value}, var(--ck-block-size))`;
+	if (typeof value === "string" && /px/.test(value.trim()))
+		return value.replace(
+			/(\d+(\.\d+)?)px/g,
+			(_, num) => `round(${num}px, var(--ck-block-size))`
+		);
 	return String(value);
 }
 

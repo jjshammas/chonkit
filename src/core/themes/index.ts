@@ -1,6 +1,10 @@
-import type { ButtonTheme } from "@/components/Button/Button";
 import { convertJSVariableNameToCSSVariableName } from "@/utils/cssVar";
 import type { InteractionState } from "@/components/Box/createVisualStyle";
+
+import type { ButtonTheme } from "@/components/Button/Button";
+import type { PanelTheme } from "@/components/Panel/Panel";
+import type { PanelControlBarTheme } from "@/components/Panel/PanelControlBar";
+import type { PanelActionBarTheme } from "@/components/Panel/PanelActionBar";
 
 export type ColorDefinition = {
 	main: string;
@@ -23,6 +27,9 @@ export type Theme = {
 		shadowBlendMode: string;
 	};
 	Button: ButtonTheme;
+	Panel: PanelTheme;
+	PanelControlBar: PanelControlBarTheme;
+	PanelActionBar: PanelActionBarTheme;
 };
 
 export type DeepPartial<T> = T extends object

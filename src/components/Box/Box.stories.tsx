@@ -10,9 +10,6 @@ const meta = {
 	tags: ["autodocs"],
 	args: {
 		backgroundColor: "#ddd",
-		_hover: {
-			backgroundColor: "red",
-		},
 		children: (
 			<div
 				style={{
@@ -23,7 +20,6 @@ const meta = {
 				Hello World
 			</div>
 		),
-		backgroundGradient: "270deg, #666, #888 10%, #888 70%, #aaa 90%",
 	},
 	parameters: {
 		controls: {
@@ -110,6 +106,31 @@ export const WithDropShadow: Story = {
 			</div>
 		),
 	],
+};
+
+/**
+ * Create interactable components by using the _hover, _active, _focus, and _disabled props.
+ */
+export const Interactable: Story = {
+	args: {
+		backgroundColor: "#ddd",
+		_hover: {
+			backgroundColor: "red",
+		},
+		_active: {
+			backgroundColor: "blue",
+		},
+		children: (
+			<div
+				style={{
+					padding: "40px",
+					// backgroundColor: "#ddd",
+				}}
+			>
+				Hover and click me
+			</div>
+		),
+	},
 };
 
 export const InsideFlexContainer: Story = {

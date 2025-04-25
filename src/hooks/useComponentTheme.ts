@@ -1,11 +1,17 @@
 import { useChonkit } from "@/core/ChonkitProvider/ChonkitProvider";
 import { mergeThemes, Theme, DeepPartial } from "@/core/themes";
 
+const isPlainObject = (val: any) =>
+	val &&
+	typeof val === "object" &&
+	val.constructor === Object &&
+	Object.getPrototypeOf(val) === Object.prototype;
+
 const deepMerge = (...objects: DeepPartial<any>[]): DeepPartial<any> => {
 	return objects.reduce((prev, obj) => {
 		obj &&
 			Object.keys(obj).forEach((key) => {
-				if (obj[key] instanceof Object && !Array.isArray(obj[key])) {
+				if (isPlainObject(obj[key])) {
 					prev[key] = deepMerge(prev[key], obj[key]);
 				} else {
 					prev[key] = obj[key];

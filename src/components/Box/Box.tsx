@@ -17,6 +17,7 @@ import { useResolvedColorProps } from "@/hooks/useResolvedColor";
 import { resolveComponentVisualStyle } from "./createVisualStyle";
 import { createComponentVisualTypes } from "@/core/themes/createComponentVisualTypes";
 import styles from "./Box.module.css";
+import clsx from "clsx";
 
 export const boxVisual = createComponentVisualTypes({
 	style: {
@@ -41,6 +42,9 @@ export const boxVisual = createComponentVisualTypes({
 		bevelShadowSize: undefined as BevelProps["shadowSize"] | undefined,
 		dropShadow: undefined as ShadowProps["dropShadow"] | undefined,
 		backgroundGradient: undefined as GradientProps["gradient"] | undefined,
+
+		padding: undefined as string | number | undefined,
+		margin: undefined as string | number | undefined,
 	},
 	interactionAllowedKeys: [
 		"backgroundColor",
@@ -95,7 +99,9 @@ export const Box: React.FC<BoxProps> = (props) => {
 		snap,
 		snapMethod = "transform",
 		...rest
-	} = useResolvedColorProps(nonVisualRest);
+		// color resolution should already happen in the visual style
+		// } = useResolvedColorProps(nonVisualRest);
+	} = nonVisualRest;
 
 	const { blockSize } = useChonkit();
 	const ref = useRef<HTMLDivElement>(null);
@@ -149,7 +155,7 @@ export const Box: React.FC<BoxProps> = (props) => {
 		{
 			...containerProps,
 			ref,
-			className: `${styles.container} ${containerProps?.className}`,
+			className: clsx(styles.container, containerProps?.className),
 			style: {
 				...cssVariables,
 				...containerProps?.style,
@@ -159,7 +165,7 @@ export const Box: React.FC<BoxProps> = (props) => {
 			<div
 				ref={innerRef}
 				{...rest}
-				className={`${styles.inner} ${rest.className}`}
+				className={clsx(styles.inner, rest.className)}
 				style={{
 					...rest.style,
 

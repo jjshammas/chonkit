@@ -5,9 +5,11 @@ import {
 	LightingDirection,
 	LightingProvider,
 } from "../src/core/LightingProvider/LightingProvider";
+import { STATE_KEYS } from "../src/components/Box/createVisualStyle";
 import "../src/index.css";
 
 const preview: Preview = {
+	tags: ["autodocs"],
 	parameters: {
 		controls: {
 			matchers: {
@@ -15,6 +17,19 @@ const preview: Preview = {
 				date: /Date$/i,
 			},
 		},
+	},
+	argTypes: {
+		...STATE_KEYS.reduce((acc, key) => {
+			acc[key] = {
+				control: {
+					type: "object",
+				},
+				description: `A set of props to override when the component is in the "${key.substring(
+					1
+				)}" state.`,
+			};
+			return acc;
+		}, {}),
 	},
 	globalTypes: {
 		gridVisible: {
