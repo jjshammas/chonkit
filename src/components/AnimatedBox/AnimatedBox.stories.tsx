@@ -76,7 +76,7 @@ export const FromTo: Story = {
 		animation: {
 			enter: {
 				from: {
-					yBlocks: -3,
+					yBlocks: -4,
 					opacity: 0,
 				},
 				to: {
@@ -84,6 +84,7 @@ export const FromTo: Story = {
 					opacity: 1,
 				},
 				duration: 300,
+				easing: "ease-out",
 			},
 			exit: {
 				from: {

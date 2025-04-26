@@ -121,6 +121,7 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 					yBlocks: to.yBlocks || 0,
 				},
 				blockSize,
+				easing,
 			});
 			const fromKeyframe: DynamicKeyframe = {
 				percent: 0,
