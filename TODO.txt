@@ -1,6 +1,6 @@
-depth
 icons
 limit geometry observer updates
 faux box shadow if no blur
 make gradient interactable
 animations
+scroll bar with snapping

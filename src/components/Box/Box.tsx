@@ -1,4 +1,4 @@
-import React, { ReactNode, useRef } from "react";
+import React, { ComponentPropsWithRef, ReactNode, useRef } from "react";
 import { useChonkit } from "@/core/ChonkitProvider/ChonkitProvider";
 import { useGeometryObserver } from "./useGeometryObserver";
 import {
@@ -63,6 +63,7 @@ export interface BoxProps
 	extends Omit<React.HTMLAttributes<HTMLDivElement>, keyof BoxVisualProps>,
 		BoxVisualProps,
 		Omit<ShadowProps, "borderRadius"> {
+	ref?: React.RefObject<HTMLDivElement | null>;
 	as?: React.ElementType;
 	children?: ReactNode;
 	containerProps?: React.HTMLAttributes<HTMLDivElement> & {
@@ -98,6 +99,7 @@ export const Box: React.FC<BoxProps> = (props) => {
 	});
 
 	const {
+		ref: forwardedRef,
 		as,
 		children,
 		containerProps,
@@ -109,7 +111,7 @@ export const Box: React.FC<BoxProps> = (props) => {
 	} = nonVisualRest;
 
 	const { blockSize } = useChonkit();
-	const ref = useRef<HTMLDivElement>(null);
+	const ref = forwardedRef || useRef<HTMLDivElement>(null);
 	const innerRef = useRef<HTMLDivElement>(null);
 
 	const shouldFabricateBorder = borderSize && borderRadius;
