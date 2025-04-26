@@ -10,6 +10,10 @@
 	--ck-color-active: var(--ck-color);
 	--ck-color-focus: var(--ck-color);
 	--ck-color-disabled: var(--ck-color);
+	--ck-depth: 0;
+	--ck-depth-hover: var(--ck-depth);
+	--ck-depth-active: var(--ck-depth);
+	--ck-depth-disabled: var(--ck-depth);
 	--ck-margin: 0;
 	--ck-padding: 0;
 
@@ -25,6 +29,7 @@
 				var(--ck-background-color)
 			);
 			color: var(--ck-color-hover, var(--ck-color));
+			top: calc(var(--ck-depth-hover, 0) * -1);
 		}
 
 		> .inner > .fabricatedBorder {
@@ -42,6 +47,7 @@
 				var(--ck-background-color)
 			);
 			color: var(--ck-color-active, var(--ck-color));
+			top: calc(var(--ck-depth-active, 0) * -1);
 		}
 
 		> .inner > .fabricatedBorder {
@@ -64,6 +70,7 @@
 	background-color: var(--ck-background-color, transparent);
 	color: var(--ck-color, inherit);
 	padding: var(--ck-padding, 0);
+	top: calc(var(--ck-depth, 0) * -1);
 }
 
 .highlight {
@@ -100,6 +107,14 @@
 	position: absolute;
 	background-size: 100% 100%;
 	pointer-events: none;
+}
+
+.depth {
+	position: absolute;
+	inset: 0;
+	top: calc(50% - var(--ck-depth, 0));
+	background: var(--ck-depth-color);
+	z-index: 4;
 }
 
 .fabricatedBorder {

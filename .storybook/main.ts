@@ -5,8 +5,8 @@ const config: StorybookConfig = {
 	staticDirs: ["../src/stories/assets"],
 	addons: [
 		"@storybook/addon-essentials",
-		"@storybook/addon-onboarding",
 		"@storybook/addon-interactions",
+		"@storybook/addon-storysource",
 		"@storybook/addon-a11y",
 	],
 	framework: {

@@ -54,14 +54,14 @@ export const calculateCenters = (
 	});
 	if (!centers[0].center) centers[0].center = 0;
 	if (!centers[centers.length - 1].center)
-		centers[centers.length - 1].center = 100;
+		centers[centers.length - 1].center = size;
 
 	for (let i = 1; i < centers.length - 1; i++) {
 		const thisStep = centers[i];
 		if (thisStep.center) continue;
 		const prevStep = centers[i - 1];
 		const prevCenter = prevStep.center;
-		if (!prevCenter)
+		if (typeof prevCenter !== "number")
 			throw new Error(
 				"Could not proces gradient. Missing center on previous step (" +
 					i +

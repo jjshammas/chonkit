@@ -27,6 +27,10 @@ const preview: Preview = {
 				description: `A set of props to override when the component is in the "${key.substring(
 					1
 				)}" state.`,
+				if: {
+					arg: key,
+					exists: true,
+				},
 			};
 			return acc;
 		}, {}),
@@ -77,7 +81,7 @@ const preview: Preview = {
 							context.globals.lightingDirection
 								? (Number(
 										context.globals.lightingDirection
-								  ) as LightingDirection)
+									) as LightingDirection)
 								: 90
 						}
 					>

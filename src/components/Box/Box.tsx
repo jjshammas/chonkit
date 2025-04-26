@@ -13,7 +13,7 @@ import { useBevel, BevelProps } from "./useBevel";
 import { useEmboss, EmbossProps } from "./useEmboss";
 import { useShadow, ShadowProps } from "./useShadow";
 import { useGradient, GradientProps } from "./useGradient";
-import { useResolvedColorProps } from "@/hooks/useResolvedColor";
+import { useDepth, DepthProps } from "./useDepth";
 import { resolveComponentVisualStyle } from "./createVisualStyle";
 import { createComponentVisualTypes } from "@/core/themes/createComponentVisualTypes";
 import styles from "./Box.module.css";
@@ -42,6 +42,8 @@ export const boxVisual = createComponentVisualTypes({
 		bevelShadowSize: undefined as BevelProps["shadowSize"] | undefined,
 		dropShadow: undefined as ShadowProps["dropShadow"] | undefined,
 		backgroundGradient: undefined as GradientProps["gradient"] | undefined,
+		depth: undefined as DepthProps["depth"] | undefined,
+		depthColor: undefined as DepthProps["depthColor"] | undefined,
 
 		padding: undefined as string | number | undefined,
 		margin: undefined as string | number | undefined,
@@ -50,6 +52,7 @@ export const boxVisual = createComponentVisualTypes({
 		"backgroundColor",
 		"color",
 		"borderColor",
+		"depth",
 	] as const,
 });
 
@@ -83,6 +86,8 @@ export const Box: React.FC<BoxProps> = (props) => {
 			embossHighlightSize,
 			embossShadowSize,
 			dropShadow,
+			depth,
+			depthColor,
 		},
 		cssVariables,
 		rest: nonVisualRest,
@@ -149,6 +154,11 @@ export const Box: React.FC<BoxProps> = (props) => {
 		{ gradient: props.backgroundGradient },
 		geometry
 	);
+	const { depthEl } = useDepth(
+		ref,
+		{ borderRadius, depth, depthColor },
+		geometry
+	);
 
 	return React.createElement(
 		as || "div",
@@ -174,7 +184,7 @@ export const Box: React.FC<BoxProps> = (props) => {
 						borderSize && !shouldFabricateBorder
 							? `inset 0 0 0 ${
 									blockSize * borderSize
-							  }px ${borderColor}`
+								}px ${borderColor}`
 							: undefined,
 				}}
 			>
@@ -184,6 +194,7 @@ export const Box: React.FC<BoxProps> = (props) => {
 				{bevelShadowEl}
 				{children}
 			</div>
+			{depthEl}
 			{embossHighlightEl}
 			{embossShadowEl}
 			{shadow}

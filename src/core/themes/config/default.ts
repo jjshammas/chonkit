@@ -44,24 +44,17 @@ const defaultTheme: Theme = {
 		color: "secondary.fg",
 		dropShadow: "1 1 rgba(0,0,0,0.2)",
 		padding: "8px 16px 6px",
+		depth: 4,
+		depthColor: "#253276",
 
-		_hover: {
-			backgroundColor: "black",
-			borderColor: "black",
+		_active: {
+			depth: 0,
 		},
 
 		variants: {
 			primary: {
 				backgroundColor: "primary",
 				color: "primary.fg",
-
-				_hover: {
-					backgroundColor: "green",
-				},
-
-				_active: {
-					backgroundColor: "yellow",
-				},
 			},
 			secondary: {},
 			positive: {

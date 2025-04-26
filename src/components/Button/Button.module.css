@@ -8,6 +8,13 @@
 	&[aria-disabled] {
 		pointer-events: none;
 	}
+
+	&:active > .button {
+		--ck-current-highlight-color: var(--ck-shadow-color);
+		--ck-current-highlight-blend-mode: var(--ck-shadow-blend-mode);
+		--ck-current-shadow-color: var(--ck-highlight-color);
+		--ck-current-shadow-blend-mode: var(--ck-highlight-blend-mode);
+	}
 }
 
 .button {
@@ -20,13 +27,6 @@
 	cursor: pointer;
 	user-select: none;
 	-webkit-user-select: none;
-
-	&:active {
-		--ck-current-highlight-color: var(--ck-shadow-color);
-		--ck-current-highlight-blend-mode: var(--ck-shadow-blend-mode);
-		--ck-current-shadow-color: var(--ck-highlight-color);
-		--ck-current-shadow-blend-mode: var(--ck-highlight-blend-mode);
-	}
 }
 
 .sm {
