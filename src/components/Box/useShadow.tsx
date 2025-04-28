@@ -148,17 +148,21 @@ export function useShadow(
 				miniCtx.shadowColor = removeAlphaFromColor(dropShadow.color);
 				miniCtx.shadowBlur = blurRadius;
 				for (let i = 0; i < SHADOW_REDRAW_COUNT; i++) {
-					miniCtx.drawImage(
-						canvas,
-						0,
-						0,
-						canvas.width,
-						canvas.height,
-						blurRadius,
-						blurRadius,
-						width / blockSize,
-						height / blockSize
-					);
+					try {
+						miniCtx.drawImage(
+							canvas,
+							0,
+							0,
+							canvas.width,
+							canvas.height,
+							blurRadius,
+							blurRadius,
+							width / blockSize,
+							height / blockSize
+						);
+					} catch (err) {
+						console.error("Could not resize shadow:", err);
+					}
 				}
 
 				const top = -blurRadius + (offsetY || 0);
@@ -189,7 +193,11 @@ export function useShadow(
 		direction,
 	]);
 
+	const shadowEl = options.dropShadow ? (
+		<div ref={shadow} className={styles.dropShadow} />
+	) : null;
+
 	return {
-		shadow: <div ref={shadow} className={styles.dropShadow} />,
+		shadow: shadowEl,
 	};
 }

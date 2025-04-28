@@ -5,6 +5,10 @@ import type { ButtonTheme } from "@/components/Button/Button";
 import type { PanelTheme } from "@/components/Panel/Panel";
 import type { PanelControlBarTheme } from "@/components/Panel/PanelControlBar";
 import type { PanelActionBarTheme } from "@/components/Panel/PanelActionBar";
+import type {
+	ScrollAreaTrackTheme,
+	ScrollAreaThumbTheme,
+} from "@/components/ScrollArea/ScrollArea";
 
 export type ColorDefinition = {
 	main: string;
@@ -30,12 +34,14 @@ export type Theme = {
 	Panel: PanelTheme;
 	PanelControlBar: PanelControlBarTheme;
 	PanelActionBar: PanelActionBarTheme;
+	ScrollAreaTrack: ScrollAreaTrackTheme;
+	ScrollAreaThumb: ScrollAreaThumbTheme;
 };
 
 export type DeepPartial<T> = T extends object
 	? {
 			[P in keyof T]?: DeepPartial<T[P]>;
-	  }
+		}
 	: T;
 export type ThemePartial = DeepPartial<Theme>;
 

@@ -16,11 +16,23 @@
 	--ck-depth-disabled: var(--ck-depth);
 	--ck-margin: 0;
 	--ck-padding: 0;
+	--ck-width: auto;
+	--ck-height: auto;
+	--ck-top: auto;
+	--ck-left: auto;
+	--ck-bottom: auto;
+	--ck-right: auto;
 
 	position: relative;
 	display: block;
 	transform-origin: top left;
 	margin: var(--ck-margin, 0);
+	width: var(--ck-width, auto);
+	height: var(--ck-height, auto);
+	top: var(--ck-top);
+	left: var(--ck-left);
+	right: var(--ck-right);
+	bottom: var(--ck-bottom);
 
 	&:hover {
 		> .inner {

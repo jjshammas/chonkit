@@ -1,4 +1,4 @@
-import React, { ComponentPropsWithRef, ReactNode, useRef } from "react";
+import React, { ReactNode, useCallback, useRef } from "react";
 import { useChonkit } from "@/core/ChonkitProvider/ChonkitProvider";
 import { useGeometryObserver } from "./useGeometryObserver";
 import {
@@ -47,6 +47,12 @@ export const boxVisual = createComponentVisualTypes({
 
 		padding: undefined as string | number | undefined,
 		margin: undefined as string | number | undefined,
+		width: undefined as string | number | undefined,
+		height: undefined as string | number | undefined,
+		top: undefined as string | number | undefined,
+		left: undefined as string | number | undefined,
+		bottom: undefined as string | number | undefined,
+		right: undefined as string | number | undefined,
 	},
 	interactionAllowedKeys: [
 		"backgroundColor",
@@ -63,8 +69,8 @@ export interface BoxProps
 	extends Omit<React.HTMLAttributes<HTMLDivElement>, keyof BoxVisualProps>,
 		BoxVisualProps,
 		Omit<ShadowProps, "borderRadius"> {
-	ref?: React.RefObject<HTMLDivElement | null>;
-	as?: React.ElementType;
+	ref?: React.Ref<HTMLDivElement>;
+	as?: React.ElementType | string;
 	children?: ReactNode;
 	containerProps?: React.HTMLAttributes<HTMLDivElement> & {
 		[key: `data-${string}`]: any;
@@ -111,7 +117,19 @@ export const Box: React.FC<BoxProps> = (props) => {
 	} = nonVisualRest;
 
 	const { blockSize } = useChonkit();
-	const ref = forwardedRef || useRef<HTMLDivElement>(null);
+	const ref = useRef<HTMLDivElement>(null);
+	const setRef = useCallback(
+		(node: HTMLDivElement | null) => {
+			ref.current = node;
+
+			if (typeof forwardedRef === "function") {
+				forwardedRef(node);
+			} else if (forwardedRef && "current" in forwardedRef) {
+				forwardedRef.current = node;
+			}
+		},
+		[forwardedRef]
+	);
 	const innerRef = useRef<HTMLDivElement>(null);
 
 	const shouldFabricateBorder = borderSize && borderRadius;
@@ -166,7 +184,7 @@ export const Box: React.FC<BoxProps> = (props) => {
 		as || "div",
 		{
 			...containerProps,
-			ref,
+			ref: setRef,
 			className: clsx(styles.container, containerProps?.className),
 			style: {
 				...cssVariables,

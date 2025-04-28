@@ -89,6 +89,21 @@ const defaultTheme: Theme = {
 	PanelActionBar: {
 		padding: "12px",
 	},
+	ScrollAreaTrack: {
+		borderRadius: 2,
+		borderColor: "#ccc",
+		borderSize: 1,
+		size: "16px",
+	},
+	ScrollAreaThumb: {
+		borderSize: 1,
+		borderRadius: 2,
+		borderColor: "rgba(0,0,0,0.3)",
+		bevelHighlightSize: 2,
+		bevelShadowSize: 1,
+		backgroundColor: "secondary",
+		size: "12px",
+	},
 };
 
 export default defaultTheme;

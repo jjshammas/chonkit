@@ -70,7 +70,7 @@ export function createVisualStyle<T extends Record<string, VisualValue>>(
 // type VisualValue = string | number | (string | number)[];
 type VisualValue = any;
 
-function normalizeVisualValue(value: VisualValue): string {
+export function normalizeVisualValue(value: VisualValue): string {
 	if (Array.isArray(value)) return value.map(normalizeVisualValue).join(" ");
 	if (typeof value === "number")
 		return `calc(${value} * var(--ck-block-size))`;
@@ -86,7 +86,7 @@ function normalizeVisualValue(value: VisualValue): string {
 
 export function resolveComponentVisualStyle<
 	T extends Record<string, VisualValue>,
-	AllProps extends Record<string, any> = T & Record<string, any>
+	AllProps extends Record<string, any> = T & Record<string, any>,
 >(args: {
 	props: AllProps;
 	keys: readonly (keyof T)[];
