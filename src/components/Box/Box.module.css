@@ -14,6 +14,16 @@
 	--ck-depth-hover: var(--ck-depth);
 	--ck-depth-active: var(--ck-depth);
 	--ck-depth-disabled: var(--ck-depth);
+	--ck-border-color: transparent;
+	--ck-border-color-hover: var(--ck-border-color);
+	--ck-border-color-active: var(--ck-border-color);
+	--ck-border-color-focus: var(--ck-border-color);
+	--ck-border-color-disabled: var(--ck-border-color);
+	--ck-inner-border-color: transparent;
+	--ck-inner-border-color-hover: var(--ck-inner-border-color);
+	--ck-inner-border-color-active: var(--ck-inner-border-color);
+	--ck-inner-border-color-focus: var(--ck-inner-border-color);
+	--ck-inner-border-color-disabled: var(--ck-inner-border-color);
 	--ck-margin: 0;
 	--ck-padding: 0;
 	--ck-width: auto;
@@ -50,6 +60,13 @@
 				var(--ck-border-color)
 			);
 		}
+
+		> .inner > .fabricatedInnerBorder {
+			background-color: var(
+				--ck-inner-border-color-hover,
+				var(--ck-inner-border-color)
+			);
+		}
 	}
 
 	&:active {
@@ -66,6 +83,13 @@
 			background-color: var(
 				--ck-border-color-active,
 				var(--ck-border-color)
+			);
+		}
+
+		> .inner > .fabricatedInnerBorder {
+			background-color: var(
+				--ck-inner-border-color-active,
+				var(--ck-inner-border-color)
 			);
 		}
 	}
@@ -135,4 +159,12 @@
 	background: var(--ck-border-color);
 	pointer-events: none;
 	z-index: 10;
+}
+
+.fabricatedInnerBorder {
+	position: absolute;
+	inset: 0;
+	background: var(--ck-inner-border-color);
+	pointer-events: none;
+	z-index: 9;
 }

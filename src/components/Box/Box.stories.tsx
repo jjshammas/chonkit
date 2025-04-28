@@ -77,35 +77,12 @@ export const WithGradientBackground: Story = {
 		// backgroundGradient: "90deg, #666, #888 50%, #aaa 75%",
 		backgroundGradient: "90deg, #666, #888 10%, #888 70%, #aaa 90%",
 	},
-	decorators: [
-		(Story) => (
-			<div
-				style={{
-					backgroundColor: "pink",
-					padding: "20px",
-				}}
-			>
-				<Story />
-			</div>
-		),
-	],
 };
 
 export const WithDropShadow: Story = {
 	args: {
 		dropShadow: "3 4 rgba(0, 0, 0, 0.3)",
 	},
-	decorators: [
-		(Story) => (
-			<div
-				style={{
-					padding: "20px",
-				}}
-			>
-				<Story />
-			</div>
-		),
-	],
 };
 
 /**
@@ -133,6 +110,13 @@ export const Interactable: Story = {
 	},
 };
 
+/**
+ * The Box component renders a container and inner div in order to accomodate all of the supported visual effects. Without using two containers, certain effects like shadows would not be possible, since clip-paths are used in order to effect rounded corners, which would also clip the shadow.
+ *
+ * When styling a Box with raw CSS properties or classnames, respect the two-div render by splitting positioning styles (size, flex, etc.) and assigning them to the container div by using `containerProps`.
+ *
+ * If you use Box props for positioning, like `width` or `margin`, Box will know to apply these to the outer container, while other props will be applied to the inner div.
+ */
 export const InsideFlexContainer: Story = {
 	args: {
 		borderRadius: 10,
@@ -145,7 +129,7 @@ export const InsideFlexContainer: Story = {
 		style: {
 			backgroundColor: "#fff",
 		},
-		children: <span>"Hello World"</span>,
+		children: "Hello World",
 	},
 	decorators: [
 		(Story) => (
@@ -168,4 +152,32 @@ export const InsideFlexContainer: Story = {
 			</div>
 		),
 	],
+};
+
+/**
+ * Box supports 2 borders, an outer and an inner border. This is to help achieve a common pixel art pattern where the shape is "highlighted" by the inner border.
+ */
+export const Bordered: Story = {
+	args: {
+		borderSize: 2,
+		borderColor: "#aaa",
+		borderRadius: 3,
+		innerBorderSize: 1,
+		innerBorderColor: "#fff",
+	},
+};
+
+/**
+ * The `depth` prop creates the illusion of depth, as if looking at the Box from above. The `depthColor` prop indicates the color of the "front face" of the Box. Shadows are rendered under the "front face."
+ *
+ * It is not currently possible to change the visual perspective direction.
+ */
+export const WithDepth: Story = {
+	args: {
+		backgroundColor: "#E0E5F8",
+		depth: 6,
+		depthColor: "#B4BDE1",
+		borderRadius: 12,
+		dropShadow: "3 5 rgba(0, 0, 0, 0.1)",
+	},
 };

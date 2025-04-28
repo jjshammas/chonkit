@@ -12,6 +12,8 @@ export type FabricatedBorderProps = {
 	borderRadius?: RoundedCornerClipProps["borderRadius"];
 	borderSize?: number;
 	borderColor?: string;
+	innerBorderSize?: number;
+	innerBorderColor?: string;
 };
 
 export function useFabricatedBorder(
@@ -21,36 +23,74 @@ export function useFabricatedBorder(
 ) {
 	const { blockSize } = useChonkit();
 	const fabricatedBorder = useRef<HTMLDivElement>(null);
+	const fabricatedInnerBorder = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
-		if (!options.borderRadius || !options.borderSize) return;
-		if (!fabricatedBorder.current) return;
+		if (
+			(!options.borderRadius || !options.borderSize) &&
+			!options.innerBorderSize
+		)
+			return;
+		if (!fabricatedBorder.current && !fabricatedInnerBorder.current) return;
 
 		const unsubscribe = geometry.subscribe(({ width, height }) => {
 			const path = generateBorderPoints(
-				options.borderRadius!,
+				options.borderRadius || 0,
 				Math.max(options.borderSize || 0, 0),
 				blockSize,
 				width,
 				height
 			);
-			fabricatedBorder.current!.style.clipPath = `path('${convertPointsToPathString(
-				path
-			)}')`;
+			if (fabricatedBorder.current) {
+				fabricatedBorder.current.style.clipPath = `path('${convertPointsToPathString(
+					path
+				)}')`;
+			}
+
+			const pathInner = generateBorderPoints(
+				options.borderRadius || 0,
+				Math.max(
+					(options.borderSize || 0) + (options.innerBorderSize || 0),
+					0
+				),
+				blockSize,
+				width,
+				height
+			);
+			if (fabricatedInnerBorder.current) {
+				fabricatedInnerBorder.current.style.clipPath = `path('${convertPointsToPathString(
+					pathInner
+				)}')`;
+			}
 		});
 
 		return unsubscribe;
 	}, [
 		options.borderRadius,
 		options.borderSize,
+		options.innerBorderSize,
 		blockSize,
 		element,
-		fabricatedBorder,
+		fabricatedBorder.current,
+		fabricatedInnerBorder.current,
 	]);
 
 	return {
-		fabricatedBorderEl: options.borderSize ? (
-			<div ref={fabricatedBorder} className={styles.fabricatedBorder} />
-		) : null,
+		fabricatedBorderEl: (
+			<>
+				{options.borderSize && options.borderRadius ? (
+					<div
+						ref={fabricatedBorder}
+						className={styles.fabricatedBorder}
+					/>
+				) : null}
+				{options.innerBorderSize ? (
+					<div
+						ref={fabricatedInnerBorder}
+						className={styles.fabricatedInnerBorder}
+					/>
+				) : null}
+			</>
+		),
 	};
 }

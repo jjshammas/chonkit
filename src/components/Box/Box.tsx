@@ -32,6 +32,12 @@ export const boxVisual = createComponentVisualTypes({
 		borderColor: undefined as
 			| FabricatedBorderProps["borderColor"]
 			| undefined,
+		innerBorderSize: undefined as
+			| FabricatedBorderProps["innerBorderSize"]
+			| undefined,
+		innerBorderColor: undefined as
+			| FabricatedBorderProps["innerBorderColor"]
+			| undefined,
 		embossHighlightSize: undefined as
 			| EmbossProps["highlightSize"]
 			| undefined,
@@ -58,6 +64,7 @@ export const boxVisual = createComponentVisualTypes({
 		"backgroundColor",
 		"color",
 		"borderColor",
+		"innerBorderColor",
 		"depth",
 	] as const,
 });
@@ -67,8 +74,7 @@ export type BoxVisualProps = typeof boxVisual.types.Props;
 
 export interface BoxProps
 	extends Omit<React.HTMLAttributes<HTMLDivElement>, keyof BoxVisualProps>,
-		BoxVisualProps,
-		Omit<ShadowProps, "borderRadius"> {
+		BoxVisualProps {
 	ref?: React.Ref<HTMLDivElement>;
 	as?: React.ElementType | string;
 	children?: ReactNode;
@@ -88,6 +94,8 @@ export const Box: React.FC<BoxProps> = (props) => {
 			borderRadius,
 			borderSize,
 			borderColor,
+			innerBorderColor,
+			innerBorderSize,
 			bevelHighlightSize,
 			bevelShadowSize,
 			embossHighlightSize,
@@ -109,8 +117,6 @@ export const Box: React.FC<BoxProps> = (props) => {
 		as,
 		children,
 		containerProps,
-		snap,
-		snapMethod = "transform",
 		...rest
 		// color resolution should already happen in the visual style
 		// } = useResolvedColorProps(nonVisualRest);
@@ -132,13 +138,20 @@ export const Box: React.FC<BoxProps> = (props) => {
 	);
 	const innerRef = useRef<HTMLDivElement>(null);
 
-	const shouldFabricateBorder = borderSize && borderRadius;
+	const shouldFabricateBorder =
+		borderSize && borderRadius && !innerBorderSize;
 
 	const geometry = useGeometryObserver(ref);
 	useRoundedCornerClip(innerRef, { borderRadius }, geometry);
 	const { fabricatedBorderEl } = useFabricatedBorder(
 		ref,
-		{ borderRadius, borderSize, borderColor },
+		{
+			borderRadius,
+			borderSize,
+			borderColor,
+			innerBorderColor,
+			innerBorderSize,
+		},
 		geometry
 	);
 	const { bevelHighlightEl, bevelShadowEl } = useBevel(
