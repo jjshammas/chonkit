@@ -21,8 +21,6 @@ import clsx from "clsx";
 
 export const boxVisual = createComponentVisualTypes({
 	style: {
-		backgroundColor: undefined as string | undefined,
-		color: undefined as string | undefined,
 		borderRadius: undefined as
 			| RoundedCornerClipProps["borderRadius"]
 			| undefined,
@@ -50,15 +48,6 @@ export const boxVisual = createComponentVisualTypes({
 		backgroundGradient: undefined as GradientProps["gradient"] | undefined,
 		depth: undefined as DepthProps["depth"] | undefined,
 		depthColor: undefined as DepthProps["depthColor"] | undefined,
-
-		padding: undefined as string | number | undefined,
-		margin: undefined as string | number | undefined,
-		width: undefined as string | number | undefined,
-		height: undefined as string | number | undefined,
-		top: undefined as string | number | undefined,
-		left: undefined as string | number | undefined,
-		bottom: undefined as string | number | undefined,
-		right: undefined as string | number | undefined,
 	},
 	interactionAllowedKeys: [
 		"backgroundColor",
@@ -73,7 +62,7 @@ export type BoxVisualStyle = typeof boxVisual.types.VisualStyle;
 export type BoxVisualProps = typeof boxVisual.types.Props;
 
 export interface BoxProps
-	extends Omit<React.HTMLAttributes<HTMLDivElement>, keyof BoxVisualProps>,
+	extends React.HTMLAttributes<HTMLDivElement>,
 		BoxVisualProps {
 	ref?: React.Ref<HTMLDivElement>;
 	as?: React.ElementType | string;
@@ -105,10 +94,15 @@ export const Box: React.FC<BoxProps> = (props) => {
 			depthColor,
 		},
 		cssVariables,
+		cssBaseStyle,
 		rest: nonVisualRest,
 	} = resolveComponentVisualStyle<BoxVisualStyle, BoxProps>({
 		props,
-		keys: boxVisual.baseKeys,
+		cssVariableKeys: [
+			"depth",
+			"depthColor",
+			...boxVisual.interactionAllowedKeys,
+		],
 		palette: useChonkit().theme.palette,
 	});
 
@@ -184,13 +178,31 @@ export const Box: React.FC<BoxProps> = (props) => {
 	);
 	const { gradientEl } = useGradient(
 		ref,
-		{ gradient: props.backgroundGradient },
+		{ gradient: props.sx?.backgroundGradient },
 		geometry
 	);
 	const { depthEl } = useDepth(
 		ref,
 		{ borderRadius, depth, depthColor },
 		geometry
+	);
+
+	const cssAttributesToMoveToInner = [
+		"padding",
+		"paddingLeft",
+		"paddingRight",
+		"paddingTop",
+		"paddingBottom",
+	];
+	const cssBaseStyleOuter = Object.fromEntries(
+		Object.entries(cssBaseStyle).filter(
+			([key]) => !cssAttributesToMoveToInner.includes(key)
+		)
+	);
+	const cssBaseStyleInner = Object.fromEntries(
+		Object.entries(cssBaseStyle).filter(([key]) =>
+			cssAttributesToMoveToInner.includes(key)
+		)
 	);
 
 	return React.createElement(
@@ -201,6 +213,7 @@ export const Box: React.FC<BoxProps> = (props) => {
 			className: clsx(styles.container, containerProps?.className),
 			style: {
 				...cssVariables,
+				...cssBaseStyleOuter,
 				...containerProps?.style,
 			},
 		},
@@ -210,6 +223,7 @@ export const Box: React.FC<BoxProps> = (props) => {
 				{...rest}
 				className={clsx(styles.inner, rest.className)}
 				style={{
+					...cssBaseStyleInner,
 					...rest.style,
 
 					// if there's a border, but no rounded corner, we can use a box shadow for the border

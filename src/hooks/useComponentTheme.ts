@@ -29,17 +29,21 @@ export function useComponentTheme<
 		"variants" | "defaultVariant"
 	> & {
 		variant?: string;
-	}
->(componentKey: Key, userProps: Props, defaultTheme?: ResolvedTheme): Props {
+	},
+>(
+	componentKey: Key,
+	userProps: Props,
+	defaultTheme?: ResolvedTheme
+): Props & { sx: Props["sx"] | Record<string, any> } {
 	const { theme } = useChonkit();
 
 	const baseTheme = theme?.[componentKey] ?? {};
-	const resolvedTheme = mergeThemes(
+	const resolvedTheme: Record<string, any> = mergeThemes(
 		defaultTheme || {},
 		baseTheme as DeepPartial<ResolvedTheme>
 	);
 
-	let variantProps = {};
+	let variantSx = {};
 
 	const selectedVariant =
 		userProps.variant ??
@@ -48,21 +52,23 @@ export function useComponentTheme<
 			: undefined);
 
 	if ("variants" in resolvedTheme && selectedVariant) {
-		variantProps = (resolvedTheme as any).variants?.[selectedVariant] ?? {};
+		variantSx = (resolvedTheme as any).variants?.[selectedVariant] ?? {};
 	}
 
-	// const mergedProps = {
-	// 	...resolvedTheme,
-	// 	...variantProps,
-	// 	...userProps,
-	// } as Props;
+	const userSx = userProps?.sx ?? {};
 
-	const mergedProps = deepMerge(
-		resolvedTheme,
-		variantProps,
-		userProps
-	) as Props;
-	delete mergedProps.defaultVariant;
-	delete mergedProps.variants;
+	const resolvedThemeSx = resolvedTheme ?? {};
+	delete resolvedThemeSx.defaultVariant;
+	delete resolvedThemeSx.variants;
+	const mergedSx = deepMerge(
+		resolvedThemeSx,
+		variantSx,
+		userSx
+	) as Props["sx"];
+
+	const mergedProps = {
+		...userProps,
+		sx: mergedSx,
+	} as Props & { sx: Props["sx"] | Record<string, any> };
 	return mergedProps;
 }

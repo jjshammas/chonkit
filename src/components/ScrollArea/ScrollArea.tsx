@@ -1,10 +1,9 @@
-import React, { ReactNode, useEffect, useRef } from "react";
+import React, { ReactNode } from "react";
 import { Box, BoxProps, boxVisual } from "../Box/Box";
 import { useComponentTheme } from "@/hooks/useComponentTheme";
 import type { WithoutInteractionStates } from "@/core/themes";
 import { createComponentVisualTypes } from "@/core/themes/createComponentVisualTypes";
 import { createComponentThemeTypes } from "@/core/themes/createComponentThemeTypes";
-import clsx from "clsx";
 import { Scrollbar } from "react-scrollbars-custom";
 import { normalizeVisualValue } from "../Box/createVisualStyle";
 
@@ -47,11 +46,11 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
 	const trackTheme = useComponentTheme<
 		"ScrollAreaTrack",
 		ScrollAreaTrackTheme
-	>("ScrollAreaTrack", {});
+	>("ScrollAreaTrack", {}).sx;
 	const thumbTheme = useComponentTheme<
 		"ScrollAreaThumb",
 		ScrollAreaThumbTheme
-	>("ScrollAreaThumb", {});
+	>("ScrollAreaThumb", {}).sx;
 
 	if (!trackTheme.size) trackTheme.size = "10px";
 	if (!thumbTheme.size) thumbTheme.size = "10px";
@@ -95,15 +94,16 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
 					return (
 						<Box
 							{...restProps}
-							{...trackTheme}
 							ref={elementRef}
-							width={trackTheme.size}
+							sx={{
+								...trackTheme,
+								width: trackTheme.size,
+							}}
 							containerProps={{
 								style: {
 									...style,
 									borderRadius: 0,
 									background: "transparent",
-									width: undefined,
 								},
 							}}
 						/>
@@ -112,20 +112,20 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
 			}}
 			trackXProps={{
 				renderer: (props) => {
-					console.log("rendering track X");
 					const { elementRef, style, ...restProps } = props;
 					return (
 						<Box
 							{...restProps}
-							{...trackTheme}
 							ref={elementRef}
-							height={trackTheme.size}
+							sx={{
+								...trackTheme,
+								height: trackTheme.size,
+							}}
 							containerProps={{
 								style: {
 									...style,
 									borderRadius: 0,
 									background: "transparent",
-									height: undefined,
 								},
 							}}
 						/>
@@ -138,15 +138,16 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
 					return (
 						<Box
 							{...restProps}
-							{...thumbTheme}
 							ref={elementRef}
-							width={thumbTheme.size}
+							sx={{
+								...thumbTheme,
+								width: thumbTheme.size,
+							}}
 							containerProps={{
 								style: {
 									...style,
 									borderRadius: 0,
 									background: "transparent",
-									width: undefined,
 									margin: "auto",
 								},
 							}}
@@ -161,15 +162,16 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
 					return (
 						<Box
 							{...restProps}
-							{...thumbTheme}
 							ref={elementRef}
-							height={thumbTheme.size}
+							sx={{
+								...thumbTheme,
+								height: thumbTheme.size,
+							}}
 							containerProps={{
 								style: {
 									...style,
 									borderRadius: 0,
 									background: "transparent",
-									height: undefined,
 								},
 							}}
 						/>

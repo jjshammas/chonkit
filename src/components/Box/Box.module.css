@@ -24,25 +24,10 @@
 	--ck-inner-border-color-active: var(--ck-inner-border-color);
 	--ck-inner-border-color-focus: var(--ck-inner-border-color);
 	--ck-inner-border-color-disabled: var(--ck-inner-border-color);
-	--ck-margin: 0;
-	--ck-padding: 0;
-	--ck-width: auto;
-	--ck-height: auto;
-	--ck-top: auto;
-	--ck-left: auto;
-	--ck-bottom: auto;
-	--ck-right: auto;
 
 	position: relative;
 	display: block;
 	transform-origin: top left;
-	margin: var(--ck-margin, 0);
-	width: var(--ck-width, auto);
-	height: var(--ck-height, auto);
-	top: var(--ck-top);
-	left: var(--ck-left);
-	right: var(--ck-right);
-	bottom: var(--ck-bottom);
 
 	&:hover {
 		> .inner {
@@ -105,7 +90,6 @@
 	position: relative;
 	background-color: var(--ck-background-color, transparent);
 	color: var(--ck-color, inherit);
-	padding: var(--ck-padding, 0);
 	top: calc(var(--ck-depth, 0) * -1);
 }
 

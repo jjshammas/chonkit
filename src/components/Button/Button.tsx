@@ -3,7 +3,6 @@ import { Box, BoxProps, boxVisual } from "../Box/Box";
 import { Text } from "../Text/Text";
 import { useComponentTheme } from "@/hooks/useComponentTheme";
 import styles from "./Button.module.css";
-import type { WithoutInteractionStates } from "@/core/themes";
 import { createComponentVisualTypes } from "@/core/themes/createComponentVisualTypes";
 import { createComponentVariantThemeTypes } from "@/core/themes/createComponentThemeTypes";
 import clsx from "clsx";
@@ -23,11 +22,8 @@ const buttonThemeTypes = createComponentVariantThemeTypes({
 export type ButtonVisualStyle = typeof buttonVisual.types.VisualStyle;
 export type ButtonVisualProps = typeof buttonVisual.types.Props;
 export type ButtonTheme = typeof buttonThemeTypes.types.Theme;
-export type ButtonThemeProps = typeof buttonThemeTypes.types.Props;
 
-export interface ButtonProps
-	extends WithoutInteractionStates<BoxProps>,
-		ButtonThemeProps {
+export interface ButtonProps extends BoxProps {
 	as?: React.ElementType;
 	children?: ReactNode;
 	disabled?: boolean;

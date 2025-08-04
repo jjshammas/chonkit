@@ -15,10 +15,13 @@ type VisualStyleOutput<T> = {
 	cssBaseStyle: React.CSSProperties;
 };
 
-export function createVisualStyle<T extends Record<string, VisualValue>>(
-	style: VisualStyle<T>,
-	palette: Theme["palette"]
-): VisualStyleOutput<T> {
+export function createVisualStyle<T extends Record<string, VisualValue>>(args: {
+	style: VisualStyle<T>;
+	cssVariableKeys: ReadonlyArray<keyof T>;
+	palette: Theme["palette"];
+}): VisualStyleOutput<T> {
+	const { style, cssVariableKeys, palette } = args;
+
 	const renderValues = {} as T;
 	const cssVariables: Record<string, string> = {};
 	const cssBaseStyle: React.CSSProperties = {};
@@ -34,10 +37,15 @@ export function createVisualStyle<T extends Record<string, VisualValue>>(
 		const varName = convertJSVariableNameToCSSVariableName(`${key}`);
 
 		renderValues[key as keyof T] = rawValue as T[keyof T];
-		cssVariables[varName] = resolved!;
-		if (key in document.documentElement.style) {
-			cssBaseStyle[key as keyof React.CSSProperties] =
-				`var(${varName})` as any;
+
+		const shouldUseCSSVariable = cssVariableKeys.includes(key as keyof T);
+		if (!shouldUseCSSVariable) {
+			if (key in document.documentElement.style) {
+				cssBaseStyle[key as keyof React.CSSProperties] =
+					normalized as any;
+			}
+		} else {
+			cssVariables[varName] = resolved!;
 		}
 	}
 
@@ -89,31 +97,23 @@ export function resolveComponentVisualStyle<
 	AllProps extends Record<string, any> = T & Record<string, any>,
 >(args: {
 	props: AllProps;
-	keys: readonly (keyof T)[];
+	cssVariableKeys: ReadonlyArray<keyof T>;
 	palette: Theme["palette"];
 }): VisualStyleOutput<T> & {
 	visualStyle: T & Partial<Record<InteractionState, Partial<T>>>;
-	rest: Omit<AllProps, keyof T | InteractionState>;
+	rest: Omit<AllProps, "sx">;
 } {
-	const { props, keys, palette } = args;
+	const { props, cssVariableKeys, palette } = args;
 
-	const visualStyle: Partial<T & Record<InteractionState, Partial<T>>> = {};
-	const rest = {} as Omit<AllProps, keyof T | InteractionState>;
+	const visualStyle = props.sx || {};
+	const rest = { ...props } as Omit<AllProps, "sx">;
+	delete rest.sx;
 
-	for (const key in props) {
-		if ((keys as readonly string[]).includes(key)) {
-			visualStyle[key as keyof T] = props[key];
-		} else if (STATE_KEYS.includes(key as InteractionState)) {
-			visualStyle[key as InteractionState] = props[key];
-		} else {
-			(rest as any)[key] = props[key];
-		}
-	}
-
-	const { renderValues, cssVariables, cssBaseStyle } = createVisualStyle(
-		visualStyle as VisualStyle<T>,
-		palette
-	);
+	const { renderValues, cssVariables, cssBaseStyle } = createVisualStyle({
+		style: visualStyle,
+		cssVariableKeys,
+		palette,
+	});
 
 	return {
 		visualStyle: visualStyle as T &

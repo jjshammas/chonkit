@@ -9,7 +9,12 @@ const meta = {
 	component: Box,
 	tags: ["autodocs"],
 	args: {
-		backgroundColor: "#ddd",
+		sx: {
+			backgroundColor: "#ddd",
+			_hover: {
+				backgroundColor: "red",
+			},
+		},
 		children: (
 			<div
 				style={{
@@ -32,30 +37,37 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-	args: {
-		borderRadius: 12,
-	},
+	args: {},
 };
 
 export const WithRoundedCorners: Story = {
 	args: {
-		borderRadius: [12, 8, 0, 5],
+		sx: {
+			backgroundColor: "#ddd",
+			borderRadius: [12, 8, 0, 5],
+		},
 	},
 };
 
 export const WithBevel: Story = {
 	args: {
-		borderRadius: 12,
-		bevelHighlightSize: 2,
-		bevelShadowSize: 4,
+		sx: {
+			backgroundColor: "#ddd",
+			borderRadius: 12,
+			bevelHighlightSize: 2,
+			bevelShadowSize: 4,
+		},
 	},
 };
 
 export const Embossed: Story = {
 	args: {
-		borderRadius: 12,
-		embossHighlightSize: 2,
-		embossShadowSize: 4,
+		sx: {
+			backgroundColor: "#ddd",
+			borderRadius: 12,
+			embossHighlightSize: 2,
+			embossShadowSize: 4,
+		},
 	},
 	decorators: [
 		(Story) => (
@@ -73,15 +85,20 @@ export const Embossed: Story = {
 
 export const WithGradientBackground: Story = {
 	args: {
-		// backgroundGradient: "0deg, #666, #888 20, #aaa 75%",
-		// backgroundGradient: "90deg, #666, #888 50%, #aaa 75%",
-		backgroundGradient: "90deg, #666, #888 10%, #888 70%, #aaa 90%",
+		sx: {
+			// backgroundGradient: "0deg, #666, #888 20, #aaa 75%",
+			// backgroundGradient: "90deg, #666, #888 50%, #aaa 75%",
+			backgroundGradient: "90deg, #666, #888 10%, #888 70%, #aaa 90%",
+		},
 	},
 };
 
 export const WithDropShadow: Story = {
 	args: {
-		dropShadow: "3 4 rgba(0, 0, 0, 0.3)",
+		sx: {
+			backgroundColor: "#ddd",
+			dropShadow: "3 4 rgba(0, 0, 0, 0.3)",
+		},
 	},
 };
 
@@ -90,12 +107,14 @@ export const WithDropShadow: Story = {
  */
 export const Interactable: Story = {
 	args: {
-		backgroundColor: "#ddd",
-		_hover: {
-			backgroundColor: "red",
-		},
-		_active: {
-			backgroundColor: "blue",
+		sx: {
+			backgroundColor: "#ddd",
+			_hover: {
+				backgroundColor: "red",
+			},
+			_active: {
+				backgroundColor: "blue",
+			},
 		},
 		children: (
 			<div
@@ -115,19 +134,15 @@ export const Interactable: Story = {
  *
  * When styling a Box with raw CSS properties or classnames, respect the two-div render by splitting positioning styles (size, flex, etc.) and assigning them to the container div by using `containerProps`.
  *
- * If you use Box props for positioning, like `width` or `margin`, Box will know to apply these to the outer container, while other props will be applied to the inner div.
+ * If you use the `sx` prop for positioning, like `width` or `margin`, Box will know to apply these to the outer container, while other props will be applied to the inner div.
  */
 export const InsideFlexContainer: Story = {
 	args: {
-		borderRadius: 10,
-		containerProps: {
-			style: {
-				flex: 1,
-				height: "100%",
-			},
-		},
-		style: {
+		sx: {
 			backgroundColor: "#fff",
+			borderRadius: 10,
+			flex: 1,
+			height: "100%",
 		},
 		children: "Hello World",
 	},
@@ -159,11 +174,14 @@ export const InsideFlexContainer: Story = {
  */
 export const Bordered: Story = {
 	args: {
-		borderSize: 2,
-		borderColor: "#aaa",
-		borderRadius: 3,
-		innerBorderSize: 1,
-		innerBorderColor: "#fff",
+		sx: {
+			backgroundColor: "#ddd",
+			borderSize: 2,
+			borderColor: "#aaa",
+			borderRadius: 3,
+			innerBorderSize: 1,
+			innerBorderColor: "#fff",
+		},
 	},
 };
 
@@ -174,10 +192,27 @@ export const Bordered: Story = {
  */
 export const WithDepth: Story = {
 	args: {
-		backgroundColor: "#E0E5F8",
-		depth: 6,
-		depthColor: "#B4BDE1",
-		borderRadius: 12,
-		dropShadow: "3 5 rgba(0, 0, 0, 0.1)",
+		sx: {
+			backgroundColor: "#E0E5F8",
+			depth: 6,
+			depthColor: "#B4BDE1",
+			borderRadius: 12,
+			dropShadow: "3 5 rgba(0, 0, 0, 0.1)",
+		},
+		color: "primary",
+	},
+};
+
+export const WithPositioningAttributes: Story = {
+	args: {
+		sx: {
+			backgroundColor: "#ddd",
+			borderRadius: 12,
+			width: "200px",
+			height: "200px",
+			margin: "20px",
+			padding: "20px",
+		},
+		children: "This Box has positioning attributes",
 	},
 };

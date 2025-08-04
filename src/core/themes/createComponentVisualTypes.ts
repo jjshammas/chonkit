@@ -10,7 +10,10 @@ type WithStateKeys<K extends string> =
 
 export function createComponentVisualTypes<
 	T extends Record<string, any> & { [key: string]: any },
-	Allowed extends readonly (keyof T & string)[]
+	Allowed extends readonly (
+		| (keyof T & string)
+		| (keyof React.CSSProperties & string)
+	)[],
 >(config: { style: Partial<T>; interactionAllowedKeys?: Allowed }) {
 	const visualKeys = Object.keys(config.style) as (keyof T & string)[];
 	const interactionAllowedKeys = config.interactionAllowedKeys ?? visualKeys;
@@ -28,10 +31,19 @@ export function createComponentVisualTypes<
 		];
 	}) as WithStateKeys<keyof T & string>[];
 
-	type VisualStyle = Partial<Pick<T, keyof T>>;
+	type VisualStyle = Partial<
+		{
+			[key in keyof React.CSSProperties]?:
+				| string
+				| number
+				| (string | number)[];
+		} & T
+	>;
 	type InteractionSubset = Partial<Pick<T, Allowed[number]>>;
-	type InteractionProps = WithInteractionStates<InteractionSubset>;
-	type Props = VisualStyle & InteractionProps;
+	type InteractionEnabledStyle = WithInteractionStates<InteractionSubset>;
+	type Props = {
+		sx: VisualStyle & InteractionEnabledStyle;
+	};
 
 	return {
 		style,
@@ -40,7 +52,7 @@ export function createComponentVisualTypes<
 		interactionAllowedKeys: interactionAllowedKeys as Allowed,
 		types: {
 			VisualStyle: null! as VisualStyle,
-			InteractionProps: null! as InteractionProps,
+			InteractionEnabledStyle: null! as InteractionEnabledStyle,
 			Props: null! as Props,
 		},
 	};

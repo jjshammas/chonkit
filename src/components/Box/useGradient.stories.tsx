@@ -56,8 +56,11 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
 	render: () => (
 		<Box
-			backgroundGradient="90deg, #ff0000, pink, primary"
-			containerProps={{ style: { width: "200px", height: "200px" } }}
+			sx={{
+				backgroundGradient: "90deg, #ff0000, pink, primary",
+				width: "200px",
+				height: "200px",
+			}}
 		/>
 	),
 };
@@ -69,20 +72,32 @@ export const Directional: Story = {
 	render: () => (
 		<div style={{ display: "flex", gap: "10px", flexDirection: "row" }}>
 			<Box
-				backgroundGradient="90deg, #ff0000, pink, primary"
-				containerProps={{ style: { width: "100px", height: "100px" } }}
+				sx={{
+					backgroundGradient: "90deg, #ff0000, pink, primary",
+					width: "100px",
+					height: "100px",
+				}}
 			/>
 			<Box
-				backgroundGradient="180deg, #ff0000, pink, primary"
-				containerProps={{ style: { width: "100px", height: "100px" } }}
+				sx={{
+					backgroundGradient: "180deg, #ff0000, pink, primary",
+					width: "100px",
+					height: "100px",
+				}}
 			/>
 			<Box
-				backgroundGradient="270deg, #ff0000, pink, primary"
-				containerProps={{ style: { width: "100px", height: "100px" } }}
+				sx={{
+					backgroundGradient: "270deg, #ff0000, pink, primary",
+					width: "100px",
+					height: "100px",
+				}}
 			/>
 			<Box
-				backgroundGradient="0deg, #ff0000, pink, primary"
-				containerProps={{ style: { width: "100px", height: "100px" } }}
+				sx={{
+					backgroundGradient: "0deg, #ff0000, pink, primary",
+					width: "100px",
+					height: "100px",
+				}}
 			/>
 		</div>
 	),
@@ -107,9 +122,11 @@ export const Size: Story = {
 					onChange={(e) => setSize(Number(e.target.value))}
 				/>
 				<Box
-					backgroundGradient="0deg, #888, #999 10%, #aaa 20%, #bbb 30%, #ccc 70%, #ddd 100%"
-					containerProps={{
-						style: { height: `200px`, width: `${size}px` },
+					sx={{
+						backgroundGradient:
+							"0deg, #888, #999 10%, #aaa 20%, #bbb 30%, #ccc 70%, #ddd 100%",
+						height: `200px`,
+						width: `${size}px`,
 					}}
 				/>
 			</div>

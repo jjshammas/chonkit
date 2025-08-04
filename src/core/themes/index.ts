@@ -38,7 +38,7 @@ export type Theme = {
 	ScrollAreaThumb: ScrollAreaThumbTheme;
 };
 
-export type DeepPartial<T> = T extends object
+type DeepPartial<T> = T extends object
 	? {
 			[P in keyof T]?: DeepPartial<T[P]>;
 		}
