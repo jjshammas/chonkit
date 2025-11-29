@@ -10,7 +10,9 @@ const meta = {
 	component: AnimatedBox,
 	args: {
 		baseProps: {
-			backgroundColor: "#ddd",
+			sx: {
+				backgroundColor: "#ddd",
+			},
 		},
 		children: (
 			<div

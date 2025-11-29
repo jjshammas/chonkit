@@ -2,7 +2,7 @@ import type { WithInteractionStates } from "./";
 
 export function createComponentThemeTypes<
 	TBase extends Record<string, any>,
-	TInteractionKeys extends readonly (keyof TBase & string)[]
+	TInteractionKeys extends readonly (keyof TBase & string)[],
 >(config: { base: TBase; interactionAllowedKeys: TInteractionKeys }) {
 	type InteractionSubset = Pick<TBase, TInteractionKeys[number]>;
 
@@ -16,10 +16,9 @@ export function createComponentThemeTypes<
 	};
 }
 
-type VariantComponentThemeProps<T extends { variants: Record<string, any> }> =
-	Omit<T, "variants" | "defaultVariant"> & {
-		variant?: keyof T["variants"];
-	};
+type VariantComponentThemeProps<T extends { variants: Record<string, any> }> = {
+	variant?: keyof T["variants"];
+};
 
 /**
  * Helper function for generating the types of a component theme.
@@ -28,7 +27,7 @@ type VariantComponentThemeProps<T extends { variants: Record<string, any> }> =
 export function createComponentVariantThemeTypes<
 	TBase extends Record<string, any>,
 	TInteractionKeys extends readonly (keyof TBase & string)[],
-	Variants extends string = string
+	Variants extends string = string,
 >(config: {
 	base: TBase;
 	interactionAllowedKeys: TInteractionKeys;

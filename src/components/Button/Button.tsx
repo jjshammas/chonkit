@@ -22,8 +22,12 @@ const buttonThemeTypes = createComponentVariantThemeTypes({
 export type ButtonVisualStyle = typeof buttonVisual.types.VisualStyle;
 export type ButtonVisualProps = typeof buttonVisual.types.Props;
 export type ButtonTheme = typeof buttonThemeTypes.types.Theme;
+export type ButtonThemeProps = typeof buttonThemeTypes.types.Props;
 
-export interface ButtonProps extends BoxProps {
+export interface ButtonProps
+	extends BoxProps,
+		ButtonVisualProps,
+		ButtonThemeProps {
 	as?: React.ElementType;
 	children?: ReactNode;
 	disabled?: boolean;

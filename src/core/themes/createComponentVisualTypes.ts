@@ -42,7 +42,7 @@ export function createComponentVisualTypes<
 	type InteractionSubset = Partial<Pick<T, Allowed[number]>>;
 	type InteractionEnabledStyle = WithInteractionStates<InteractionSubset>;
 	type Props = {
-		sx: VisualStyle & InteractionEnabledStyle;
+		sx?: VisualStyle & InteractionEnabledStyle;
 	};
 
 	return {

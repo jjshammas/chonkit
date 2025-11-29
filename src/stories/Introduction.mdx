@@ -1,0 +1,46 @@
+import {
+	Meta,
+	Title,
+	Subtitle,
+	Description,
+	Canvas,
+	Story,
+} from "@storybook/blocks";
+
+<Meta title="Introduction" />
+
+<Title>Chonkit</Title>
+<Subtitle>
+	Chonkit is a React UI library for building chonky pixel art interfaces
+	without losing the power of CSS.
+</Subtitle>
+
+## Features
+
+- **Pixel-perfect layouts**: Design with blocks instead of pixels to ensure pixel grid alignment
+- **Dynamic lighting**: Easily add dynamic lighting effects to your components
+- **Theming support**: Customize colors and styles with theming capabilities
+- **Dithering effects**: Apply dithering to your components for authentic pixel art aesthetics
+
+## Usage
+
+Use `ChonkitProvider` and `LightingProvider` to set up your app, then use components like `Button` inside:
+
+```tsx
+import { ChonkitProvider, LightingProvider, Button } from "chonkit";
+import "node_modules/chonkit/dist/chonkit.css";
+
+export function Example() {
+	return (
+		<ChonkitProvider blockSize={5} showGrid={false}>
+			<LightingProvider direction={135}>
+				<Button>Launch</Button>
+			</LightingProvider>
+		</ChonkitProvider>
+	);
+}
+```
+
+## Concepts
+
+## Live preview
