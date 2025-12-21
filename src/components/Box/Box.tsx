@@ -86,19 +86,52 @@ export interface BoxProps
 	[key: `data-${string}`]: any;
 }
 
+const cssAttributesToMoveToInner = [
+	"padding",
+	"paddingLeft",
+	"paddingRight",
+	"paddingTop",
+	"paddingBottom",
+	"flexDirection",
+	"flexWrap",
+	"flexFlow",
+	"justifyContent",
+	"alignItems",
+	"alignContent",
+	"gap",
+	"gridTemplateColumns",
+	"gridTemplateRows",
+	"gridTemplateAreas",
+	"gridAutoColumns",
+	"gridAutoRows",
+	"gridAutoFlow",
+	"gridColumnGap",
+	"gridRowGap",
+	"gridGap",
+	"placeItems",
+	"placeContent",
+];
+
 export const Box: React.FC<BoxProps> = (props) => {
 	const { theme, blockSize, viewportWidth } = useChonkit();
 
-	const resolved = resolveComponentVisualStyle<BoxVisualStyle, BoxProps>({
-		props,
-		cssVariableKeys: [
-			"depth",
-			"depthColor",
-			...boxVisual.interactionAllowedKeys,
-		],
-		palette: theme.palette,
-		breakpoints: theme.breakpoints,
-	});
+	// this is specifically memoized so that the resulting variables
+	// like cssVariables don't change on every render
+	// thus, allowing future memoized functions not to re-run
+	const resolved = useMemo(
+		() =>
+			resolveComponentVisualStyle<BoxVisualStyle, BoxProps>({
+				props,
+				cssVariableKeys: [
+					"depth",
+					"depthColor",
+					...boxVisual.interactionAllowedKeys,
+				],
+				palette: theme.palette,
+				breakpoints: theme.breakpoints,
+			}),
+		[props, theme.palette, theme.breakpoints]
+	);
 	const { cssVariables, cssBaseStyle, mediaQueryStyles } = resolved;
 	const nonVisualRest = resolved.rest;
 
@@ -206,37 +239,58 @@ export const Box: React.FC<BoxProps> = (props) => {
 		[]
 	);
 
-	// Create media query styles
+	// Create media query styles, splitting outer and inner as needed
 	const mediaQueryContent = useMemo(() => {
 		const breakpointEntries = (
 			Object.entries(mediaQueryStyles) as Array<
 				[BreakpointKey, React.CSSProperties]
 			>
-		).filter(([_, styles]) => Object.keys(styles).length > 0);
+		).filter(([_, styleObject]) => Object.keys(styleObject).length > 0);
 
 		if (breakpointEntries.length === 0) return "";
 
 		let css = "";
-		for (const [breakpoint, styles] of breakpointEntries) {
+		for (const [breakpoint, styleObject] of breakpointEntries) {
 			if (breakpoint === "xs") continue; // xs is already applied in base style
 			const minWidth = theme.breakpoints[breakpoint as BreakpointKey];
-			const styleString = Object.entries(styles)
-				.map(([key, value]) => {
-					// Convert camelCase CSS properties to kebab-case
-					const cssKey = key.replace(
-						/([A-Z])/g,
-						(match) => `-${match.toLowerCase()}`
-					);
-					return `${cssKey}: ${value}`;
-				})
+
+			// Split styles into outer and inner
+			const outerStyles: Record<string, string> = {};
+			const innerStyles: Record<string, string> = {};
+
+			for (const [key, value] of Object.entries(styleObject)) {
+				const cssKey = key.replace(
+					/([A-Z])/g,
+					(match) => `-${match.toLowerCase()}`
+				);
+				if (cssAttributesToMoveToInner.includes(key)) {
+					innerStyles[cssKey] = value as string;
+				} else {
+					outerStyles[cssKey] = value as string;
+				}
+			}
+
+			const outerString = Object.entries(outerStyles)
+				.map(([k, v]) => `${k}: ${v}`)
+				.join("; ");
+			const innerString = Object.entries(innerStyles)
+				.map(([k, v]) => `${k}: ${v}`)
 				.join("; ");
 
-			if (styleString) {
-				css += `@media (min-width: ${minWidth}px) { .${instanceId} { ${styleString} } }`;
+			if (outerString) {
+				css += `@media (min-width: ${minWidth}px) { .${instanceId} { ${outerString} } }`;
+			}
+			if (innerString) {
+				css += `@media (min-width: ${minWidth}px) { .${instanceId} > .${styles.inner} { ${innerString} } }`;
 			}
 		}
 		return css;
-	}, [mediaQueryStyles, instanceId]);
+	}, [
+		mediaQueryStyles,
+		instanceId,
+		theme.breakpoints,
+		cssAttributesToMoveToInner,
+	]);
 
 	// Inject media query styles and clean up on unmount
 	useEffect(() => {
@@ -316,31 +370,6 @@ export const Box: React.FC<BoxProps> = (props) => {
 		geometry
 	);
 
-	const cssAttributesToMoveToInner = [
-		"padding",
-		"paddingLeft",
-		"paddingRight",
-		"paddingTop",
-		"paddingBottom",
-		"flexDirection",
-		"flexWrap",
-		"flexFlow",
-		"justifyContent",
-		"alignItems",
-		"alignContent",
-		"gap",
-		"gridTemplateColumns",
-		"gridTemplateRows",
-		"gridTemplateAreas",
-		"gridAutoColumns",
-		"gridAutoRows",
-		"gridAutoFlow",
-		"gridColumnGap",
-		"gridRowGap",
-		"gridGap",
-		"placeItems",
-		"placeContent",
-	];
 	const cssBaseStyleOuter = Object.fromEntries(
 		Object.entries(cssBaseStyle).filter(
 			([key]) => !cssAttributesToMoveToInner.includes(key)

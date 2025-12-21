@@ -251,6 +251,13 @@ export const ResponsiveDesign: Story = {
 			borderRadius: { xs: 0, sm: 5, md: 10, lg: 15, xl: 20 },
 			borderWidth: 2,
 			borderColor: "#000",
+			padding: {
+				xs: "10px",
+				sm: "15px",
+				md: "20px",
+				lg: "25px",
+				xl: "30px",
+			},
 		},
 		children:
 			"Resize the window to see responsive styles change at different breakpoints",
