@@ -1,0 +1,107 @@
+import {
+	Meta,
+	Title,
+	Subtitle,
+	Story,
+	Canvas,
+	Controls,
+} from "@storybook/blocks";
+import * as StylingStories from "./Styling.stories";
+
+<Meta title="Styling" />
+
+<Title>Styling</Title>
+
+## Block sizing
+
+Units in Chonkit are based on "blocks", which are square units that scale with the `blockSize` prop on `ChonkitProvider`. This allows you to create pixel-perfect layouts that align to a pixel grid.
+
+See below for an example of how block size impacts components (using the same font in this example):
+
+<Canvas of={StylingStories.AllBlocks} />
+
+When designing your interface, consider whether a unit quantity is best expressed in blocks or pixels. For example, you may want to use pixel values for all positioning properties to ensure consistent spacing regardless of block size:
+
+```tsx
+{
+	"border": 1, // will always be 1 block
+	"padding": "8px" // will always look like 8px, regardless of block size
+}
+```
+
+…will create the following effect. Notice how the border scales with block size, but the padding remains visually consistent:
+
+<Canvas of={StylingStories.SomeBlocks} />
+
+## Sx prop
+
+Chonkit components support the `sx` prop for applying custom styles using a CSS-in-JS approach. The `sx` prop accepts an object where keys are CSS properties (in camelCase) and values are the corresponding CSS values.
+
+```tsx
+<Box sx={{ backgroundColor: "primary", padding: 10 }}>Custom styled box</Box>
+```
+
+The `sx` prop is a **superset** of the standard `style` prop.
+
+### Grid snapping
+
+Numbers expressed in pixels within the `sx` prop will automatically snap to the nearest block grid defined by the `blockSize` prop on `ChonkitProvider`. This ensures that all dimensions align perfectly to the pixel grid.
+
+```tsx
+<ChonkitProvider blockSize={5}>
+	<Box sx={{ padding: "12px" }}>Padding will be snapped to 10px</Box>
+</ChonkitProvider>
+```
+
+### Colors
+
+Any color values provided in the `sx` prop will automatically resolve to the current theme's color palette.
+
+```tsx
+sx: {
+	backgroundColor: "primary",
+	color: "primary.fg",
+}
+
+// Theme definition
+palette: {
+	primary: {
+		main: "#3b5bdb",
+		fg: "#ffffff",
+	},
+}
+```
+
+### Interactions
+
+Interaction states (like hover and active) are supported through the `sx` prop using pseudo-selectors:
+
+```tsx
+sx: {
+	backgroundColor: "primary",
+	"_hover": {
+		backgroundColor: "primary.dark",
+	},
+	"_active": {
+		backgroundColor: "primary.darker",
+	},
+	"_focus": {},
+	"_disabled": {},
+}
+```
+
+### Pixelified properties
+
+Certain CSS properties that affect pixel rendering are automatically "pixelified" using the `sx` prop. This ensures that effects like dithering and pixelated borders are applied correctly. This includes properties like:
+
+- `borderRadius`
+- `boxShadow`
+- `background` (for gradients)
+
+For more examples, view the Box component documentation.
+
+### Chonkit-specific properties
+
+Components may define additional custom properties within the `sx` prop that are specific to Chonkit. For example, the `Box` component supports a `depth` property to apply a 3D effect. These are declared as `sx` properties instead of top-level props to work alongside theming and state effects.
+
+## Fonts

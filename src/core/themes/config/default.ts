@@ -28,9 +28,9 @@ const defaultTheme: Theme = {
 		},
 	},
 	lighting: {
-		highlightColor: "rgba(255, 255, 255, 0.5)",
+		highlightColor: "rgba(255, 255, 255, 0.3)",
 		highlightBlendMode: "soft-light",
-		shadowColor: "rgba(0, 0, 0, 0.2)",
+		shadowColor: "rgba(0, 0, 0, 0.3)",
 		shadowBlendMode: "multiply",
 	},
 	Button: {
@@ -44,7 +44,7 @@ const defaultTheme: Theme = {
 		color: "secondary.fg",
 		dropShadow: "1 1 rgba(0,0,0,0.2)",
 		padding: "8px 16px 6px",
-		depth: 4,
+		depth: 2,
 		depthColor: "#253276",
 
 		_active: {

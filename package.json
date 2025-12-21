@@ -5,7 +5,8 @@
 	"license": "ISC",
 	"author": "",
 	"type": "module",
-	"main": "index.js",
+	"main": "dist/chonkit.es.js",
+	"types": "dist/chonkit.d.ts",
 	"scripts": {
 		"test": "vitest",
 		"dev": "vite",

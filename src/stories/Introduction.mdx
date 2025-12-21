@@ -1,11 +1,5 @@
-import {
-	Meta,
-	Title,
-	Subtitle,
-	Description,
-	Canvas,
-	Story,
-} from "@storybook/blocks";
+import { Meta, Title, Subtitle, Canvas } from "@storybook/blocks";
+import * as IntroductionStories from "./Introduction.stories";
 
 <Meta title="Introduction" />
 
@@ -21,6 +15,10 @@ import {
 - **Dynamic lighting**: Easily add dynamic lighting effects to your components
 - **Theming support**: Customize colors and styles with theming capabilities
 - **Dithering effects**: Apply dithering to your components for authentic pixel art aesthetics
+
+## Live preview
+
+<Canvas of={IntroductionStories.Default} />
 
 ## Usage
 
@@ -41,6 +39,18 @@ export function Example() {
 }
 ```
 
-## Concepts
+## Where should I use Chonkit?
 
-## Live preview
+Pixel graphic effects (like pixelated corners or gradients) are normally achieved using bitmap images or canvas rendering. Chonkit allows you to build pixel art interfaces using normal CSS. This means you can do things like:
+
+- Use CSS layout techniques like Flexbox and Grid
+- Create completely responsive pixel art designs
+- Utilize CSS interaction states like `:hover` and `:active`
+
+In short:
+
+✅ **If you are making a website or webapp with a pixel art style,** Chonkit gives you perfect pixel art effects without sacrificing the power of CSS.
+
+❌ **If you are making a game,** Chonkit is probably not the right tool, unless you are already using React for your game UI.
+
+## Concepts

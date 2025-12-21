@@ -193,6 +193,13 @@ export const Box: React.FC<BoxProps> = (props) => {
 		"paddingRight",
 		"paddingTop",
 		"paddingBottom",
+		"flexDirection",
+		"flexWrap",
+		"flexFlow",
+		"justifyContent",
+		"alignItems",
+		"alignContent",
+		"gap",
 	];
 	const cssBaseStyleOuter = Object.fromEntries(
 		Object.entries(cssBaseStyle).filter(

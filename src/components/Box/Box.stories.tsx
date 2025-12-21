@@ -216,3 +216,19 @@ export const WithPositioningAttributes: Story = {
 		children: "This Box has positioning attributes",
 	},
 };
+
+export const Ex: Story = {
+	args: {
+		sx: {
+			background: "#4865d8",
+			color: "#fff",
+			padding: "6px",
+			borderRadius: 3,
+			embossHighlightSize: 1,
+			embossShadowSize: 1,
+			borderSize: 1,
+			borderColor: "#000",
+		},
+		children: "This Box has positioning attributes",
+	},
+};

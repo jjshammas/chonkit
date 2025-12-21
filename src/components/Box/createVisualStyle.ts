@@ -15,6 +15,7 @@ type VisualStyleOutput<T> = {
 	cssBaseStyle: React.CSSProperties;
 };
 
+const exemptKeysFromNormalization = ["flex", "flexGrow", "flexShrink"];
 export function createVisualStyle<T extends Record<string, VisualValue>>(args: {
 	style: VisualStyle<T>;
 	cssVariableKeys: ReadonlyArray<keyof T>;
@@ -32,7 +33,7 @@ export function createVisualStyle<T extends Record<string, VisualValue>>(args: {
 		const rawValue = style[key];
 		if (rawValue === undefined) continue;
 
-		const normalized = normalizeVisualValue(rawValue);
+		const normalized = normalizeVisualValue(rawValue, key);
 		const resolved = resolveColor(normalized, palette);
 		const varName = convertJSVariableNameToCSSVariableName(`${key}`);
 
@@ -58,7 +59,10 @@ export function createVisualStyle<T extends Record<string, VisualValue>>(args: {
 			const rawValue = nested[key];
 			if (rawValue == null) continue;
 
-			const normalized = normalizeVisualValue(rawValue as VisualValue);
+			const normalized = normalizeVisualValue(
+				rawValue as VisualValue,
+				key
+			);
 			const resolved = resolveColor(normalized, palette);
 			const varName = convertJSVariableNameToCSSVariableName(
 				`${key}-${state.slice(1)}`
@@ -78,8 +82,15 @@ export function createVisualStyle<T extends Record<string, VisualValue>>(args: {
 // type VisualValue = string | number | (string | number)[];
 type VisualValue = any;
 
-export function normalizeVisualValue(value: VisualValue): string {
-	if (Array.isArray(value)) return value.map(normalizeVisualValue).join(" ");
+export function normalizeVisualValue(
+	value: VisualValue,
+	cssKey: string
+): string {
+	if (Array.isArray(value))
+		return value
+			.map((value) => normalizeVisualValue(value, cssKey))
+			.join(" ");
+	if (exemptKeysFromNormalization.includes(cssKey)) return String(value);
 	if (typeof value === "number")
 		return `calc(${value} * var(--ck-block-size))`;
 	if (/^\d+px$/.test(value.trim()))
