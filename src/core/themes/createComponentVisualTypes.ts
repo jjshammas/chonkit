@@ -2,6 +2,7 @@ import type { WithInteractionStates } from "@/core/themes";
 import {
 	STATE_KEYS,
 	InteractionState,
+	BreakpointKey,
 } from "@/components/Box/createVisualStyle";
 
 type WithStateKeys<K extends string> =
@@ -31,13 +32,15 @@ export function createComponentVisualTypes<
 		];
 	}) as WithStateKeys<keyof T & string>[];
 
+	type Primitive = string | number | (string | number)[];
+	type Responsive<V> = V | Partial<Record<BreakpointKey, V>>;
+
 	type VisualStyle = Partial<
 		{
-			[key in keyof React.CSSProperties]?:
-				| string
-				| number
-				| (string | number)[];
-		} & T
+			[key in keyof React.CSSProperties]?: Responsive<Primitive>;
+		} & {
+			[key in keyof T]?: Responsive<T[key]>;
+		}
 	>;
 	type InteractionSubset = Partial<Pick<T, Allowed[number]>>;
 	type InteractionEnabledStyle = WithInteractionStates<InteractionSubset>;

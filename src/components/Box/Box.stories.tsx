@@ -232,3 +232,27 @@ export const Ex: Story = {
 		children: "This Box has positioning attributes",
 	},
 };
+/**
+ * The sx prop supports responsive design via breakpoint objects.
+ * Provide an object with breakpoints (xs, sm, md, lg, xl, 2xl) as keys and values for each breakpoint.
+ * xs is the default, sm applies at 640px and above, md at 768px, lg at 1024px, xl at 1280px, 2xl at 1536px.
+ */
+export const ResponsiveDesign: Story = {
+	args: {
+		sx: {
+			backgroundColor: {
+				xs: "#ff6b6b",
+				sm: "#4ecdc4",
+				md: "#45b7d1",
+				lg: "#96ceb4",
+				xl: "#ffeaa7",
+			},
+			height: { xs: "50px", sm: "75px", md: "100px", lg: "150px" },
+			borderRadius: { xs: 0, sm: 5, md: 10, lg: 15, xl: 20 },
+			borderWidth: 2,
+			borderColor: "#000",
+		},
+		children:
+			"Resize the window to see responsive styles change at different breakpoints",
+	},
+};

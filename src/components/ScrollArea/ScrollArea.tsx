@@ -190,10 +190,10 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
 							style={{
 								...style,
 								paddingRight: isVertical
-									? `calc(${normalizeVisualValue(trackGap)} + 10px)`
+									? `calc(${normalizeVisualValue(trackGap, "gap")} + 10px)`
 									: undefined,
 								paddingBottom: isHorizontal
-									? `calc(${normalizeVisualValue(trackGap)} + 10px)`
+									? `calc(${normalizeVisualValue(trackGap, "gap")} + 10px)`
 									: undefined,
 							}}
 							ref={elementRef}

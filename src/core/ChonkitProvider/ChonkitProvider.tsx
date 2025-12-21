@@ -1,4 +1,11 @@
-import React, { createContext, ReactNode, useContext, useRef } from "react";
+import React, {
+	createContext,
+	ReactNode,
+	useContext,
+	useRef,
+	useState,
+	useEffect,
+} from "react";
 import clsx from "clsx";
 import themes, {
 	Theme,
@@ -11,6 +18,7 @@ interface ChonkitContextValue {
 	blockSize: number;
 	rootAncestor: React.RefObject<HTMLDivElement | null>;
 	theme: Theme;
+	viewportWidth: number;
 }
 
 const ChonkitContext = createContext<ChonkitContextValue | undefined>(
@@ -54,12 +62,30 @@ export const ChonkitProvider: React.FC<ChonkitProviderProps> = ({
 }) => {
 	const rootAncestor = useRef<HTMLDivElement>(null);
 
+	const [viewportWidth, setViewportWidth] = useState<number>(
+		typeof window !== "undefined" ? window.innerWidth : 0
+	);
+	useEffect(() => {
+		let raf = 0 as number | undefined;
+		const onResize = () => {
+			if (raf) cancelAnimationFrame(raf);
+			raf = requestAnimationFrame(() => {
+				setViewportWidth(window.innerWidth);
+			});
+		};
+		window.addEventListener("resize", onResize);
+		return () => {
+			window.removeEventListener("resize", onResize);
+			if (raf) cancelAnimationFrame(raf);
+		};
+	}, []);
+
 	const theme =
 		typeof rawTheme === "string"
 			? themes[rawTheme as keyof typeof themes]
 			: typeof rawTheme === "object"
-			? mergeThemes(themes.default, rawTheme)
-			: themes.default;
+				? mergeThemes(themes.default, rawTheme)
+				: themes.default;
 
 	const addlStyle = {
 		"--ck-block-size": `${blockSize}px`,
@@ -76,6 +102,7 @@ export const ChonkitProvider: React.FC<ChonkitProviderProps> = ({
 				blockSize,
 				rootAncestor: rootAncestor,
 				theme,
+				viewportWidth,
 			}}
 		>
 			<div

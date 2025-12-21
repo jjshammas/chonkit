@@ -6,3 +6,4 @@ export { PanelActionBar } from "./Panel/PanelActionBar";
 export { ScrollArea } from "./ScrollArea/ScrollArea";
 export { Text } from "./Text/Text";
 export { AnimatedBox } from "./AnimatedBox/AnimatedBox";
+export type { BreakpointKey } from "./Box/createVisualStyle";

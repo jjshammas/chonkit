@@ -5,6 +5,8 @@ import type { Theme } from "@/core/themes";
 export const STATE_KEYS = ["_hover", "_active", "_focus", "_disabled"] as const;
 export type InteractionState = (typeof STATE_KEYS)[number];
 
+export type BreakpointKey = keyof Theme["breakpoints"];
+
 type VisualStyle<T extends Record<string, VisualValue>> = T & {
 	[state in InteractionState]?: Partial<T>;
 };
@@ -13,6 +15,7 @@ type VisualStyleOutput<T> = {
 	renderValues: T;
 	cssVariables: Record<string, string>;
 	cssBaseStyle: React.CSSProperties;
+	mediaQueryStyles: Partial<Record<BreakpointKey, React.CSSProperties>>;
 };
 
 const exemptKeysFromNormalization = ["flex", "flexGrow", "flexShrink"];
@@ -20,12 +23,16 @@ export function createVisualStyle<T extends Record<string, VisualValue>>(args: {
 	style: VisualStyle<T>;
 	cssVariableKeys: ReadonlyArray<keyof T>;
 	palette: Theme["palette"];
+	breakpoints: Theme["breakpoints"];
 }): VisualStyleOutput<T> {
-	const { style, cssVariableKeys, palette } = args;
+	const { style, cssVariableKeys, palette, breakpoints } = args;
 
 	const renderValues = {} as T;
 	const cssVariables: Record<string, string> = {};
 	const cssBaseStyle: React.CSSProperties = {};
+	const mediaQueryStyles: Partial<
+		Record<BreakpointKey, React.CSSProperties>
+	> = {};
 
 	for (const key in style) {
 		if (STATE_KEYS.includes(key as InteractionState)) continue;
@@ -33,20 +40,76 @@ export function createVisualStyle<T extends Record<string, VisualValue>>(args: {
 		const rawValue = style[key];
 		if (rawValue === undefined) continue;
 
-		const normalized = normalizeVisualValue(rawValue, key);
-		const resolved = resolveColor(normalized, palette);
-		const varName = convertJSVariableNameToCSSVariableName(`${key}`);
+		// Check if the value is a breakpoint object
+		if (
+			isBreakpointObject(rawValue, breakpoints) &&
+			!Array.isArray(rawValue) &&
+			typeof rawValue === "object"
+		) {
+			renderValues[key as keyof T] = rawValue as T[keyof T];
 
-		renderValues[key as keyof T] = rawValue as T[keyof T];
+			const shouldUseCSSVariable = cssVariableKeys.includes(
+				key as keyof T
+			);
 
-		const shouldUseCSSVariable = cssVariableKeys.includes(key as keyof T);
-		if (!shouldUseCSSVariable) {
-			if (key in document.documentElement.style) {
-				cssBaseStyle[key as keyof React.CSSProperties] =
-					normalized as any;
+			// For each breakpoint, process the value
+			for (const breakpoint of Object.keys(rawValue) as BreakpointKey[]) {
+				const breakpointValue = rawValue[breakpoint];
+				if (breakpointValue === undefined) continue;
+
+				const normalized = normalizeVisualValue(breakpointValue, key);
+				const resolved = resolveColor(normalized, palette);
+
+				if (breakpoint === "xs") {
+					// xs is the default, applies to cssBaseStyle
+					const varName = convertJSVariableNameToCSSVariableName(
+						`${key}`
+					);
+					if (!shouldUseCSSVariable) {
+						if (key in document.documentElement.style) {
+							cssBaseStyle[key as keyof React.CSSProperties] =
+								normalized as any;
+						}
+					} else {
+						cssVariables[varName] = resolved!;
+					}
+				} else {
+					// Other breakpoints go into mediaQueryStyles
+					const varName = convertJSVariableNameToCSSVariableName(
+						`${key}`
+					);
+					if (!mediaQueryStyles[breakpoint])
+						mediaQueryStyles[breakpoint] = {};
+					if (!shouldUseCSSVariable) {
+						(mediaQueryStyles[breakpoint] as React.CSSProperties)[
+							key as keyof React.CSSProperties
+						] = (normalized + " !important") as any;
+					} else {
+						(mediaQueryStyles[breakpoint] as React.CSSProperties)[
+							`${varName}` as keyof React.CSSProperties
+						] = (resolved + " !important") as any;
+					}
+				}
 			}
 		} else {
-			cssVariables[varName] = resolved!;
+			// Non-breakpoint value
+			const normalized = normalizeVisualValue(rawValue, key);
+			const resolved = resolveColor(normalized, palette);
+			const varName = convertJSVariableNameToCSSVariableName(`${key}`);
+
+			renderValues[key as keyof T] = rawValue as T[keyof T];
+
+			const shouldUseCSSVariable = cssVariableKeys.includes(
+				key as keyof T
+			);
+			if (!shouldUseCSSVariable) {
+				if (key in document.documentElement.style) {
+					cssBaseStyle[key as keyof React.CSSProperties] =
+						normalized as any;
+				}
+			} else {
+				cssVariables[varName] = resolved!;
+			}
 		}
 	}
 
@@ -76,11 +139,24 @@ export function createVisualStyle<T extends Record<string, VisualValue>>(args: {
 		renderValues,
 		cssVariables,
 		cssBaseStyle,
+		mediaQueryStyles,
 	};
 }
 
 // type VisualValue = string | number | (string | number)[];
 type VisualValue = any;
+
+function isBreakpointObject(
+	value: any,
+	breakpoints: Theme["breakpoints"]
+): value is Record<BreakpointKey, VisualValue> {
+	if (typeof value !== "object" || value === null || Array.isArray(value)) {
+		return false;
+	}
+	// Check if the object has any of the known breakpoint keys
+	const breakpointKeys = Object.keys(breakpoints);
+	return Object.keys(value).some((key) => breakpointKeys.includes(key));
+}
 
 export function normalizeVisualValue(
 	value: VisualValue,
@@ -110,21 +186,24 @@ export function resolveComponentVisualStyle<
 	props: AllProps;
 	cssVariableKeys: ReadonlyArray<keyof T>;
 	palette: Theme["palette"];
+	breakpoints: Theme["breakpoints"];
 }): VisualStyleOutput<T> & {
 	visualStyle: T & Partial<Record<InteractionState, Partial<T>>>;
 	rest: Omit<AllProps, "sx">;
 } {
-	const { props, cssVariableKeys, palette } = args;
+	const { props, cssVariableKeys, palette, breakpoints } = args;
 
 	const visualStyle = props.sx || {};
 	const rest = { ...props } as Omit<AllProps, "sx">;
 	delete rest.sx;
 
-	const { renderValues, cssVariables, cssBaseStyle } = createVisualStyle({
-		style: visualStyle,
-		cssVariableKeys,
-		palette,
-	});
+	const { renderValues, cssVariables, cssBaseStyle, mediaQueryStyles } =
+		createVisualStyle({
+			style: visualStyle,
+			cssVariableKeys,
+			palette,
+			breakpoints,
+		});
 
 	return {
 		visualStyle: visualStyle as T &
@@ -133,5 +212,6 @@ export function resolveComponentVisualStyle<
 		renderValues,
 		cssVariables,
 		cssBaseStyle,
+		mediaQueryStyles,
 	};
 }

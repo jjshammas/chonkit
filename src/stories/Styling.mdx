@@ -104,4 +104,46 @@ For more examples, view the Box component documentation.
 
 Components may define additional custom properties within the `sx` prop that are specific to Chonkit. For example, the `Box` component supports a `depth` property to apply a 3D effect. These are declared as `sx` properties instead of top-level props to work alongside theming and state effects.
 
+### Responsive design
+
+Chonkit supports responsive design through breakpoint objects in the `sx` prop. Any style property can accept an object with breakpoint keys (`xs`, `sm`, `md`, `lg`, `xl`, `2xl`) to define values at different viewport widths.
+
+```tsx
+<Box
+	sx={{
+		backgroundColor: {
+			xs: "#ff6b6b",
+			sm: "#4ecdc4",
+			md: "#45b7d1",
+			lg: "#96ceb4",
+			xl: "#ffeaa7",
+		},
+		padding: { xs: "10px", sm: "15px", md: "20px", lg: "30px" },
+		borderRadius: { xs: 4, sm: 8, md: 12, lg: 16 },
+	}}
+>
+	Responsive content
+</Box>
+```
+
+Breakpoints are defined in the theme and can be customized:
+
+```tsx
+// Default breakpoints (in pixels)
+breakpoints: {
+	xs: 0,    // Base/mobile
+	sm: 640,  // Small tablets
+	md: 768,  // Tablets
+	lg: 1024, // Laptops
+	xl: 1280, // Desktops
+	"2xl": 1536, // Large screens
+}
+```
+
+Responsive values work for **all** properties in the `sx` prop, including:
+
+- Standard CSS properties (colors, spacing, typography, etc.)
+- Chonkit-specific properties (`depth`, `borderRadius`, `backgroundGradient`, etc.)
+- Interaction states can also use responsive values
+
 ## Fonts
