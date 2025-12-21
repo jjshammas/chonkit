@@ -14,7 +14,7 @@ export type EmbossProps = {
 	highlightSize?: number;
 	shadowSize?: number;
 	borderRadius?: RoundedCornerClipProps["borderRadius"];
-	borderSize?: FabricatedBorderProps["borderSize"];
+	borderWidth?: FabricatedBorderProps["borderWidth"];
 };
 
 export function useEmboss(
@@ -71,7 +71,7 @@ export function useEmboss(
 		return unsubscribe;
 	}, [
 		options.borderRadius,
-		options.borderSize,
+		options.borderWidth,
 		blockSize,
 		highlightSize,
 		shadowSize,

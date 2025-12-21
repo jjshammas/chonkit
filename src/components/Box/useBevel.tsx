@@ -17,7 +17,7 @@ export type BevelProps = {
 	highlightSize?: number;
 	shadowSize?: number;
 	borderRadius?: RoundedCornerClipProps["borderRadius"];
-	borderSize?: FabricatedBorderProps["borderSize"];
+	borderWidth?: FabricatedBorderProps["borderWidth"];
 };
 
 export function useBevel(
@@ -39,7 +39,7 @@ export function useBevel(
 				const highlightPath = `path('${convertPointsToPathString(
 					generateHighlightPoints(
 						options.borderRadius || 0,
-						options.borderSize || 0,
+						options.borderWidth || 0,
 						blockSize,
 						highlightSize,
 						direction,
@@ -53,7 +53,7 @@ export function useBevel(
 				const shadowPath = `path('${convertPointsToPathString(
 					generateHighlightPoints(
 						options.borderRadius || 0,
-						options.borderSize || 0,
+						options.borderWidth || 0,
 						blockSize,
 						shadowSize,
 						rotateDirection(direction, 180),
@@ -68,7 +68,7 @@ export function useBevel(
 		return unsubscribe;
 	}, [
 		options.borderRadius,
-		options.borderSize,
+		options.borderWidth,
 		blockSize,
 		highlightSize,
 		shadowSize,

@@ -24,14 +24,14 @@ export const boxVisual = createComponentVisualTypes({
 		borderRadius: undefined as
 			| RoundedCornerClipProps["borderRadius"]
 			| undefined,
-		borderSize: undefined as
-			| FabricatedBorderProps["borderSize"]
+		borderWidth: undefined as
+			| FabricatedBorderProps["borderWidth"]
 			| undefined,
 		borderColor: undefined as
 			| FabricatedBorderProps["borderColor"]
 			| undefined,
-		innerBorderSize: undefined as
-			| FabricatedBorderProps["innerBorderSize"]
+		innerborderWidth: undefined as
+			| FabricatedBorderProps["innerborderWidth"]
 			| undefined,
 		innerBorderColor: undefined as
 			| FabricatedBorderProps["innerBorderColor"]
@@ -81,10 +81,10 @@ export const Box: React.FC<BoxProps> = (props) => {
 	const {
 		renderValues: {
 			borderRadius,
-			borderSize,
+			borderWidth,
 			borderColor,
 			innerBorderColor,
-			innerBorderSize,
+			innerborderWidth,
 			bevelHighlightSize,
 			bevelShadowSize,
 			embossHighlightSize,
@@ -133,7 +133,7 @@ export const Box: React.FC<BoxProps> = (props) => {
 	const innerRef = useRef<HTMLDivElement>(null);
 
 	const shouldFabricateBorder =
-		borderSize && borderRadius && !innerBorderSize;
+		borderWidth && borderRadius && !innerborderWidth;
 
 	const geometry = useGeometryObserver(ref);
 	useRoundedCornerClip(innerRef, { borderRadius }, geometry);
@@ -141,10 +141,10 @@ export const Box: React.FC<BoxProps> = (props) => {
 		ref,
 		{
 			borderRadius,
-			borderSize,
+			borderWidth,
 			borderColor,
 			innerBorderColor,
-			innerBorderSize,
+			innerborderWidth,
 		},
 		geometry
 	);
@@ -152,7 +152,7 @@ export const Box: React.FC<BoxProps> = (props) => {
 		ref,
 		{
 			borderRadius,
-			borderSize,
+			borderWidth,
 			highlightSize: bevelHighlightSize,
 			shadowSize: bevelShadowSize,
 		},
@@ -162,7 +162,7 @@ export const Box: React.FC<BoxProps> = (props) => {
 		ref,
 		{
 			borderRadius,
-			borderSize,
+			borderWidth,
 			highlightSize: embossHighlightSize,
 			shadowSize: embossShadowSize,
 		},
@@ -235,9 +235,9 @@ export const Box: React.FC<BoxProps> = (props) => {
 
 					// if there's a border, but no rounded corner, we can use a box shadow for the border
 					boxShadow:
-						borderSize && !shouldFabricateBorder
+						borderWidth && !shouldFabricateBorder
 							? `inset 0 0 0 ${
-									blockSize * borderSize
+									blockSize * borderWidth
 								}px ${borderColor}`
 							: undefined,
 				}}

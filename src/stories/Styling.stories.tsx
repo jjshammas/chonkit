@@ -73,7 +73,7 @@ export const SomeBlocks: Story = {
 						<div style={{ padding: "12px" }}>
 							<Box
 								sx={{
-									borderSize: 1,
+									borderWidth: 1,
 									borderColor: "black",
 									padding: "8px",
 								}}
@@ -88,7 +88,7 @@ export const SomeBlocks: Story = {
 						<div style={{ padding: "12px" }}>
 							<Box
 								sx={{
-									borderSize: 1,
+									borderWidth: 1,
 									borderColor: "black",
 									padding: "8px",
 								}}
@@ -103,7 +103,7 @@ export const SomeBlocks: Story = {
 						<div style={{ padding: "12px" }}>
 							<Box
 								sx={{
-									borderSize: 1,
+									borderWidth: 1,
 									borderColor: "black",
 									padding: "8px",
 								}}

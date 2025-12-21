@@ -43,7 +43,7 @@ const InnerExample = () => (
 					borderRadius: 3,
 					embossHighlightSize: 1,
 					embossShadowSize: 1,
-					borderSize: 1,
+					borderWidth: 1,
 					borderColor: "#000",
 					display: "inline-block",
 				}}

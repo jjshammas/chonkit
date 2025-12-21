@@ -35,7 +35,7 @@ const defaultTheme: Theme = {
 	},
 	Button: {
 		defaultVariant: "primary",
-		borderSize: 1,
+		borderWidth: 1,
 		borderRadius: 6,
 		borderColor: "rgba(0,0,0,0.3)",
 		bevelHighlightSize: 2,
@@ -72,7 +72,7 @@ const defaultTheme: Theme = {
 		backgroundColor: "bg",
 		color: "bg.fg",
 		borderRadius: 3,
-		borderSize: 1,
+		borderWidth: 1,
 		borderColor: "#aaa",
 		bevelHighlightSize: 1,
 		bevelShadowSize: 1,
@@ -92,11 +92,11 @@ const defaultTheme: Theme = {
 	ScrollAreaTrack: {
 		borderRadius: 2,
 		borderColor: "#ccc",
-		borderSize: 1,
+		borderWidth: 1,
 		size: "16px",
 	},
 	ScrollAreaThumb: {
-		borderSize: 1,
+		borderWidth: 1,
 		borderRadius: 2,
 		borderColor: "rgba(0,0,0,0.3)",
 		bevelHighlightSize: 2,

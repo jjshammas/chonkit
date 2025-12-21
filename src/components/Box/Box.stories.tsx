@@ -176,10 +176,10 @@ export const Bordered: Story = {
 	args: {
 		sx: {
 			backgroundColor: "#ddd",
-			borderSize: 2,
+			borderWidth: 2,
 			borderColor: "#aaa",
 			borderRadius: 3,
-			innerBorderSize: 1,
+			innerborderWidth: 1,
 			innerBorderColor: "#fff",
 		},
 	},
@@ -226,7 +226,7 @@ export const Ex: Story = {
 			borderRadius: 3,
 			embossHighlightSize: 1,
 			embossShadowSize: 1,
-			borderSize: 1,
+			borderWidth: 1,
 			borderColor: "#000",
 		},
 		children: "This Box has positioning attributes",

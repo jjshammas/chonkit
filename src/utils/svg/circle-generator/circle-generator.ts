@@ -209,7 +209,7 @@ export function generateRoundedCornerPoints(
 
 export function generateBorderPoints(
 	radius: number | RadiiAllCorners,
-	borderSize: number,
+	borderWidth: number,
 	blockSize: number,
 	width: number,
 	height: number
@@ -217,17 +217,17 @@ export function generateBorderPoints(
 	let innerPoints = nudgePoints(
 		generateRoundedCornerPoints(
 			Array.isArray(radius)
-				? ((radius.map((r) => r - borderSize) as number[])
+				? ((radius.map((r) => r - borderWidth) as number[])
 						.slice(0, 4)
 						.concat(Array(4).fill(0).slice(radius.length))
 						.slice(0, 4) as RadiiAllCorners)
-				: radius - borderSize,
+				: radius - borderWidth,
 			blockSize,
-			width - borderSize * blockSize * 2,
-			height - borderSize * blockSize * 2
+			width - borderWidth * blockSize * 2,
+			height - borderWidth * blockSize * 2
 		),
-		blockSize * borderSize,
-		blockSize * borderSize
+		blockSize * borderWidth,
+		blockSize * borderWidth
 	);
 
 	// we finish the above path on the left edge. now add points to invert this
@@ -246,7 +246,7 @@ export function generateBorderPoints(
 
 export function generateHighlightPoints(
 	radius: number | RadiiAllCorners,
-	borderSize: number,
+	borderWidth: number,
 	blockSize: number,
 	effectSize: number,
 	direction: LightingDirection,
@@ -255,11 +255,11 @@ export function generateHighlightPoints(
 ): [number, number][] {
 	const innerPoints = nudgePoints(
 		generateRoundedCornerPoints(radius, blockSize, width, height),
-		(effectSize + borderSize) *
+		(effectSize + borderWidth) *
 			blockSize *
 			(direction !== 90 && direction !== 270 ? 1 : 0) *
 			(direction < 90 || direction > 270 ? 1 : -1),
-		(effectSize + borderSize) *
+		(effectSize + borderWidth) *
 			blockSize *
 			(direction !== 0 && direction !== 180 ? 1 : 0) *
 			(direction < 180 ? 1 : -1)

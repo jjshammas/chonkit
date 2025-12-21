@@ -10,9 +10,9 @@ import styles from "./Box.module.css";
 
 export type FabricatedBorderProps = {
 	borderRadius?: RoundedCornerClipProps["borderRadius"];
-	borderSize?: number;
+	borderWidth?: number;
 	borderColor?: string;
-	innerBorderSize?: number;
+	innerborderWidth?: number;
 	innerBorderColor?: string;
 };
 
@@ -27,8 +27,8 @@ export function useFabricatedBorder(
 
 	useEffect(() => {
 		if (
-			(!options.borderRadius || !options.borderSize) &&
-			!options.innerBorderSize
+			(!options.borderRadius || !options.borderWidth) &&
+			!options.innerborderWidth
 		)
 			return;
 		if (!fabricatedBorder.current && !fabricatedInnerBorder.current) return;
@@ -36,7 +36,7 @@ export function useFabricatedBorder(
 		const unsubscribe = geometry.subscribe(({ width, height }) => {
 			const path = generateBorderPoints(
 				options.borderRadius || 0,
-				Math.max(options.borderSize || 0, 0),
+				Math.max(options.borderWidth || 0, 0),
 				blockSize,
 				width,
 				height
@@ -50,7 +50,8 @@ export function useFabricatedBorder(
 			const pathInner = generateBorderPoints(
 				options.borderRadius || 0,
 				Math.max(
-					(options.borderSize || 0) + (options.innerBorderSize || 0),
+					(options.borderWidth || 0) +
+						(options.innerborderWidth || 0),
 					0
 				),
 				blockSize,
@@ -67,8 +68,8 @@ export function useFabricatedBorder(
 		return unsubscribe;
 	}, [
 		options.borderRadius,
-		options.borderSize,
-		options.innerBorderSize,
+		options.borderWidth,
+		options.innerborderWidth,
 		blockSize,
 		element,
 		fabricatedBorder.current,
@@ -78,13 +79,13 @@ export function useFabricatedBorder(
 	return {
 		fabricatedBorderEl: (
 			<>
-				{options.borderSize && options.borderRadius ? (
+				{options.borderWidth && options.borderRadius ? (
 					<div
 						ref={fabricatedBorder}
 						className={styles.fabricatedBorder}
 					/>
 				) : null}
-				{options.innerBorderSize ? (
+				{options.innerborderWidth ? (
 					<div
 						ref={fabricatedInnerBorder}
 						className={styles.fabricatedInnerBorder}
