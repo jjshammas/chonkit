@@ -1,9 +1,26 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import dts from "vite-plugin-dts";
 import path from "path";
 
 export default defineConfig({
-	plugins: [react()],
+	plugins: [
+		react(),
+		dts({
+			entryRoot: "src",
+			outDir: "dist",
+			insertTypesEntry: true,
+			rollupTypes: true,
+			exclude: [
+				"src/**/*.stories.ts",
+				"src/**/*.stories.tsx",
+				"src/**/*.mdx",
+				"src/**/*.test.ts",
+				"src/**/*.test.tsx",
+				"src/**/_exampleComponent/**",
+			],
+		}),
+	],
 	resolve: {
 		alias: {
 			"@": path.resolve(__dirname, "./src"),
@@ -14,7 +31,7 @@ export default defineConfig({
 			entry: "src/index.ts",
 			name: "Chonkit",
 			fileName: (format) => `chonkit.${format}.js`,
-			formats: ["es", "umd"],
+			formats: ["es"],
 		},
 		outDir: "dist",
 		rollupOptions: {
