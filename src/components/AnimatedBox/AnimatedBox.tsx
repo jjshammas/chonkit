@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { Box, BoxProps } from "@/components/Box/Box";
 import {
 	DynamicKeyframe,
@@ -38,6 +38,26 @@ type AnimationPhaseConfig = {
 };
 
 /**
+ * Serialize animation config to a stable string for dependency comparison.
+ * This ensures effects only re-run when animation values actually change,
+ * not just when the parent re-renders with a new object reference.
+ */
+function serializeAnimationPhase(
+	phase: AnimationPhaseConfig | undefined
+): string {
+	if (!phase) return "";
+	// Only serialize the meaningful parts (not callbacks)
+	return JSON.stringify({
+		frames: phase.frames,
+		from: phase.from,
+		to: phase.to,
+		duration: phase.duration,
+		delay: phase.delay,
+		easing: phase.easing,
+	});
+}
+
+/**
  * AnimatedBox supports three types of animations:
  * - enter: Plays when the component mounts (isVisible becomes true)
  * - exit: Plays when the component unmounts (isVisible becomes false)
@@ -71,6 +91,21 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 	);
 	const previousTriggerRef = useRef<any>(animation?.transition?.trigger);
 	const cachedKeyframeStringsRef = useRef<string[]>([]);
+
+	// Memoize serialized animation configs to avoid re-running effects
+	// when parent re-renders with new object references
+	const serializedEnterPhase = useMemo(
+		() => serializeAnimationPhase(animation?.enter),
+		[animation?.enter]
+	);
+	const serializedExitPhase = useMemo(
+		() => serializeAnimationPhase(animation?.exit),
+		[animation?.exit]
+	);
+	const serializedTransitionPhase = useMemo(
+		() => serializeAnimationPhase(animation?.transition),
+		[animation?.transition]
+	);
 
 	// Mount or unmount based on isVisible
 	useEffect(() => {
@@ -149,7 +184,12 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 			});
 			cachedKeyframeStringsRef.current = [];
 		};
-	}, [animation, isVisible, shouldRender, blockSize]);
+	}, [
+		isVisible ? serializedEnterPhase : serializedExitPhase,
+		isVisible,
+		shouldRender,
+		blockSize,
+	]);
 
 	// Handle transition animations triggered by value changes
 	useEffect(() => {
@@ -224,7 +264,7 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 			});
 			cachedKeyframeStringsRef.current = [];
 		};
-	}, [animation?.transition, animation?.transition?.trigger, blockSize]);
+	}, [animation?.transition?.trigger, serializedTransitionPhase, blockSize]);
 
 	if (!shouldRender) return null;
 
