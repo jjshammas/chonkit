@@ -331,13 +331,29 @@ export const createAnimatedProperties = ({
 }: createAnimatedPropertiesOptions) => {
 	const frames: DynamicKeyframe[] = [];
 
-	const allProperties = Object.entries(from).filter(
-		([key]) => key !== "x" && key !== "y"
-	);
+	// Convert x/y to xBlocks/yBlocks
+	const normalizedFrom = { ...from };
+	const normalizedTo = { ...to };
+
+	if (from.x !== undefined && to.x !== undefined) {
+		normalizedFrom.xBlocks = parseFloat(String(from.x)) / blockSize;
+		normalizedTo.xBlocks = parseFloat(String(to.x)) / blockSize;
+		delete normalizedFrom.x;
+		delete normalizedTo.x;
+	}
+
+	if (from.y !== undefined && to.y !== undefined) {
+		normalizedFrom.yBlocks = parseFloat(String(from.y)) / blockSize;
+		normalizedTo.yBlocks = parseFloat(String(to.y)) / blockSize;
+		delete normalizedFrom.y;
+		delete normalizedTo.y;
+	}
+
+	const allProperties = Object.entries(normalizedFrom);
 
 	let maxSteps = 0;
 	allProperties.forEach(([key, fromValue]) => {
-		const toValue = to[key];
+		const toValue = normalizedTo[key];
 		if (toValue === undefined) return;
 
 		const fromNum = parseFloat(String(fromValue));
@@ -366,7 +382,7 @@ export const createAnimatedProperties = ({
 	const sharedSteps = hertzSteps ?? (maxSteps > 0 ? maxSteps : 1);
 
 	allProperties.forEach(([key, fromValue]) => {
-		const toValue = to[key];
+		const toValue = normalizedTo[key];
 		if (toValue === undefined) return;
 
 		const isBlockBased = key === "xBlocks" || key === "yBlocks";

@@ -14,6 +14,9 @@ import themes, {
 	mergeThemes,
 } from "@/core/themes";
 
+const DEFAULT_BLOCK_SIZE = 2;
+const DEFAULT_STEP_RATE_HZ = 24;
+
 interface ChonkitContextValue {
 	blockSize: number;
 	rootAncestor: React.RefObject<HTMLDivElement | null>;
@@ -56,11 +59,11 @@ const Grid = ({ blockSize }: { blockSize: number }) => {
 
 export const ChonkitProvider: React.FC<ChonkitProviderProps> = ({
 	children,
-	blockSize = 2,
+	blockSize = DEFAULT_BLOCK_SIZE,
 	showGrid,
 	style,
 	theme: rawTheme,
-	stepRateHz = 15,
+	stepRateHz = DEFAULT_STEP_RATE_HZ,
 	...rest
 }) => {
 	const rootAncestor = useRef<HTMLDivElement>(null);

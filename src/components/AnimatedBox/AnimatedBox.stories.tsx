@@ -387,3 +387,111 @@ export const RandomPosition: Story = {
 		);
 	},
 };
+
+export const PixelTranslation: Story = {
+	args: {
+		baseProps: {
+			sx: {
+				position: "relative",
+				width: "400px",
+				height: "300px",
+				backgroundColor: "#f5f5f5",
+				border: "2px solid #333",
+				borderRadius: "8px",
+				overflow: "hidden",
+			},
+		},
+		children: null,
+	},
+	render: (args) => {
+		const [position, setPosition] = useState({ x: 0, y: 0 });
+		const [prevPosition, setPrevPosition] = useState({ x: 0, y: 0 });
+
+		const presets = [
+			{ x: 0, y: 0, label: "Top Left" },
+			{ x: 300, y: 0, label: "Top Right" },
+			{ x: 300, y: 200, label: "Bottom Right" },
+			{ x: 0, y: 200, label: "Bottom Left" },
+			{ x: 150, y: 100, label: "Center" },
+		];
+
+		const handlePositionChange = (newPos: { x: number; y: number }) => {
+			setPrevPosition(position);
+			setPosition(newPos);
+		};
+
+		return (
+			<div>
+				<div
+					style={{
+						marginBottom: "20px",
+						display: "flex",
+						gap: "8px",
+					}}
+				>
+					{presets.map((preset) => (
+						<button
+							key={preset.label}
+							onClick={() =>
+								handlePositionChange({
+									x: preset.x,
+									y: preset.y,
+								})
+							}
+						>
+							{preset.label}
+						</button>
+					))}
+				</div>
+				<div
+					style={{
+						position: "relative",
+						width: "400px",
+						height: "300px",
+						backgroundColor: "#f5f5f5",
+						border: "2px solid #333",
+						borderRadius: "8px",
+						overflow: "hidden",
+					}}
+				>
+					<AnimatedBox
+						baseProps={{
+							sx: {
+								position: "absolute",
+								backgroundColor: "#e74c3c",
+								color: "white",
+								borderRadius: "4px",
+								width: "100px",
+								height: "100px",
+								display: "flex",
+								alignItems: "center",
+								justifyContent: "center",
+								fontWeight: "bold",
+								boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+							},
+						}}
+						animation={{
+							transition: {
+								trigger: `${position.x}-${position.y}`,
+								from: {
+									x: prevPosition.x,
+									y: prevPosition.y,
+								},
+								to: {
+									x: position.x,
+									y: position.y,
+								},
+								duration: 800,
+								easing: "linear",
+							},
+						}}
+					>
+						x: {position.x}
+						<br />
+						y: {position.y}
+					</AnimatedBox>
+				</div>
+			</div>
+		);
+	},
+};
