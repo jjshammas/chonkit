@@ -5,6 +5,25 @@ export type DynamicKeyframe = {
 	styles: string;
 };
 
+/**
+ * Property configuration for animation
+ * - blockBased: true for properties that are measured in block units (xBlocks, yBlocks)
+ *   and should be converted to transform: translate
+ * - cssProperty: the CSS property name to animate (width, height, opacity, etc.)
+ *   or null for block-based properties that use transform
+ */
+type PropertyConfig = {
+	blockBased?: boolean;
+	cssProperty?: string;
+	transformType?: "translateX" | "translateY"; // for block-based properties
+};
+
+type AnimationProperty = {
+	from: number | string;
+	to: number | string;
+	config: PropertyConfig;
+};
+
 type createAnimationTranslationFramesOptions = {
 	from: {
 		xBlocks?: number;
@@ -77,17 +96,20 @@ export const mergeTransformValues = (...transformValues: string[]): string => {
 	const transformMap: Record<string, string> = {};
 
 	transformValues.forEach((transform) => {
-		const transforms = transform.split(" ").map((t) => t.trim());
-		transforms.forEach((t) => {
-			const [key, value] = t.split("(");
-			if (key && value) {
-				transformMap[key] = value;
-			}
-		});
+		// Parse transform functions like "translateX(100px)" or "scale(1.5)"
+		const functionMatch = transform.match(/(\w+)\(([^)]+)\)/g);
+		if (functionMatch) {
+			functionMatch.forEach((func) => {
+				const [, name, value] = func.match(/(\w+)\(([^)]+)\)/) || [];
+				if (name && value) {
+					transformMap[name] = value;
+				}
+			});
+		}
 	});
 
 	return Object.entries(transformMap)
-		.map(([key, value]) => `${key}(${value}`)
+		.map(([key, value]) => `${key}(${value})`)
 		.join(" ");
 };
 
@@ -203,4 +225,153 @@ export const createAnimationTranslationFrames = ({
 	}
 
 	return insertSteppedAnimationFrames(mergeAnimationFrames(frames));
+};
+
+export type createAnimationPropertyFramesOptions = {
+	property: string;
+	from: string | number;
+	to: string | number;
+	blockSize: number;
+	isBlockBased?: boolean; // true for xBlocks/yBlocks, converts to transform: translateX/Y
+	startPercent?: number;
+	endPercent?: number;
+	easing?: string;
+};
+
+/**
+ * Unified keyframe generator for all animation properties
+ * - Block-based properties (xBlocks, yBlocks): Converted to transform: translateX/Y with block-size stepping
+ * - Pixel-based CSS properties (width, height): Stepped by blockSize increments
+ * - Unitless CSS properties (opacity, z-index): Simple start/end keyframes
+ */
+export const createAnimationPropertyFrames = ({
+	property,
+	from,
+	to,
+	blockSize,
+	isBlockBased = false,
+	startPercent = 0,
+	endPercent = 100,
+	easing = "ease-in-out",
+}: createAnimationPropertyFramesOptions) => {
+	const frames: DynamicKeyframe[] = [];
+
+	// Parse numeric values
+	const fromNum = parseFloat(String(from));
+	const toNum = parseFloat(String(to));
+
+	// If values aren't numeric, generate simple start/end keyframes
+	if (isNaN(fromNum) || isNaN(toNum)) {
+		return [
+			{ percent: startPercent, styles: `${property}: ${from};` },
+			{ percent: endPercent, styles: `${property}: ${to};` },
+		];
+	}
+
+	const timingFunction = parseCSSTimingFunction(easing);
+
+	// For block-based properties (xBlocks, yBlocks), generate stepped translation frames
+	if (isBlockBased) {
+		const totalBlocks = Math.abs(toNum - fromNum);
+		const direction = toNum >= fromNum ? 1 : -1;
+		const blockIncrement = totalBlocks > 0 ? 1 / totalBlocks : 0;
+
+		for (let i = 0; i <= totalBlocks; i++) {
+			const easedProgress = timingFunction(i * blockIncrement);
+			const percent =
+				startPercent + easedProgress * (endPercent - startPercent);
+			const pixels = (fromNum + i * direction) * blockSize;
+			const transformProperty =
+				property === "xBlocks" ? "translateX" : "translateY";
+			frames.push({
+				percent,
+				styles: `transform: ${transformProperty}(${pixels}px);`,
+			});
+		}
+
+		return insertSteppedAnimationFrames(mergeAnimationFrames(frames));
+	}
+
+	// Extract unit (e.g., "px" from "100px")
+	const fromStr = String(from);
+	const unit = fromStr.replace(/[0-9.-]/g, "") || "";
+
+	// For unitless properties (opacity, z-index, etc.), use simple start/end keyframes
+	if (!unit || unit === "") {
+		return [
+			{ percent: startPercent, styles: `${property}: ${fromNum};` },
+			{ percent: endPercent, styles: `${property}: ${toNum};` },
+		];
+	}
+
+	// For pixel-based CSS properties, generate stair-stepped keyframes
+	const totalDifference = Math.abs(toNum - fromNum);
+	const direction = toNum >= fromNum ? 1 : -1;
+	const steps = Math.ceil(totalDifference / blockSize);
+
+	// Generate keyframes for each step
+	for (let i = 0; i <= steps; i++) {
+		const easedProgress = timingFunction(i / steps);
+		const percent =
+			startPercent + easedProgress * (endPercent - startPercent);
+		const value = fromNum + i * blockSize * direction;
+		frames.push({
+			percent,
+			styles: `${property}: ${value}${unit};`,
+		});
+	}
+
+	return insertSteppedAnimationFrames(mergeAnimationFrames(frames));
+};
+
+/**
+ * Unified animation builder for all animation properties
+ * Handles block-based properties (xBlocks, yBlocks) and CSS properties (width, height, opacity, etc.)
+ */
+export type createAnimatedPropertiesOptions = {
+	from: Record<string, any>;
+	to: Record<string, any>;
+	blockSize: number;
+	startPercent?: number;
+	endPercent?: number;
+	easing?: string;
+};
+
+export const createAnimatedProperties = ({
+	from,
+	to,
+	blockSize,
+	startPercent = 0,
+	endPercent = 100,
+	easing = "ease-in-out",
+}: createAnimatedPropertiesOptions) => {
+	const frames: DynamicKeyframe[] = [];
+
+	// Process all properties uniformly
+	const allProperties = Object.entries(from).filter(
+		([key]) => key !== "x" && key !== "y" // exclude raw x/y, they're deprecated
+	);
+
+	allProperties.forEach(([key, fromValue]) => {
+		const toValue = to[key];
+		if (toValue === undefined) return;
+
+		// Check if this is a block-based property
+		const isBlockBased = key === "xBlocks" || key === "yBlocks";
+
+		const propertyFrames = createAnimationPropertyFrames({
+			property: key,
+			from: fromValue,
+			to: toValue,
+			blockSize,
+			isBlockBased,
+			startPercent,
+			endPercent,
+			easing,
+		});
+
+		frames.push(...propertyFrames);
+	});
+
+	return mergeAnimationFrames(frames);
 };
