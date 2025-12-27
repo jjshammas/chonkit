@@ -236,6 +236,7 @@ export type createAnimationPropertyFramesOptions = {
 	startPercent?: number;
 	endPercent?: number;
 	easing?: string;
+	sharedSteps?: number; // Shared timing reference across all properties
 };
 
 /**
@@ -243,6 +244,7 @@ export type createAnimationPropertyFramesOptions = {
  * - Block-based properties (xBlocks, yBlocks): Converted to transform: translateX/Y with block-size stepping
  * - Pixel-based CSS properties (width, height): Stepped by blockSize increments
  * - Unitless CSS properties (opacity, z-index): Simple start/end keyframes
+ * - sharedSteps: When provided, synchronizes all properties to the same timing base
  */
 export const createAnimationPropertyFrames = ({
 	property,
@@ -253,6 +255,7 @@ export const createAnimationPropertyFrames = ({
 	startPercent = 0,
 	endPercent = 100,
 	easing = "ease-in-out",
+	sharedSteps,
 }: createAnimationPropertyFramesOptions) => {
 	const frames: DynamicKeyframe[] = [];
 
@@ -274,13 +277,19 @@ export const createAnimationPropertyFrames = ({
 	if (isBlockBased) {
 		const totalBlocks = Math.abs(toNum - fromNum);
 		const direction = toNum >= fromNum ? 1 : -1;
-		const blockIncrement = totalBlocks > 0 ? 1 / totalBlocks : 0;
 
-		for (let i = 0; i <= totalBlocks; i++) {
-			const easedProgress = timingFunction(i * blockIncrement);
+		// Use sharedSteps if provided for synchronized animations, otherwise use totalBlocks
+		const stepsToUse =
+			sharedSteps !== undefined ? sharedSteps : totalBlocks;
+		const blockIncrement = stepsToUse > 0 ? totalBlocks / stepsToUse : 0;
+		const timeIncrement = stepsToUse > 0 ? 1 / stepsToUse : 0;
+
+		for (let i = 0; i <= stepsToUse; i++) {
+			const easedProgress = timingFunction(i * timeIncrement);
 			const percent =
 				startPercent + easedProgress * (endPercent - startPercent);
-			const pixels = (fromNum + i * direction) * blockSize;
+			const pixels =
+				(fromNum + i * blockIncrement * direction) * blockSize;
 			const transformProperty =
 				property === "xBlocks" ? "translateX" : "translateY";
 			frames.push({
@@ -307,14 +316,21 @@ export const createAnimationPropertyFrames = ({
 	// For pixel-based CSS properties, generate stair-stepped keyframes
 	const totalDifference = Math.abs(toNum - fromNum);
 	const direction = toNum >= fromNum ? 1 : -1;
-	const steps = Math.ceil(totalDifference / blockSize);
+
+	// Use sharedSteps if provided for synchronized animations, otherwise calculate based on blockSize
+	const steps =
+		sharedSteps !== undefined
+			? sharedSteps
+			: Math.ceil(totalDifference / blockSize);
+	const valueIncrement = steps > 0 ? totalDifference / steps : 0;
+	const timeIncrement = steps > 0 ? 1 / steps : 0;
 
 	// Generate keyframes for each step
 	for (let i = 0; i <= steps; i++) {
-		const easedProgress = timingFunction(i / steps);
+		const easedProgress = timingFunction(i * timeIncrement);
 		const percent =
 			startPercent + easedProgress * (endPercent - startPercent);
-		const value = fromNum + i * blockSize * direction;
+		const value = fromNum + i * valueIncrement * direction;
 		frames.push({
 			percent,
 			styles: `${property}: ${value}${unit};`,
@@ -352,6 +368,38 @@ export const createAnimatedProperties = ({
 		([key]) => key !== "x" && key !== "y" // exclude raw x/y, they're deprecated
 	);
 
+	// Calculate the maximum number of steps across all properties
+	// This ensures all animations use the same time base, keeping them synchronized
+	let maxSteps = 0;
+	allProperties.forEach(([key, fromValue]) => {
+		const toValue = to[key];
+		if (toValue === undefined) return;
+
+		const fromNum = parseFloat(String(fromValue));
+		const toNum = parseFloat(String(toValue));
+
+		if (isNaN(fromNum) || isNaN(toNum)) return;
+
+		let steps = 0;
+		if (key === "xBlocks" || key === "yBlocks") {
+			// Block-based: count blocks
+			steps = Math.abs(toNum - fromNum);
+		} else {
+			// CSS property: extract unit and calculate steps
+			const fromStr = String(fromValue);
+			const unit = fromStr.replace(/[0-9.-]/g, "") || "";
+			if (unit !== "") {
+				// Only count steps for properties with units (pixel-based)
+				steps = Math.ceil(Math.abs(toNum - fromNum) / blockSize);
+			}
+		}
+
+		maxSteps = Math.max(maxSteps, steps);
+	});
+
+	// Use maxSteps as the shared timing base; if no block-based properties, use a default
+	const sharedSteps = maxSteps > 0 ? maxSteps : 1;
+
 	allProperties.forEach(([key, fromValue]) => {
 		const toValue = to[key];
 		if (toValue === undefined) return;
@@ -368,6 +416,7 @@ export const createAnimatedProperties = ({
 			startPercent,
 			endPercent,
 			easing,
+			sharedSteps, // Pass the maximum steps as a shared timing reference
 		});
 
 		frames.push(...propertyFrames);
