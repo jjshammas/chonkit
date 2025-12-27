@@ -19,6 +19,7 @@ interface ChonkitContextValue {
 	rootAncestor: React.RefObject<HTMLDivElement | null>;
 	theme: Theme;
 	viewportWidth: number;
+	stepRateHz?: number;
 }
 
 const ChonkitContext = createContext<ChonkitContextValue | undefined>(
@@ -31,6 +32,7 @@ export interface ChonkitProviderProps
 	blockSize: number;
 	showGrid?: boolean;
 	theme?: Theme | ThemePartial | keyof typeof themes;
+	stepRateHz?: number;
 }
 
 const Grid = ({ blockSize }: { blockSize: number }) => {
@@ -58,6 +60,7 @@ export const ChonkitProvider: React.FC<ChonkitProviderProps> = ({
 	showGrid,
 	style,
 	theme: rawTheme,
+	stepRateHz = 15,
 	...rest
 }) => {
 	const rootAncestor = useRef<HTMLDivElement>(null);
@@ -103,6 +106,7 @@ export const ChonkitProvider: React.FC<ChonkitProviderProps> = ({
 				rootAncestor: rootAncestor,
 				theme,
 				viewportWidth,
+				stepRateHz,
 			}}
 		>
 			<div

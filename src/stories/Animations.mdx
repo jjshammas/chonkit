@@ -1,0 +1,286 @@
+import {
+	Meta,
+	Title,
+	Subtitle,
+	Story,
+	Canvas,
+	Controls,
+} from "@storybook/blocks";
+import * as AnimationsStories from "./Animations.stories";
+
+<Meta title="Animations" />
+
+<Title>Animations</Title>
+
+Chonkit provides a powerful animation system through the `AnimatedBox` component that creates pixel-perfect, stair-stepped animations aligned to your grid system. Unlike smooth CSS transitions, Chonkit animations move in discrete steps to maintain the crisp, retro aesthetic of pixel-art interfaces.
+
+## Basic Usage
+
+The `AnimatedBox` component supports three types of animations:
+
+- **Enter**: Plays when the component becomes visible (`isVisible` becomes `true`)
+- **Exit**: Plays when the component is hidden (`isVisible` becomes `false`)
+- **Transition**: Plays when a trigger value changes during the component's lifespan
+
+## Animation Configuration
+
+### Using From/To
+
+The simplest way to define animations is using the `from` and `to` properties. This automatically generates stepped keyframes for you:
+
+```tsx
+<AnimatedBox
+	isVisible={isVisible}
+	animation={{
+		enter: {
+			from: { yBlocks: -4, opacity: 0 },
+			to: { yBlocks: 0, opacity: 1 },
+			duration: 300,
+			easing: "ease-out",
+		},
+		exit: {
+			from: { xBlocks: 0, opacity: 1 },
+			to: { xBlocks: -10, opacity: 0 },
+			duration: 500,
+		},
+	}}
+>
+	<div>Animated content</div>
+</AnimatedBox>
+```
+
+### Using Custom Frames
+
+For complete control, you can provide raw keyframe arrays:
+
+```tsx
+animation={{
+	enter: {
+		frames: [
+			{ percent: 0, styles: "opacity: 0; transform: scale(0.5);" },
+			{ percent: 100, styles: "opacity: 1; transform: scale(1);" },
+		],
+		duration: 500,
+	},
+}}
+```
+
+## Animatable Properties
+
+### Block-Based Properties
+
+Properties measured in "blocks" automatically snap to your grid:
+
+- `xBlocks`: Horizontal position (converted to `translateX`)
+- `yBlocks`: Vertical position (converted to `translateY`)
+
+These properties will always align to whole block values, ensuring pixel-perfect movement across the grid.
+
+### Pixel-Based Properties
+
+Standard CSS properties with pixel units are stepped by your `blockSize`:
+
+- `width`, `height`
+- `padding`, `margin`
+- Any property with `px` units
+
+### Unitless Properties
+
+Properties without units are animated in discrete steps:
+
+- `opacity`: Fades in stepped increments
+- `zIndex`: Integer stepping
+- Other unitless CSS properties
+
+## The Hertz Rate
+
+Chonkit introduces the concept of an "animation hertz rate" (`stepRateHz`) - the number of discrete steps per second during an animation. This is what creates the characteristic stair-stepped, retro animation style.
+
+### Why Hertz Rate?
+
+Traditional CSS animations interpolate smoothly between values at 60fps. For pixel-art interfaces, this creates undesirable anti-aliasing and blurry motion. By quantizing animations into discrete steps at a lower rate (like 12-30 Hz), movements appear crisp and aligned to the pixel grid - similar to classic sprite-based games.
+
+### Global Configuration
+
+Set a global hertz rate via `ChonkitProvider` that applies to all animations:
+
+```tsx
+<ChonkitProvider blockSize={2} stepRateHz={24}>
+	<YourApp />
+</ChonkitProvider>
+```
+
+### Per-Animation Override
+
+Individual animations can override the global rate:
+
+```tsx
+animation={{
+	enter: {
+		stepRateHz: 12, // Slower, choppier animation
+		from: { xBlocks: -10 },
+		to: { xBlocks: 0 },
+		duration: 500,
+	},
+}}
+```
+
+Common hertz rates and their effects:
+
+- **12 Hz**: Very choppy, classic NES-era feel
+- **24 Hz**: Smooth enough for most movements, retro aesthetic
+- **30 Hz**: Balanced between smooth and stepped
+- **60 Hz**: Maximum smoothness while maintaining steps
+
+## Transition Animations
+
+Transitions animate between states during a component's lifespan, triggered by a changing value:
+
+```tsx
+const [position, setPosition] = useState({ x: 0, y: 0 });
+
+<AnimatedBox
+	animation={{
+		transition: {
+			trigger: position, // Animation plays when this changes
+			from: { xBlocks: position.x, yBlocks: position.y },
+			to: { xBlocks: newPosition.x, yBlocks: newPosition.y },
+			duration: 300,
+		},
+	}}
+/>;
+```
+
+## Synchronized Multi-Property Animations
+
+When animating multiple properties simultaneously, Chonkit synchronizes them to a shared time base. This ensures properties like position and size change in lockstep:
+
+```tsx
+animation={{
+	transition: {
+		trigger: state,
+		from: {
+			xBlocks: 0,
+			yBlocks: 0,
+			width: "50px",
+			height: "50px",
+			opacity: 0.5,
+		},
+		to: {
+			xBlocks: 10,
+			yBlocks: 5,
+			width: "100px",
+			height: "75px",
+			opacity: 1,
+		},
+		duration: 800,
+	},
+}}
+```
+
+All properties animate over the same number of steps, maintaining visual coherence.
+
+## Animation Lifecycle
+
+Each animation phase supports lifecycle callbacks:
+
+```tsx
+animation={{
+	enter: {
+		from: { opacity: 0 },
+		to: { opacity: 1 },
+		duration: 300,
+		onBeforeStart: () => {
+			console.log("Animation about to start");
+		},
+		onAfterEnd: () => {
+			console.log("Animation completed");
+		},
+	},
+}}
+```
+
+## Easing Functions
+
+Chonkit supports standard CSS easing functions, which are applied to the stepped animation:
+
+- `linear`: Even steps
+- `ease`, `ease-in`, `ease-out`, `ease-in-out`: Natural acceleration/deceleration
+- `cubic-bezier(x1, y1, x2, y2)`: Custom curves
+- `steps(n, start|end)`: Manual step control
+
+The easing function determines **when** each step happens during the animation, not the visual interpolation between steps (which remains crisp and discrete).
+
+## Performance Considerations
+
+- Chonkit uses **CSS keyframe animations**, not JavaScript-based animation loops
+- Keyframes are cached and reused across similar animations
+- Animations are automatically cleaned up when components unmount
+- The browser's compositor handles the actual rendering for smooth 60fps playback
+
+Even with low hertz rates (like 12 Hz), the browser still renders at 60fps - it just holds each step for multiple frames, creating the stair-stepped effect without performance overhead.
+
+## Best Practices
+
+### Align Hertz Rate to Animation Duration
+
+Choose a hertz rate that creates an appropriate number of steps for your animation duration:
+
+- **Short animations** (100-300ms): Use higher Hz (24-30) for smoother feel
+- **Long animations** (500-1000ms): Use lower Hz (12-18) for retro effect
+- **Calculate steps**: `steps = (stepRateHz × duration) / 1000`
+
+### Block-Based Movement for Grid Alignment
+
+Use `xBlocks` and `yBlocks` for position to guarantee grid alignment:
+
+```tsx
+// ✓ Good - always grid-aligned
+from: {
+	xBlocks: 0;
+}
+to: {
+	xBlocks: 10;
+}
+
+// ✗ Avoid - may not align to grid
+from: {
+	transform: "translateX(0px)";
+}
+to: {
+	transform: "translateX(100px)";
+}
+```
+
+### Combine Enter/Exit for Seamless Toggling
+
+Define both enter and exit animations to create polished show/hide interactions:
+
+```tsx
+animation={{
+	enter: {
+		from: { yBlocks: -2, opacity: 0 },
+		to: { yBlocks: 0, opacity: 1 },
+	},
+	exit: {
+		from: { yBlocks: 0, opacity: 1 },
+		to: { yBlocks: 2, opacity: 0 },
+	},
+}}
+```
+
+### Use Transitions for Interactive Elements
+
+Transition animations are perfect for drag-and-drop, game elements, or any interactive component that changes state frequently:
+
+```tsx
+animation={{
+	transition: {
+		trigger: gameState.playerPosition,
+		from: { xBlocks: prevPos.x, yBlocks: prevPos.y },
+		to: { xBlocks: gameState.playerPosition.x, yBlocks: gameState.playerPosition.y },
+		duration: 150,
+		stepRateHz: 12, // Choppy for retro game feel
+	},
+}}
+```

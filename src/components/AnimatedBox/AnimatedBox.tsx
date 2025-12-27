@@ -33,6 +33,7 @@ type AnimationPhaseConfig = {
 	duration?: number;
 	delay?: number;
 	easing?: string;
+	stepRateHz?: number; // optional global tick rate to stair-step properties
 	onBeforeStart?: () => void;
 	onAfterEnd?: () => void;
 };
@@ -84,7 +85,7 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 }) => {
 	const ref = useRef<HTMLDivElement>(null);
 	const [shouldRender, setShouldRender] = useState(isVisible);
-	const { blockSize } = useChonkit();
+	const { blockSize, stepRateHz: globalStepRateHz } = useChonkit();
 
 	const currentAnimationRef = useRef<"enter" | "exit" | "transition" | null>(
 		null
@@ -137,11 +138,14 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 
 		let frames: DynamicKeyframe[] = rawFrames || [];
 		if (from && to) {
+			const effectiveStepRateHz = phase.stepRateHz ?? globalStepRateHz;
 			frames = createAnimatedProperties({
 				from,
 				to,
 				blockSize,
 				easing,
+				durationMs: duration,
+				stepRateHz: effectiveStepRateHz,
 			});
 		}
 
@@ -185,10 +189,12 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 			cachedKeyframeStringsRef.current = [];
 		};
 	}, [
-		isVisible ? serializedEnterPhase : serializedExitPhase,
+		serializedEnterPhase,
+		serializedExitPhase,
 		isVisible,
 		shouldRender,
 		blockSize,
+		globalStepRateHz,
 	]);
 
 	// Handle transition animations triggered by value changes
@@ -224,11 +230,15 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 
 		let frames: DynamicKeyframe[] = rawFrames || [];
 		if (from && to) {
+			const effectiveStepRateHz =
+				animation.transition.stepRateHz ?? globalStepRateHz;
 			frames = createAnimatedProperties({
 				from,
 				to,
 				blockSize,
 				easing,
+				durationMs: duration,
+				stepRateHz: effectiveStepRateHz,
 			});
 		}
 
@@ -264,7 +274,12 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 			});
 			cachedKeyframeStringsRef.current = [];
 		};
-	}, [animation?.transition?.trigger, serializedTransitionPhase, blockSize]);
+	}, [
+		animation?.transition?.trigger,
+		serializedTransitionPhase,
+		blockSize,
+		globalStepRateHz,
+	]);
 
 	if (!shouldRender) return null;
 
