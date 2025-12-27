@@ -158,7 +158,6 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
 			thumbXProps={{
 				renderer: (props) => {
 					const { elementRef, style, ...restProps } = props;
-					console.log(props);
 					return (
 						<Box
 							{...restProps}

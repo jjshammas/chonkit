@@ -179,7 +179,7 @@ export const Bordered: Story = {
 			borderWidth: 2,
 			borderColor: "#aaa",
 			borderRadius: 3,
-			innerborderWidth: 1,
+			innerBorderWidth: 1,
 			innerBorderColor: "#fff",
 		},
 	},

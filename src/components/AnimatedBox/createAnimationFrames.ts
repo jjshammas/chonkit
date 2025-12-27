@@ -164,6 +164,10 @@ export const createAnimationTranslationFrames = ({
 	const totalXBlocks = Math.abs(toXBlocks - fromXBlocks);
 	const totalYBlocks = Math.abs(toYBlocks - fromYBlocks);
 
+	// Determine direction for each axis
+	const xDirection = toXBlocks >= fromXBlocks ? 1 : -1;
+	const yDirection = toYBlocks >= fromYBlocks ? 1 : -1;
+
 	// Calculate the percentage increment for each block
 	const xPercentIncrement = totalXBlocks > 0 ? 1 / totalXBlocks : 0;
 	const yPercentIncrement = totalYBlocks > 0 ? 1 / totalYBlocks : 0;
@@ -176,7 +180,7 @@ export const createAnimationTranslationFrames = ({
 			const easedProgress = timingFunction(i * xPercentIncrement);
 			const percent =
 				startPercent + easedProgress * (endPercent - startPercent);
-			const translateX = (fromXBlocks + i) * blockSize;
+			const translateX = (fromXBlocks + i * xDirection) * blockSize;
 			frames.push({
 				percent,
 				styles: `transform: translateX(${translateX}px);`,
@@ -190,7 +194,7 @@ export const createAnimationTranslationFrames = ({
 			const easedProgress = timingFunction(j * yPercentIncrement);
 			const percent =
 				startPercent + easedProgress * (endPercent - startPercent);
-			const translateY = (fromYBlocks + j) * blockSize;
+			const translateY = (fromYBlocks + j * yDirection) * blockSize;
 			frames.push({
 				percent,
 				styles: `transform: translateY(${translateY}px);`,

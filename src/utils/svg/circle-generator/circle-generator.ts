@@ -2,7 +2,7 @@ import type { LightingDirection } from "@/core/LightingProvider/LightingProvider
 
 // Based on https://observablehq.com/@jheeffer/pixelated-circle
 export function generatePixelOval(radius: number) {
-	if (radius < 1) return [];
+	if (radius < 1 || isNaN(radius)) return [];
 
 	type Step = {
 		x: number;
@@ -255,11 +255,11 @@ export function generateHighlightPoints(
 ): [number, number][] {
 	const innerPoints = nudgePoints(
 		generateRoundedCornerPoints(radius, blockSize, width, height),
-		(effectSize + borderWidth) *
+		effectSize *
 			blockSize *
 			(direction !== 90 && direction !== 270 ? 1 : 0) *
 			(direction < 90 || direction > 270 ? 1 : -1),
-		(effectSize + borderWidth) *
+		effectSize *
 			blockSize *
 			(direction !== 0 && direction !== 180 ? 1 : 0) *
 			(direction < 180 ? 1 : -1)

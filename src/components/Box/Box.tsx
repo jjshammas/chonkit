@@ -39,8 +39,8 @@ export const boxVisual = createComponentVisualTypes({
 		borderColor: undefined as
 			| FabricatedBorderProps["borderColor"]
 			| undefined,
-		innerborderWidth: undefined as
-			| FabricatedBorderProps["innerborderWidth"]
+		innerBorderWidth: undefined as
+			| FabricatedBorderProps["innerBorderWidth"]
 			| undefined,
 		innerBorderColor: undefined as
 			| FabricatedBorderProps["innerBorderColor"]
@@ -110,6 +110,13 @@ const cssAttributesToMoveToInner = [
 	"gridGap",
 	"placeItems",
 	"placeContent",
+	"backgroundImage",
+	"backgroundPosition",
+	"backgroundSize",
+	"backgroundRepeat",
+	"backgroundOrigin",
+	"backgroundClip",
+	"backgroundAttachment",
 ];
 
 export const Box: React.FC<BoxProps> = (props) => {
@@ -176,9 +183,9 @@ export const Box: React.FC<BoxProps> = (props) => {
 	const innerBorderColor = pickBreakpointValue<
 		FabricatedBorderProps["innerBorderColor"]
 	>(resolved.renderValues.innerBorderColor as any, viewportWidth);
-	const innerborderWidth = pickBreakpointValue<
-		FabricatedBorderProps["innerborderWidth"]
-	>(resolved.renderValues.innerborderWidth as any, viewportWidth);
+	const innerBorderWidth = pickBreakpointValue<
+		FabricatedBorderProps["innerBorderWidth"]
+	>(resolved.renderValues.innerBorderWidth as any, viewportWidth);
 	const bevelHighlightSize = pickBreakpointValue<BevelProps["highlightSize"]>(
 		resolved.renderValues.bevelHighlightSize as any,
 		viewportWidth
@@ -311,7 +318,7 @@ export const Box: React.FC<BoxProps> = (props) => {
 	}, [mediaQueryContent, instanceId]);
 
 	const shouldFabricateBorder =
-		borderWidth && borderRadius && !innerborderWidth;
+		borderWidth && borderRadius && !innerBorderWidth;
 
 	const geometry = useGeometryObserver(ref);
 	useRoundedCornerClip(innerRef, { borderRadius }, geometry);
@@ -322,7 +329,7 @@ export const Box: React.FC<BoxProps> = (props) => {
 			borderWidth,
 			borderColor,
 			innerBorderColor,
-			innerborderWidth,
+			innerBorderWidth,
 		},
 		geometry
 	);

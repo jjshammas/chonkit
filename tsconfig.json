@@ -5,6 +5,7 @@
 		"lib": ["DOM", "ESNext"], // Include DOM and modern ECMAScript APIs.
 		"jsx": "react-jsx", // Use the new JSX transform (React 17+).
 		"declaration": true, // Emit .d.ts files for consumers.
+		"declarationMap": true, // Generate .d.ts.map files for IDE navigation.
 		"declarationDir": "dist/types", // Output directory for declaration files.
 		"sourceMap": true, // Generate source maps.
 		"outDir": "dist", // Output directory for compiled code.

@@ -12,7 +12,7 @@ export type FabricatedBorderProps = {
 	borderRadius?: RoundedCornerClipProps["borderRadius"];
 	borderWidth?: number;
 	borderColor?: string;
-	innerborderWidth?: number;
+	innerBorderWidth?: number;
 	innerBorderColor?: string;
 };
 
@@ -28,7 +28,7 @@ export function useFabricatedBorder(
 	useEffect(() => {
 		if (
 			(!options.borderRadius || !options.borderWidth) &&
-			!options.innerborderWidth
+			!options.innerBorderWidth
 		)
 			return;
 		if (!fabricatedBorder.current && !fabricatedInnerBorder.current) return;
@@ -51,7 +51,7 @@ export function useFabricatedBorder(
 				options.borderRadius || 0,
 				Math.max(
 					(options.borderWidth || 0) +
-						(options.innerborderWidth || 0),
+						(options.innerBorderWidth || 0),
 					0
 				),
 				blockSize,
@@ -69,7 +69,7 @@ export function useFabricatedBorder(
 	}, [
 		options.borderRadius,
 		options.borderWidth,
-		options.innerborderWidth,
+		options.innerBorderWidth,
 		blockSize,
 		element,
 		fabricatedBorder.current,
@@ -85,7 +85,7 @@ export function useFabricatedBorder(
 						className={styles.fabricatedBorder}
 					/>
 				) : null}
-				{options.innerborderWidth ? (
+				{options.innerBorderWidth ? (
 					<div
 						ref={fabricatedInnerBorder}
 						className={styles.fabricatedInnerBorder}

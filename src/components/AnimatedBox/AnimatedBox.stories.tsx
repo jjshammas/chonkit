@@ -62,6 +62,7 @@ export const Default: Story = {
 	},
 	render: (args) => {
 		const [isVisible, setIsVisible] = useState(true);
+
 		return (
 			<div>
 				<button onClick={() => setIsVisible((prev) => !prev)}>

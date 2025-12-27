@@ -18,7 +18,13 @@ type VisualStyleOutput<T> = {
 	mediaQueryStyles: Partial<Record<BreakpointKey, React.CSSProperties>>;
 };
 
-const exemptKeysFromNormalization = ["flex", "flexGrow", "flexShrink"];
+const exemptKeysFromNormalization = [
+	"flex",
+	"flexGrow",
+	"flexShrink",
+	"opacity",
+	"zIndex",
+];
 export function createVisualStyle<T extends Record<string, VisualValue>>(args: {
 	style: VisualStyle<T>;
 	cssVariableKeys: ReadonlyArray<keyof T>;
@@ -169,7 +175,7 @@ export function normalizeVisualValue(
 	if (exemptKeysFromNormalization.includes(cssKey)) return String(value);
 	if (typeof value === "number")
 		return `calc(${value} * var(--ck-block-size))`;
-	if (/^\d+px$/.test(value.trim()))
+	if (/^-?\d+px$/.test(value.trim()))
 		return `round(${value}, var(--ck-block-size))`;
 	if (typeof value === "string" && /px/.test(value.trim()))
 		return value.replace(

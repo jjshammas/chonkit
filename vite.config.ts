@@ -33,6 +33,7 @@ export default defineConfig({
 			fileName: (format) => `chonkit.${format}.js`,
 			formats: ["es"],
 		},
+		sourcemap: true,
 		outDir: "dist",
 		rollupOptions: {
 			external: ["react", "react-dom"],

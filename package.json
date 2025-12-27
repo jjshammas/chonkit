@@ -7,6 +7,10 @@
 	"type": "module",
 	"main": "dist/chonkit.es.js",
 	"types": "dist/index.d.ts",
+	"files": [
+		"dist",
+		"src"
+	],
 	"scripts": {
 		"test": "vitest",
 		"dev": "vite",
