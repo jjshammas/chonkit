@@ -284,3 +284,72 @@ animation={{
 	},
 }}
 ```
+
+## Route Transition Awareness
+
+### The Problem
+
+When using client-side routing (e.g., React Router), components may unmount and remount when navigating between pages. This can cause unexpected entry animations to play when restoring component state, even though the user perceives a page transition rather than a new component appearing.
+
+### The Solution
+
+Chonkit provides `RouteTransitionContext` to automatically detect when navigation transitions are occurring and intelligently skip entry animations in those cases.
+
+### Setup
+
+Wrap your app with `RouteTransitionProvider` at the top level, **after** your Router but **before** `ChonkitProvider`:
+
+```tsx
+import { BrowserRouter } from 'react-router-dom';
+import { ChonkitProvider, LightingProvider, RouteTransitionProvider } from 'chonkit';
+
+createRoot(document.getElementById('root')!).render(
+  <BrowserRouter>
+    <RouteTransitionProvider>
+      <ChonkitProvider blockSize={2} stepRateHz={24}>
+        <LightingProvider direction={90}>
+          <App />
+        </LightingProvider>
+      </ChonkitProvider>
+    </RouteTransitionProvider>
+  </BrowserRouter>,
+);
+```
+
+### How It Works
+
+The `RouteTransitionProvider`:
+1. Monitors the current URL pathname using React Router's `useLocation` hook
+2. Detects when the pathname changes (a route transition)
+3. Provides this information via `RouteTransitionContext` to all child components
+
+The `AnimatedBox` component:
+1. Checks if a route transition is occurring when it mounts
+2. Tracks whether the component has ever been in a "visible" state via internal ref
+3. On **first visibility during a route transition**: Skips the enter animation
+4. On **any other visibility change** (including first visibility after initial mount): Plays the animation normally
+5. On **subsequent visibility changes**: Always plays the animation as configured
+
+### Why This Matters
+
+This pattern elegantly solves a common UX problem:
+- **Route navigation**: Components that unmount/remount due to route changes won't animate in
+- **Page load**: Initial component render on page load will still show animations
+- **In-game elements**: Dynamic elements that appear during gameplay will animate in smoothly
+- **Component reuse**: The same `AnimatedBox` configuration works correctly in all scenarios without per-component customization
+
+### Manual Control
+
+If you need to explicitly control whether to skip the enter animation, use the `skipEnterAnimation` prop:
+
+```tsx
+<AnimatedBox
+  animation={animation}
+  isVisible={isVisible}
+  skipEnterAnimation={true}
+>
+  <div>Content that won't animate in</div>
+</AnimatedBox>
+```
+
+This is useful when you want to override the automatic behavior for specific components.

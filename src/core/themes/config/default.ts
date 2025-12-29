@@ -70,27 +70,6 @@ const defaultTheme: Theme = {
 			disabled: {},
 		},
 	},
-	Panel: {
-		backgroundColor: "bg",
-		color: "bg.fg",
-		borderRadius: 3,
-		borderWidth: 1,
-		borderColor: "#aaa",
-		bevelHighlightSize: 1,
-		bevelShadowSize: 1,
-		dropShadow: "4 0 rgba(0,0,0,0.1)",
-		padding: "12px",
-	},
-	PanelControlBar: {
-		backgroundColor: "#eee",
-		backgroundGradient: "90deg, #eee 60%, #ddd 80%",
-		bevelShadowSize: 1,
-		embossShadowSize: 1,
-		padding: "12px",
-	},
-	PanelActionBar: {
-		padding: "12px",
-	},
 	ScrollAreaTrack: {
 		borderRadius: 2,
 		borderColor: "#ccc",
