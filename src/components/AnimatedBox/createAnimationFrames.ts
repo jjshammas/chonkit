@@ -14,12 +14,41 @@ function steps(n: number, end: "start" | "end" = "end") {
 }
 
 // Map of standard CSS timing keywords to cubic-bezier equivalents
+// Source: https://easings.net (Robert Penner's easing functions)
 const cssTimingMap: Record<string, [number, number, number, number]> = {
 	linear: [0, 0, 1, 1],
 	ease: [0.25, 0.1, 0.25, 1],
 	"ease-in": [0.42, 0, 1, 1],
 	"ease-out": [0, 0, 0.58, 1],
 	"ease-in-out": [0.42, 0, 0.58, 1],
+	// Quadratic (x^2)
+	"ease-in-quad": [0.55, 0.085, 0.68, 0.53],
+	"ease-out-quad": [0.25, 0.46, 0.45, 0.94],
+	"ease-in-out-quad": [0.455, 0.03, 0.515, 0.955],
+	// Cubic (x^3)
+	"ease-in-cubic": [0.55, 0.055, 0.675, 0.19],
+	"ease-out-cubic": [0.215, 0.61, 0.355, 1],
+	"ease-in-out-cubic": [0.645, 0.045, 0.355, 1],
+	// Quartic (x^4)
+	"ease-in-quart": [0.895, 0.03, 0.685, 0.22],
+	"ease-out-quart": [0.165, 0.84, 0.44, 1],
+	"ease-in-out-quart": [0.77, 0, 0.175, 1],
+	// Quintic (x^5)
+	"ease-in-quint": [0.755, 0.05, 0.855, 0.06],
+	"ease-out-quint": [0.23, 1, 0.32, 1],
+	"ease-in-out-quint": [0.86, 0, 0.07, 1],
+	// Sinusoidal
+	"ease-in-sine": [0.47, 0, 0.745, 0.715],
+	"ease-out-sine": [0.39, 0.575, 0.565, 1],
+	"ease-in-out-sine": [0.445, 0.05, 0.55, 0.95],
+	// Exponential
+	"ease-in-expo": [0.95, 0.05, 0.795, 0.035],
+	"ease-out-expo": [0.19, 1, 0.22, 1],
+	"ease-in-out-expo": [1, 0, 0, 1],
+	// Circular
+	"ease-in-circ": [0.6, 0.04, 0.98, 0.335],
+	"ease-out-circ": [0.075, 0.82, 0.165, 1],
+	"ease-in-out-circ": [0.785, 0.135, 0.15, 0.86],
 };
 
 export function parseCSSTimingFunction(timing: string): (t: number) => number {
@@ -28,7 +57,17 @@ export function parseCSSTimingFunction(timing: string): (t: number) => number {
 	// Handle standard keywords
 	if (cssTimingMap[timing]) {
 		const [x1, y1, x2, y2] = cssTimingMap[timing];
-		return BezierEasing(x1, y1, x2, y2);
+		try {
+			return BezierEasing(x1, y1, x2, y2);
+		} catch (e) {
+			console.warn(`Invalid bezier easing values for ${timing}:`, [
+				x1,
+				y1,
+				x2,
+				y2,
+			]);
+			return (t: number) => t; // linear fallback
+		}
 	}
 
 	// Handle cubic-bezier()
@@ -38,7 +77,12 @@ export function parseCSSTimingFunction(timing: string): (t: number) => number {
 			.split(",")
 			.map((v) => parseFloat(v.trim()));
 		if (points.length === 4 && points.every((n) => !isNaN(n))) {
-			return BezierEasing(points[0], points[1], points[2], points[3]);
+			try {
+				return BezierEasing(points[0], points[1], points[2], points[3]);
+			} catch (e) {
+				console.warn(`Invalid cubic-bezier values:`, points);
+				return (t: number) => t; // linear fallback
+			}
 		}
 	}
 
@@ -165,10 +209,17 @@ export const createAnimationTranslationFrames = ({
 
 	if (totalXBlocks > 0) {
 		for (let i = 0; i <= totalXBlocks; i++) {
-			const easedProgress = timingFunction(i * xPercentIncrement);
+			const linearProgress = i * xPercentIncrement;
 			const percent =
-				startPercent + easedProgress * (endPercent - startPercent);
-			const translateX = (fromXBlocks + i * xDirection) * blockSize;
+				startPercent + linearProgress * (endPercent - startPercent);
+			const easedProgress = timingFunction(linearProgress);
+			const continuousBlocks =
+				fromXBlocks + easedProgress * totalXBlocks * xDirection;
+			const quantizedBlocks =
+				xDirection >= 0
+					? Math.floor(continuousBlocks)
+					: Math.ceil(continuousBlocks);
+			const translateX = quantizedBlocks * blockSize;
 			frames.push({
 				percent,
 				styles: `transform: translateX(${translateX}px);`,
@@ -178,10 +229,17 @@ export const createAnimationTranslationFrames = ({
 
 	if (totalYBlocks > 0) {
 		for (let j = 0; j <= totalYBlocks; j++) {
-			const easedProgress = timingFunction(j * yPercentIncrement);
+			const linearProgress = j * yPercentIncrement;
 			const percent =
-				startPercent + easedProgress * (endPercent - startPercent);
-			const translateY = (fromYBlocks + j * yDirection) * blockSize;
+				startPercent + linearProgress * (endPercent - startPercent);
+			const easedProgress = timingFunction(linearProgress);
+			const continuousBlocks =
+				fromYBlocks + easedProgress * totalYBlocks * yDirection;
+			const quantizedBlocks =
+				yDirection >= 0
+					? Math.floor(continuousBlocks)
+					: Math.ceil(continuousBlocks);
+			const translateY = quantizedBlocks * blockSize;
 			frames.push({
 				percent,
 				styles: `transform: translateY(${translateY}px);`,
@@ -238,9 +296,10 @@ export const createAnimationPropertyFrames = ({
 		const timeIncrement = stepsToUse > 0 ? 1 / stepsToUse : 0;
 
 		for (let i = 0; i <= stepsToUse; i++) {
-			const easedProgress = timingFunction(i * timeIncrement);
+			const linearProgress = i * timeIncrement;
 			const percent =
-				startPercent + easedProgress * (endPercent - startPercent);
+				startPercent + linearProgress * (endPercent - startPercent);
+			const easedProgress = timingFunction(linearProgress);
 
 			const continuousBlocks =
 				fromNum + easedProgress * totalBlocks * direction;
@@ -274,14 +333,14 @@ export const createAnimationPropertyFrames = ({
 
 	if (!unit || unit === "") {
 		const steps = sharedSteps !== undefined ? sharedSteps : 1;
-		const valueIncrement = steps > 0 ? (toNum - fromNum) / steps : 0;
 		const timeIncrement = steps > 0 ? 1 / steps : 0;
 
 		for (let i = 0; i <= steps; i++) {
-			const easedProgress = timingFunction(i * timeIncrement);
+			const linearProgress = i * timeIncrement;
 			const percent =
-				startPercent + easedProgress * (endPercent - startPercent);
-			const value = fromNum + i * valueIncrement;
+				startPercent + linearProgress * (endPercent - startPercent);
+			const easedProgress = timingFunction(linearProgress);
+			const value = fromNum + easedProgress * (toNum - fromNum);
 			frames.push({ percent, styles: `${property}: ${value};` });
 		}
 
@@ -294,15 +353,23 @@ export const createAnimationPropertyFrames = ({
 		sharedSteps !== undefined
 			? sharedSteps
 			: Math.ceil(totalDifference / blockSize);
-	const valueIncrement = steps > 0 ? totalDifference / steps : 0;
 	const timeIncrement = steps > 0 ? 1 / steps : 0;
 
 	for (let i = 0; i <= steps; i++) {
-		const easedProgress = timingFunction(i * timeIncrement);
+		const linearProgress = i * timeIncrement;
 		const percent =
-			startPercent + easedProgress * (endPercent - startPercent);
-		const value = fromNum + i * valueIncrement * direction;
-		frames.push({ percent, styles: `${property}: ${value}${unit};` });
+			startPercent + linearProgress * (endPercent - startPercent);
+		const easedProgress = timingFunction(linearProgress);
+		const continuousValue =
+			fromNum + easedProgress * totalDifference * direction;
+		const quantizedValue =
+			direction >= 0
+				? Math.floor(continuousValue / blockSize) * blockSize
+				: Math.ceil(continuousValue / blockSize) * blockSize;
+		frames.push({
+			percent,
+			styles: `${property}: ${quantizedValue}${unit};`,
+		});
 	}
 
 	return insertSteppedAnimationFrames(mergeAnimationFrames(frames));
@@ -368,6 +435,10 @@ export const createAnimatedProperties = ({
 			const unit = fromStr.replace(/[0-9.-]/g, "") || "";
 			if (unit !== "") {
 				steps = Math.ceil(Math.abs(toNum - fromNum) / blockSize);
+			} else {
+				// For unitless properties (opacity, etc), count them as 1 step minimum
+				// so they participate in the Hz-based step calculation
+				steps = 1;
 			}
 		}
 

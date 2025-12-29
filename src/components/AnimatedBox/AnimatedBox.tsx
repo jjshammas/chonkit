@@ -160,7 +160,8 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 		el.style.animation = "none";
 		void el.offsetHeight; // Force reflow
 
-		el.style.animation = `${keyframeName} ${duration}ms ${easing} ${delay}ms forwards`;
+		// Use linear timing since easing is already baked into keyframe positions
+		el.style.animation = `${keyframeName} ${duration}ms linear ${delay}ms forwards`;
 
 		const handleEnd = () => {
 			// Ensure this is still the correct animation phase
@@ -253,7 +254,8 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 		el.style.animation = "none";
 		void el.offsetHeight; // Force reflow
 
-		el.style.animation = `${keyframeName} ${duration}ms ${easing} ${delay}ms forwards`;
+		// Use linear timing since easing is already baked into keyframe positions
+		el.style.animation = `${keyframeName} ${duration}ms linear ${delay}ms forwards`;
 
 		const handleEnd = () => {
 			// Ensure this is still the correct animation phase

@@ -44,7 +44,7 @@ export const Default: Story = {
 					{ percent: 100, styles: "opacity: 1;" },
 				],
 				duration: 1000,
-				easing: "ease-out",
+				easing: "ease-in-out-quad",
 				onBeforeStart: () => console.log("Enter starting..."),
 				onAfterEnd: () => console.log("Enter complete."),
 			},

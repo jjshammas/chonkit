@@ -2,9 +2,6 @@ import { convertJSVariableNameToCSSVariableName } from "@/utils/cssVar";
 import type { InteractionState } from "@/components/Box/createVisualStyle";
 
 import type { ButtonTheme } from "@/components/Button/Button";
-import type { PanelTheme } from "@/components/Panel/Panel";
-import type { PanelControlBarTheme } from "@/components/Panel/PanelControlBar";
-import type { PanelActionBarTheme } from "@/components/Panel/PanelActionBar";
 import type {
 	ScrollAreaTrackTheme,
 	ScrollAreaThumbTheme,
@@ -39,9 +36,6 @@ export type Theme = {
 		shadowBlendMode: string;
 	};
 	Button: ButtonTheme;
-	Panel: PanelTheme;
-	PanelControlBar: PanelControlBarTheme;
-	PanelActionBar: PanelActionBarTheme;
 	ScrollAreaTrack: ScrollAreaTrackTheme;
 	ScrollAreaThumb: ScrollAreaThumbTheme;
 };
