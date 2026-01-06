@@ -219,6 +219,8 @@ export const Box: React.FC<BoxProps> = (props) => {
 		as,
 		children,
 		containerProps,
+		className,
+		style,
 		...rest
 		// color resolution should already happen in the visual style
 		// } = useResolvedColorProps(nonVisualRest);
@@ -408,10 +410,10 @@ export const Box: React.FC<BoxProps> = (props) => {
 			<div
 				ref={innerRef}
 				{...rest}
-				className={clsx(styles.inner, rest.className)}
+				className={clsx(styles.inner, className)}
 				style={{
 					...cssBaseStyleInner,
-					...rest.style,
+					...style,
 
 					// if there's a border, but no rounded corner, we can use a box shadow for the border
 					boxShadow:

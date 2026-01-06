@@ -3,6 +3,7 @@ import type { LightingDirection } from "@/core/LightingProvider/LightingProvider
 // Based on https://observablehq.com/@jheeffer/pixelated-circle
 export function generatePixelOval(radius: number) {
 	if (radius < 1 || isNaN(radius)) return [];
+	radius = Math.round(radius);
 
 	type Step = {
 		x: number;
