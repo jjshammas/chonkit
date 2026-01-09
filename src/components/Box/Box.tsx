@@ -1,32 +1,32 @@
+import { useChonkit } from "@/core/ChonkitProvider/ChonkitProvider";
+import { createComponentVisualTypes } from "@/core/themes/createComponentVisualTypes";
+import clsx from "clsx";
 import React, {
 	ReactNode,
 	useCallback,
-	useRef,
-	useMemo,
 	useEffect,
+	useMemo,
+	useRef,
 } from "react";
-import { useChonkit } from "@/core/ChonkitProvider/ChonkitProvider";
-import { useGeometryObserver } from "./useGeometryObserver";
-import {
-	useFabricatedBorder,
-	FabricatedBorderProps,
-} from "./useFabricatedBorder";
-import {
-	useRoundedCornerClip,
-	RoundedCornerClipProps,
-} from "./useRoundedCornerClip";
-import { useBevel, BevelProps } from "./useBevel";
-import { useEmboss, EmbossProps } from "./useEmboss";
-import { useShadow, ShadowProps } from "./useShadow";
-import { useGradient, GradientProps } from "./useGradient";
-import { useDepth, DepthProps } from "./useDepth";
-import {
-	resolveComponentVisualStyle,
-	BreakpointKey,
-} from "./createVisualStyle";
-import { createComponentVisualTypes } from "@/core/themes/createComponentVisualTypes";
 import styles from "./Box.module.css";
-import clsx from "clsx";
+import {
+	BreakpointKey,
+	resolveComponentVisualStyle,
+} from "./createVisualStyle";
+import { BevelProps, useBevel } from "./useBevel";
+import { DepthProps, useDepth } from "./useDepth";
+import { EmbossProps, useEmboss } from "./useEmboss";
+import {
+	FabricatedBorderProps,
+	useFabricatedBorder,
+} from "./useFabricatedBorder";
+import { useGeometryObserver } from "./useGeometryObserver";
+import { GradientProps, useGradient } from "./useGradient";
+import {
+	RoundedCornerClipProps,
+	useRoundedCornerClip,
+} from "./useRoundedCornerClip";
+import { ShadowProps, useShadow } from "./useShadow";
 
 export const boxVisual = createComponentVisualTypes({
 	style: {
@@ -121,6 +121,23 @@ const cssAttributesToMoveToInner = [
 
 // Use a Set for O(1) membership checks when splitting styles
 const cssAttributesMovedToInnerSet = new Set(cssAttributesToMoveToInner);
+
+// Props consumed by hooks that should not leak to DOM CSS
+const hookConsumedProps = new Set([
+	"borderRadius",
+	"borderWidth",
+	"borderColor",
+	"innerBorderWidth",
+	"innerBorderColor",
+	"embossHighlightSize",
+	"embossShadowSize",
+	"bevelHighlightSize",
+	"bevelShadowSize",
+	"dropShadow",
+	"backgroundGradient",
+	"depth",
+	"depthColor",
+]);
 
 export const Box: React.FC<BoxProps> = (props) => {
 	const { theme, blockSize, viewportWidth } = useChonkit();
@@ -289,6 +306,9 @@ export const Box: React.FC<BoxProps> = (props) => {
 			const innerStyles: Record<string, string> = {};
 
 			for (const [key, value] of Object.entries(styleObject)) {
+				// Skip hook-consumed props
+				if (hookConsumedProps.has(key)) continue;
+
 				const cssKey = key.replace(
 					/([A-Z])/g,
 					(match) => `-${match.toLowerCase()}`
@@ -399,7 +419,9 @@ export const Box: React.FC<BoxProps> = (props) => {
 		() =>
 			Object.fromEntries(
 				Object.entries(cssBaseStyle).filter(
-					([key]) => !cssAttributesMovedToInnerSet.has(key)
+					([key]) =>
+						!cssAttributesMovedToInnerSet.has(key) &&
+						!hookConsumedProps.has(key)
 				)
 			),
 		[cssBaseStyle]
@@ -407,8 +429,10 @@ export const Box: React.FC<BoxProps> = (props) => {
 	const cssBaseStyleInner = useMemo(
 		() =>
 			Object.fromEntries(
-				Object.entries(cssBaseStyle).filter(([key]) =>
-					cssAttributesMovedToInnerSet.has(key)
+				Object.entries(cssBaseStyle).filter(
+					([key]) =>
+						cssAttributesMovedToInnerSet.has(key) &&
+						!hookConsumedProps.has(key)
 				)
 			),
 		[cssBaseStyle]
