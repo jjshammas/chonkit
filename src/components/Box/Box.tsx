@@ -119,6 +119,9 @@ const cssAttributesToMoveToInner = [
 	"backgroundAttachment",
 ];
 
+// Use a Set for O(1) membership checks when splitting styles
+const cssAttributesMovedToInnerSet = new Set(cssAttributesToMoveToInner);
+
 export const Box: React.FC<BoxProps> = (props) => {
 	const { theme, blockSize, viewportWidth } = useChonkit();
 
@@ -171,48 +174,66 @@ export const Box: React.FC<BoxProps> = (props) => {
 		return value as V;
 	}
 
-	const borderRadius = pickBreakpointValue<
-		RoundedCornerClipProps["borderRadius"]
-	>(resolved.renderValues.borderRadius as any, viewportWidth);
-	const borderWidth = pickBreakpointValue<
-		FabricatedBorderProps["borderWidth"]
-	>(resolved.renderValues.borderWidth as any, viewportWidth);
-	const borderColor = pickBreakpointValue<
-		FabricatedBorderProps["borderColor"]
-	>(resolved.renderValues.borderColor as any, viewportWidth);
-	const innerBorderColor = pickBreakpointValue<
-		FabricatedBorderProps["innerBorderColor"]
-	>(resolved.renderValues.innerBorderColor as any, viewportWidth);
-	const innerBorderWidth = pickBreakpointValue<
-		FabricatedBorderProps["innerBorderWidth"]
-	>(resolved.renderValues.innerBorderWidth as any, viewportWidth);
-	const bevelHighlightSize = pickBreakpointValue<BevelProps["highlightSize"]>(
-		resolved.renderValues.bevelHighlightSize as any,
-		viewportWidth
-	);
-	const bevelShadowSize = pickBreakpointValue<BevelProps["shadowSize"]>(
-		resolved.renderValues.bevelShadowSize as any,
-		viewportWidth
-	);
-	const embossHighlightSize = pickBreakpointValue<
-		EmbossProps["highlightSize"]
-	>(resolved.renderValues.embossHighlightSize as any, viewportWidth);
-	const embossShadowSize = pickBreakpointValue<EmbossProps["shadowSize"]>(
-		resolved.renderValues.embossShadowSize as any,
-		viewportWidth
-	);
-	const dropShadow = pickBreakpointValue<ShadowProps["dropShadow"]>(
-		resolved.renderValues.dropShadow as any,
-		viewportWidth
-	);
-	const depth = pickBreakpointValue<DepthProps["depth"]>(
-		resolved.renderValues.depth as any,
-		viewportWidth
-	);
-	const depthColor = pickBreakpointValue<DepthProps["depthColor"]>(
-		resolved.renderValues.depthColor as any,
-		viewportWidth
-	);
+	const pickedValues = useMemo(() => {
+		return {
+			borderRadius: pickBreakpointValue<
+				RoundedCornerClipProps["borderRadius"]
+			>(resolved.renderValues.borderRadius as any, viewportWidth),
+			borderWidth: pickBreakpointValue<
+				FabricatedBorderProps["borderWidth"]
+			>(resolved.renderValues.borderWidth as any, viewportWidth),
+			borderColor: pickBreakpointValue<
+				FabricatedBorderProps["borderColor"]
+			>(resolved.renderValues.borderColor as any, viewportWidth),
+			innerBorderColor: pickBreakpointValue<
+				FabricatedBorderProps["innerBorderColor"]
+			>(resolved.renderValues.innerBorderColor as any, viewportWidth),
+			innerBorderWidth: pickBreakpointValue<
+				FabricatedBorderProps["innerBorderWidth"]
+			>(resolved.renderValues.innerBorderWidth as any, viewportWidth),
+			bevelHighlightSize: pickBreakpointValue<
+				BevelProps["highlightSize"]
+			>(resolved.renderValues.bevelHighlightSize as any, viewportWidth),
+			bevelShadowSize: pickBreakpointValue<BevelProps["shadowSize"]>(
+				resolved.renderValues.bevelShadowSize as any,
+				viewportWidth
+			),
+			embossHighlightSize: pickBreakpointValue<
+				EmbossProps["highlightSize"]
+			>(resolved.renderValues.embossHighlightSize as any, viewportWidth),
+			embossShadowSize: pickBreakpointValue<EmbossProps["shadowSize"]>(
+				resolved.renderValues.embossShadowSize as any,
+				viewportWidth
+			),
+			dropShadow: pickBreakpointValue<ShadowProps["dropShadow"]>(
+				resolved.renderValues.dropShadow as any,
+				viewportWidth
+			),
+			depth: pickBreakpointValue<DepthProps["depth"]>(
+				resolved.renderValues.depth as any,
+				viewportWidth
+			),
+			depthColor: pickBreakpointValue<DepthProps["depthColor"]>(
+				resolved.renderValues.depthColor as any,
+				viewportWidth
+			),
+		};
+	}, [resolved.renderValues, viewportWidth]);
+
+	const {
+		borderRadius,
+		borderWidth,
+		borderColor,
+		innerBorderColor,
+		innerBorderWidth,
+		bevelHighlightSize,
+		bevelShadowSize,
+		embossHighlightSize,
+		embossShadowSize,
+		dropShadow,
+		depth,
+		depthColor,
+	} = pickedValues;
 
 	const {
 		ref: forwardedRef,
@@ -272,7 +293,7 @@ export const Box: React.FC<BoxProps> = (props) => {
 					/([A-Z])/g,
 					(match) => `-${match.toLowerCase()}`
 				);
-				if (cssAttributesToMoveToInner.includes(key)) {
+				if (cssAttributesMovedToInnerSet.has(key)) {
 					innerStyles[cssKey] = value as string;
 				} else {
 					outerStyles[cssKey] = value as string;
@@ -294,12 +315,7 @@ export const Box: React.FC<BoxProps> = (props) => {
 			}
 		}
 		return css;
-	}, [
-		mediaQueryStyles,
-		instanceId,
-		theme.breakpoints,
-		cssAttributesToMoveToInner,
-	]);
+	}, [mediaQueryStyles, instanceId, theme.breakpoints]);
 
 	// Inject media query styles and clean up on unmount
 	useEffect(() => {
@@ -379,15 +395,23 @@ export const Box: React.FC<BoxProps> = (props) => {
 		geometry
 	);
 
-	const cssBaseStyleOuter = Object.fromEntries(
-		Object.entries(cssBaseStyle).filter(
-			([key]) => !cssAttributesToMoveToInner.includes(key)
-		)
+	const cssBaseStyleOuter = useMemo(
+		() =>
+			Object.fromEntries(
+				Object.entries(cssBaseStyle).filter(
+					([key]) => !cssAttributesMovedToInnerSet.has(key)
+				)
+			),
+		[cssBaseStyle]
 	);
-	const cssBaseStyleInner = Object.fromEntries(
-		Object.entries(cssBaseStyle).filter(([key]) =>
-			cssAttributesToMoveToInner.includes(key)
-		)
+	const cssBaseStyleInner = useMemo(
+		() =>
+			Object.fromEntries(
+				Object.entries(cssBaseStyle).filter(([key]) =>
+					cssAttributesMovedToInnerSet.has(key)
+				)
+			),
+		[cssBaseStyle]
 	);
 
 	return React.createElement(
