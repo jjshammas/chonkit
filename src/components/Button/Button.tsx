@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React from "react";
 import { Box, BoxProps, boxVisual } from "../Box/Box";
 import { Text } from "../Text/Text";
 import { useComponentTheme } from "@/hooks/useComponentTheme";
@@ -29,7 +29,6 @@ export interface ButtonProps
 		ButtonVisualProps,
 		ButtonThemeProps {
 	as?: React.ElementType;
-	children?: ReactNode;
 	disabled?: boolean;
 	size?: "sm" | "base" | "lg";
 }

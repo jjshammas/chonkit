@@ -39,6 +39,12 @@ export type ScrollAreaThumbTheme = typeof scrollAreaThumbThemeTypes.types.Theme;
 
 export interface ScrollAreaProps extends WithoutInteractionStates<BoxProps> {
 	children?: ReactNode;
+	noScrollX?: boolean;
+	noScrollY?: boolean;
+	noScroll?: boolean;
+	permanentTrackX?: boolean;
+	permanentTrackY?: boolean;
+	permanentTracks?: boolean;
 }
 
 export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
@@ -87,6 +93,12 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
 
 	return (
 		<Scrollbar
+			noScrollX={rest.noScrollX}
+			noScrollY={rest.noScrollY}
+			noScroll={rest.noScroll}
+			permanentTrackX={rest.permanentTrackX}
+			permanentTrackY={rest.permanentTrackY}
+			permanentTracks={rest.permanentTracks}
 			/*ref={scrollRef}*/ style={{ flex: 1 }}
 			trackYProps={{
 				renderer: (props) => {

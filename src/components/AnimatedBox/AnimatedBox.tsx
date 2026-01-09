@@ -5,6 +5,7 @@ import React, {
 	useMemo,
 	useContext,
 	createContext,
+	useLayoutEffect,
 } from "react";
 import { Box, BoxProps } from "@/components/Box/Box";
 import {
@@ -75,6 +76,63 @@ function serializeAnimationPhase(
 }
 
 /**
+ * Compute inline styles from animation phase values (from/to).
+ * Handles both regular CSS properties and block-based/pixel-based transforms.
+ */
+function computeAnimationStyles(
+	values: Record<string, any> | undefined,
+	blockSize: number
+): React.CSSProperties {
+	if (!values) return {};
+
+	const styles: React.CSSProperties = {};
+
+	// Apply regular CSS properties
+	Object.entries(values).forEach(([key, value]) => {
+		if (
+			key === "xBlocks" ||
+			key === "yBlocks" ||
+			key === "x" ||
+			key === "y"
+		) {
+			// Skip - will handle transforms separately
+			return;
+		}
+		if (typeof value === "number" || typeof value === "string") {
+			(styles as any)[key] = value;
+		}
+	});
+
+	// Handle xBlocks/yBlocks/x/y transforms
+	let xPx = 0;
+	let yPx = 0;
+
+	if (values.xBlocks !== undefined) {
+		xPx = values.xBlocks * blockSize;
+	} else if (values.x !== undefined) {
+		xPx = parseFloat(String(values.x));
+	}
+
+	if (values.yBlocks !== undefined) {
+		yPx = values.yBlocks * blockSize;
+	} else if (values.y !== undefined) {
+		yPx = parseFloat(String(values.y));
+	}
+
+	// Always set transform if any position values were specified, even if result is 0
+	if (
+		values.xBlocks !== undefined ||
+		values.yBlocks !== undefined ||
+		values.x !== undefined ||
+		values.y !== undefined
+	) {
+		styles.transform = `translate(${xPx}px, ${yPx}px)`;
+	}
+
+	return styles;
+}
+
+/**
  * AnimatedBox supports three types of animations:
  * - enter: Plays when the component mounts (isVisible becomes true)
  * - exit: Plays when the component unmounts (isVisible becomes false)
@@ -115,6 +173,8 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 	const animationDecisionMadeRef = useRef(false);
 	const lastVisibleStateRef = useRef(isVisible);
 	const hasEverBeenVisibleRef = useRef(false); // Always start as false, set to true only after first visibility
+	// Track persistent inline styles from completed animations
+	const persistentStylesRef = useRef<React.CSSProperties>({});
 
 	// Capture the skip decision once per visibility transition
 	const shouldSkipEnterDecision = useMemo(() => {
@@ -129,7 +189,42 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 			routeTransition?.isTransitioning ||
 			false
 		);
-	}, [explicitSkipEnterAnimation, routeTransition?.isTransitioning, isVisible]);
+	}, [
+		explicitSkipEnterAnimation,
+		routeTransition?.isTransitioning,
+		isVisible,
+	]);
+
+	// Compute initial styles from "from" animation to prevent flash
+	const initialStyles = useMemo(() => {
+		if (
+			!animation?.enter?.from ||
+			shouldSkipEnterDecision ||
+			hasEverBeenVisibleRef.current
+		) {
+			return {};
+		}
+
+		return computeAnimationStyles(animation.enter.from, blockSize);
+	}, [animation?.enter?.from, shouldSkipEnterDecision, blockSize]);
+
+	// Apply initial "from" styles synchronously on first layout to prevent flash
+	useLayoutEffect(() => {
+		const el = ref.current;
+		if (
+			!el ||
+			!animation?.enter?.from ||
+			shouldSkipEnterDecision ||
+			hasEverBeenVisibleRef.current
+		) {
+			return;
+		}
+
+		const styles = computeAnimationStyles(animation.enter.from, blockSize);
+		Object.entries(styles).forEach(([key, value]) => {
+			(el.style as any)[key] = value;
+		});
+	}, [animation?.enter?.from, shouldSkipEnterDecision, blockSize]);
 
 	// Memoize serialized animation configs to avoid re-running effects
 	// when parent re-renders with new object references
@@ -154,7 +249,7 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 	}, [isVisible, shouldRender]);
 
 	// Handle animations when shouldRender changes
-	useEffect(() => {
+	useLayoutEffect(() => {
 		const el = ref.current;
 		if (!el || !animation) return;
 
@@ -182,27 +277,10 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 			// Apply final animation values to prevent stuck state
 			const enterPhase = animation.enter;
 			if (enterPhase?.to) {
-				// Apply the "to" styles directly
-				Object.entries(enterPhase.to).forEach(([key, value]) => {
-					if (key === "xBlocks" || key === "yBlocks") {
-						// Skip computed transform properties
-						return;
-					}
-					if (
-						typeof value === "number" ||
-						typeof value === "string"
-					) {
-						(el.style as any)[key] = value;
-					}
+				const styles = computeAnimationStyles(enterPhase.to, blockSize);
+				Object.entries(styles).forEach(([key, value]) => {
+					(el.style as any)[key] = value;
 				});
-
-				// Handle xBlocks/yBlocks transforms
-				const { xBlocks = 0, yBlocks = 0 } = enterPhase.to;
-				if (xBlocks !== 0 || yBlocks !== 0) {
-					const xPx = xBlocks * blockSize;
-					const yPx = yBlocks * blockSize;
-					el.style.transform = `translate(${xPx}px, ${yPx}px)`;
-				}
 			}
 			enterPhase?.onAfterEnd?.();
 			return;
@@ -232,6 +310,42 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 				durationMs: duration,
 				stepRateHz: effectiveStepRateHz,
 			});
+
+			// Apply "from" styles directly to ensure they're visible during animation delay
+			Object.entries(from).forEach(([key, value]) => {
+				if (
+					key === "xBlocks" ||
+					key === "yBlocks" ||
+					key === "x" ||
+					key === "y"
+				) {
+					// Skip - will be handled by animation
+					return;
+				}
+				if (typeof value === "number" || typeof value === "string") {
+					(el.style as any)[key] = value;
+				}
+			});
+
+			// Handle xBlocks/yBlocks/x/y transforms
+			let xPx = 0;
+			let yPx = 0;
+
+			if (from.xBlocks !== undefined) {
+				xPx = from.xBlocks * blockSize;
+			} else if (from.x !== undefined) {
+				xPx = parseFloat(String(from.x));
+			}
+
+			if (from.yBlocks !== undefined) {
+				yPx = from.yBlocks * blockSize;
+			} else if (from.y !== undefined) {
+				yPx = parseFloat(String(from.y));
+			}
+
+			if (xPx !== 0 || yPx !== 0) {
+				el.style.transform = `translate(${xPx}px, ${yPx}px)`;
+			}
 		}
 
 		const keyframeString = buildKeyframeString(frames);
@@ -257,6 +371,23 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 				if (!isVisible) {
 					setShouldRender(false); // Unmount after exit completes
 				}
+
+				// Apply "to" styles as inline styles so element stays at final position
+				const finalStyles = computeAnimationStyles(
+					to || from,
+					blockSize
+				);
+				Object.entries(finalStyles).forEach(([key, value]) => {
+					if (value !== undefined) {
+						(el.style as any)[key] = value;
+					}
+				});
+
+				// Save these styles so they persist across future transitions
+				persistentStylesRef.current = {
+					...persistentStylesRef.current,
+					...finalStyles,
+				};
 			}
 			el.removeEventListener("animationend", handleEnd);
 		};
@@ -284,7 +415,7 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 	]);
 
 	// Handle transition animations triggered by value changes
-	useEffect(() => {
+	useLayoutEffect(() => {
 		const el = ref.current;
 		if (!el || !animation?.transition) return;
 
@@ -335,7 +466,20 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 		// Track the current animation phase
 		currentAnimationRef.current = "transition";
 
-		// Reset animation state before applying new one
+		// Apply "from" styles synchronously BEFORE clearing animation
+		// Merge with persistent styles from previous animations to preserve enter animation state
+		const fromStyles = computeAnimationStyles(from, blockSize);
+		const mergedStyles = {
+			...persistentStylesRef.current,
+			...fromStyles,
+		};
+		Object.entries(mergedStyles).forEach(([key, value]) => {
+			if (value !== undefined) {
+				(el.style as any)[key] = value;
+			}
+		});
+
+		// Reset animation state AFTER applying from styles
 		el.style.animation = "none";
 		void el.offsetHeight; // Force reflow
 
@@ -346,6 +490,21 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 			// Ensure this is still the correct animation phase
 			if (currentAnimationRef.current === "transition") {
 				onAfterEnd?.();
+
+				// Apply "to" styles as inline styles so element stays at final position
+				const toStyles = computeAnimationStyles(to, blockSize);
+				const mergedStyles = {
+					...persistentStylesRef.current,
+					...toStyles,
+				};
+				Object.entries(mergedStyles).forEach(([key, value]) => {
+					if (value !== undefined) {
+						(el.style as any)[key] = value;
+					}
+				});
+
+				// Update persistent styles with the new final state
+				persistentStylesRef.current = mergedStyles;
 			}
 			el.removeEventListener("animationend", handleEnd);
 		};
@@ -371,7 +530,7 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 	if (!shouldRender) return null;
 
 	return (
-		<Box ref={ref} {...baseProps}>
+		<Box ref={ref} {...baseProps} sx={{ ...baseProps?.sx }}>
 			{children}
 		</Box>
 	);

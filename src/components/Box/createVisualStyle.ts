@@ -179,7 +179,7 @@ export function normalizeVisualValue(
 		return `round(${value}, var(--ck-block-size))`;
 	if (typeof value === "string" && /px/.test(value.trim()))
 		return value.replace(
-			/(\d+(\.\d+)?)px/g,
+			/(-?\d+(\.\d+)?)px/g,
 			(_, num) => `round(${num}px, var(--ck-block-size))`
 		);
 	return String(value);
