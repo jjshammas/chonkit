@@ -23,6 +23,18 @@ interface ChonkitContextValue {
 	theme: Theme;
 	viewportWidth: number;
 	stepRateHz?: number;
+	geometryObserver: {
+		subscribe: (
+			element: HTMLElement,
+			cb: (geometry: {
+				width: number;
+				height: number;
+				x: number;
+				y: number;
+			}) => void,
+			opts?: { immediate?: boolean }
+		) => () => void;
+	};
 }
 
 const ChonkitContext = createContext<ChonkitContextValue | undefined>(
@@ -68,6 +80,108 @@ export const ChonkitProvider: React.FC<ChonkitProviderProps> = ({
 }) => {
 	const rootAncestor = useRef<HTMLDivElement>(null);
 
+	// Shared ResizeObserver and subscriber registry for all elements
+	const roRef = useRef<ResizeObserver | null>(null);
+	const subscribersByEl = useRef<
+		Map<
+			HTMLElement,
+			Set<
+				(g: {
+					width: number;
+					height: number;
+					x: number;
+					y: number;
+				}) => void
+			>
+		>
+	>(new Map());
+	const dirtyTargets = useRef<Set<HTMLElement>>(new Set());
+	const rafIdRef = useRef<number | null>(null);
+
+	const scheduleBroadcast = () => {
+		if (rafIdRef.current != null) return;
+		rafIdRef.current = requestAnimationFrame(() => {
+			rafIdRef.current = null;
+			const root = rootAncestor.current;
+			if (!root) {
+				dirtyTargets.current.clear();
+				return;
+			}
+			const rootBox = root.getBoundingClientRect();
+			const targets = Array.from(dirtyTargets.current);
+			dirtyTargets.current.clear();
+			for (const el of targets) {
+				const subs = subscribersByEl.current.get(el);
+				if (!subs || subs.size === 0) continue;
+				const box = el.getBoundingClientRect();
+				const geometry = {
+					width: box.width,
+					height: box.height,
+					x: box.left - rootBox.left,
+					y: box.top - rootBox.top,
+				};
+				for (const cb of subs) cb(geometry);
+			}
+		});
+	};
+
+	const ensureRO = () => {
+		if (!roRef.current) {
+			roRef.current = new ResizeObserver((entries) => {
+				for (const entry of entries) {
+					const el = entry.target as HTMLElement;
+					if (subscribersByEl.current.has(el)) {
+						dirtyTargets.current.add(el);
+					}
+				}
+				scheduleBroadcast();
+			});
+		}
+	};
+
+	const geometrySubscribe = (
+		element: HTMLElement,
+		cb: (geometry: {
+			width: number;
+			height: number;
+			x: number;
+			y: number;
+		}) => void,
+		opts?: { immediate?: boolean }
+	) => {
+		ensureRO();
+		let set = subscribersByEl.current.get(element);
+		if (!set) {
+			set = new Set();
+			subscribersByEl.current.set(element, set);
+			roRef.current!.observe(element);
+		}
+		set.add(cb);
+
+		if (opts?.immediate !== false && rootAncestor.current) {
+			const rootBox = rootAncestor.current.getBoundingClientRect();
+			const box = element.getBoundingClientRect();
+			cb({
+				width: box.width,
+				height: box.height,
+				x: box.left - rootBox.left,
+				y: box.top - rootBox.top,
+			});
+		}
+
+		return () => {
+			const s = subscribersByEl.current.get(element);
+			if (!s) return;
+			s.delete(cb);
+			if (s.size === 0) {
+				subscribersByEl.current.delete(element);
+				try {
+					roRef.current?.unobserve(element);
+				} catch {}
+			}
+		};
+	};
+
 	const [viewportWidth, setViewportWidth] = useState<number>(
 		typeof window !== "undefined" ? window.innerWidth : 0
 	);
@@ -110,6 +224,7 @@ export const ChonkitProvider: React.FC<ChonkitProviderProps> = ({
 				theme,
 				viewportWidth,
 				stepRateHz,
+				geometryObserver: { subscribe: geometrySubscribe },
 			}}
 		>
 			<div

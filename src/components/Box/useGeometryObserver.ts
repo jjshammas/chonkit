@@ -14,70 +14,47 @@ export function useGeometryObserver(
 	ref: React.RefObject<HTMLElement | null>
 ): GeometryObserver {
 	const subscribers = useRef<Set<GeometryCallback>>(new Set());
-	const { rootAncestor } = useChonkit();
-	const observerRef = useRef<ResizeObserver | null>(null);
-	const observedElRef = useRef<HTMLElement | null>(null);
-	const rafIdRef = useRef<number | null>(null);
+	const providerUnsubRef = useRef<(() => void) | null>(null);
+	const currentElRef = useRef<HTMLElement | null>(null);
+	const { geometryObserver, rootAncestor } = useChonkit();
 
-	const notify = () => {
-		if (rafIdRef.current != null) return;
-		rafIdRef.current = requestAnimationFrame(() => {
-			rafIdRef.current = null;
-
-			const el = ref.current;
-			const root = rootAncestor.current;
-			if (!el || !root) return;
-
-			const box = el.getBoundingClientRect();
-			const rootBox = root.getBoundingClientRect();
-
-			const geometry = {
-				width: box.width,
-				height: box.height,
-				x: box.left - rootBox.left,
-				y: box.top - rootBox.top,
-			};
-
-			subscribers.current.forEach((cb) => cb(geometry));
-		});
+	const providerCallback = (geometry: Geometry) => {
+		subscribers.current.forEach((cb) => cb(geometry));
 	};
 
-	const ensureObservation = () => {
+	const ensureProviderSubscription = () => {
 		const el = ref.current;
 		if (!el || subscribers.current.size === 0) return;
+		if (currentElRef.current === el && providerUnsubRef.current) return;
 
-		// Create observer lazily on first subscriber
-		if (!observerRef.current) {
-			observerRef.current = new ResizeObserver(() => notify());
+		// Resubscribe to provider if element changed
+		if (providerUnsubRef.current) {
+			providerUnsubRef.current();
+			providerUnsubRef.current = null;
 		}
-
-		// Observe current element or switch if element changed
-		if (observedElRef.current !== el) {
-			if (observedElRef.current) {
-				observerRef.current!.unobserve(observedElRef.current);
+		providerUnsubRef.current = geometryObserver.subscribe(
+			el,
+			providerCallback,
+			{
+				immediate: false,
 			}
-			observerRef.current.observe(el);
-			observedElRef.current = el;
-		}
+		);
+		currentElRef.current = el;
 	};
 
-	// If the element changes and we already have subscribers, update observation
+	// If the element changes and we already have subscribers, update provider subscription
 	useEffect(() => {
-		ensureObservation();
+		ensureProviderSubscription();
 	}, [ref.current]);
 
-	// Cleanup on unmount: disconnect observer and cancel any pending rAF
+	// Cleanup on unmount: unsubscribe provider
 	useEffect(() => {
 		return () => {
-			if (rafIdRef.current != null) {
-				cancelAnimationFrame(rafIdRef.current);
-				rafIdRef.current = null;
+			if (providerUnsubRef.current) {
+				providerUnsubRef.current();
+				providerUnsubRef.current = null;
 			}
-			if (observerRef.current) {
-				observerRef.current.disconnect();
-				observerRef.current = null;
-				observedElRef.current = null;
-			}
+			currentElRef.current = null;
 		};
 	}, []);
 
@@ -87,8 +64,8 @@ export function useGeometryObserver(
 	) => {
 		subscribers.current.add(cb);
 
-		// Lazily create/attach the observer on first subscriber
-		ensureObservation();
+		// Lazily create/attach provider subscription on first subscriber
+		ensureProviderSubscription();
 
 		if (opts?.immediate !== false) {
 			// 👇 Immediately notify with current geometry
@@ -108,11 +85,11 @@ export function useGeometryObserver(
 
 		return () => {
 			subscribers.current.delete(cb);
-			// If no subscribers remain, disconnect observer
-			if (subscribers.current.size === 0 && observerRef.current) {
-				observerRef.current.disconnect();
-				observerRef.current = null;
-				observedElRef.current = null;
+			// If no subscribers remain, unsubscribe from provider
+			if (subscribers.current.size === 0 && providerUnsubRef.current) {
+				providerUnsubRef.current();
+				providerUnsubRef.current = null;
+				currentElRef.current = null;
 			}
 		};
 	};
