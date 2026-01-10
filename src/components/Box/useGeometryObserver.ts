@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
 import { useChonkit } from "@/core/ChonkitProvider/ChonkitProvider";
+import { useEffect, useRef } from "react";
 
 export type Geometry = { width: number; height: number; x: number; y: number };
 export type GeometryCallback = (geometry: Geometry) => void;
@@ -11,14 +11,20 @@ export type GeometryObserver = {
 };
 
 export function useGeometryObserver(
-	ref: React.RefObject<HTMLElement | null>
+	ref: React.RefObject<HTMLElement | null>,
+	opts?: { immediateGeometry?: boolean }
 ): GeometryObserver {
 	const subscribers = useRef<Set<GeometryCallback>>(new Set());
 	const providerUnsubRef = useRef<(() => void) | null>(null);
 	const currentElRef = useRef<HTMLElement | null>(null);
+	const firstNotificationRef = useRef<boolean>(true);
 	const { geometryObserver, rootAncestor } = useChonkit();
 
 	const providerCallback = (geometry: Geometry) => {
+		// Mark that first geometry has been delivered; provider handles batched class removal
+		if (firstNotificationRef.current) {
+			firstNotificationRef.current = false;
+		}
 		subscribers.current.forEach((cb) => cb(geometry));
 	};
 
@@ -36,7 +42,7 @@ export function useGeometryObserver(
 			el,
 			providerCallback,
 			{
-				immediate: false,
+				immediate: false, // Provider batches all reads via ResizeObserver
 			}
 		);
 		currentElRef.current = el;
@@ -60,15 +66,15 @@ export function useGeometryObserver(
 
 	const subscribe = (
 		cb: GeometryCallback,
-		opts?: { immediate?: boolean }
+		subscribeOpts?: { immediate?: boolean }
 	) => {
 		subscribers.current.add(cb);
 
 		// Lazily create/attach provider subscription on first subscriber
 		ensureProviderSubscription();
 
-		if (opts?.immediate !== false) {
-			// 👇 Immediately notify with current geometry
+		// If immediateGeometry is enabled at hook level, read synchronously on first subscription
+		if (subscribeOpts?.immediate !== false && opts?.immediateGeometry) {
 			const el = ref.current;
 			const root = rootAncestor.current;
 			if (el && root) {

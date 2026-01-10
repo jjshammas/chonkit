@@ -1,12 +1,12 @@
-import { useEffect, useRef } from "react";
+import { useChonkit } from "@/core/ChonkitProvider/ChonkitProvider";
 import {
-	generateBorderPoints,
 	convertPointsToPathString,
+	generateBorderPoints,
 } from "@/utils/svg/circle-generator/circle-generator";
+import { useEffect, useRef } from "react";
+import styles from "./Box.module.css";
 import type { GeometryObserver } from "./useGeometryObserver";
 import type { RoundedCornerClipProps } from "./useRoundedCornerClip";
-import { useChonkit } from "@/core/ChonkitProvider/ChonkitProvider";
-import styles from "./Box.module.css";
 
 export type FabricatedBorderProps = {
 	borderRadius?: RoundedCornerClipProps["borderRadius"];

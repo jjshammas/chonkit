@@ -1,13 +1,14 @@
-import { useEffect } from "react";
+import { useChonkit } from "@/core/ChonkitProvider/ChonkitProvider";
 import {
 	convertPointsToPathString,
 	generateRoundedCornerPoints,
 } from "@/utils/svg/circle-generator/circle-generator";
+import { useEffect, useLayoutEffect } from "react";
 import type { GeometryObserver } from "./useGeometryObserver";
-import { useChonkit } from "@/core/ChonkitProvider/ChonkitProvider";
 
 export type RoundedCornerClipProps = {
 	borderRadius?: number | [number, number, number, number];
+	showWhileGeometryUnknown?: boolean;
 };
 
 export function useRoundedCornerClip(
@@ -16,6 +17,23 @@ export function useRoundedCornerClip(
 	geometry: GeometryObserver
 ) {
 	const { blockSize } = useChonkit();
+
+	useLayoutEffect(() => {
+		// this applies a non-pixelated border radius only while geometry is not yet known. This looks better than no border radius at all.
+		if (
+			options.showWhileGeometryUnknown &&
+			element.current &&
+			options.borderRadius
+		) {
+			const cssBorderRadius = Array.isArray(options.borderRadius)
+				? options.borderRadius
+						.map((radius) => `${radius * blockSize}px`)
+						.join(" ")
+				: `${options.borderRadius * blockSize}px`;
+			if (element.current)
+				element.current.style.borderRadius = cssBorderRadius;
+		}
+	}, []);
 
 	useEffect(() => {
 		if (!options.borderRadius || !element.current) return;
@@ -40,6 +58,12 @@ export function useRoundedCornerClip(
 			} else {
 				element.current.style.clipPath = "none";
 			}
+			if (
+				options.showWhileGeometryUnknown &&
+				element.current &&
+				element.current.style.borderRadius
+			)
+				element.current.style.borderRadius = "";
 		};
 
 		const unsubscribe = geometry.subscribe(apply);

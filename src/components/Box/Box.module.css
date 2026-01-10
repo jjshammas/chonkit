@@ -78,6 +78,18 @@
 			);
 		}
 	}
+
+	&:global(.geometry-unknown) {
+		visibility: hidden;
+	}
+
+	&:global(.geometry-unknown-show) {
+		visibility: visible;
+
+		> .fabricatedBorder, > .fabricatedInnerBorder > .shadow > .highlight {
+			visibility: hidden;
+		}
+	}
 }
 
 .inner {

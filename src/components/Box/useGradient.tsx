@@ -1,10 +1,10 @@
-import { useEffect, useRef } from "react";
-import type { GeometryObserver } from "./useGeometryObserver";
 import { useChonkit } from "@/core/ChonkitProvider/ChonkitProvider";
-import { resolveColor } from "@/hooks/useResolvedColor";
 import type { Theme } from "@/core/themes";
+import { resolveColor } from "@/hooks/useResolvedColor";
 import { createGradientSVG } from "@/utils/svg/gradients/gradients";
+import { useEffect, useRef } from "react";
 import styles from "./Box.module.css";
+import type { GeometryObserver } from "./useGeometryObserver";
 
 const resolveGradientColors = (
 	gradient: string,
@@ -43,6 +43,11 @@ export function useGradient(
 		if (!options.gradient) return;
 
 		const gradientString = resolveGradientColors(options.gradient, palette);
+		// const dominantColor = gradientString.split(",")[1].trim().split(" ")[0];
+		// if (element.current) {
+		// 	element.current.style.backgroundColor = dominantColor;
+		// }
+
 		const unsubscribe = geometry.subscribe(({ width, height }) => {
 			if (!gradientString || !elementGradient.current) return;
 			const svg = createGradientSVG(

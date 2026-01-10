@@ -1,18 +1,18 @@
+import themes, {
+	createCSSVariables,
+	mergeThemes,
+	Theme,
+	ThemePartial,
+} from "@/core/themes";
+import clsx from "clsx";
 import React, {
 	createContext,
 	ReactNode,
 	useContext,
+	useEffect,
 	useRef,
 	useState,
-	useEffect,
 } from "react";
-import clsx from "clsx";
-import themes, {
-	Theme,
-	ThemePartial,
-	createCSSVariables,
-	mergeThemes,
-} from "@/core/themes";
 
 const DEFAULT_BLOCK_SIZE = 2;
 const DEFAULT_STEP_RATE_HZ = 24;
@@ -98,6 +98,35 @@ export const ChonkitProvider: React.FC<ChonkitProviderProps> = ({
 	const dirtyTargets = useRef<Set<HTMLElement>>(new Set());
 	const rafIdRef = useRef<number | null>(null);
 
+	// Queue to batch-removal of placeholder classes to avoid synchronous chains
+	const pendingUnknownRemovals = useRef<Set<HTMLElement>>(new Set());
+	const unknownRemoved = useRef<WeakSet<HTMLElement>>(new WeakSet());
+	const unknownRafIdRef = useRef<number | null>(null);
+
+	const scheduleUnknownRemovals = () => {
+		if (unknownRafIdRef.current != null) return;
+		unknownRafIdRef.current = requestAnimationFrame(() => {
+			unknownRafIdRef.current = null;
+			const start = performance.now();
+			const budgetMs = 3; // limit work per frame to keep FPS smooth
+			let processed = 0;
+			const batch = Array.from(pendingUnknownRemovals.current);
+			for (const el of batch) {
+				pendingUnknownRemovals.current.delete(el);
+				if (unknownRemoved.current.has(el)) continue;
+				el.classList.remove("geometry-unknown");
+				el.classList.remove("geometry-unknown-show");
+				unknownRemoved.current.add(el);
+				processed++;
+				if (performance.now() - start > budgetMs) break;
+			}
+			// If work remains, schedule next frame
+			if (pendingUnknownRemovals.current.size > 0) {
+				scheduleUnknownRemovals();
+			}
+		});
+	};
+
 	const scheduleBroadcast = () => {
 		if (rafIdRef.current != null) return;
 		rafIdRef.current = requestAnimationFrame(() => {
@@ -121,7 +150,16 @@ export const ChonkitProvider: React.FC<ChonkitProviderProps> = ({
 					y: box.top - rootBox.top,
 				};
 				for (const cb of subs) cb(geometry);
+				// Batch-clear placeholder classes; only once per element
+				if (
+					(el.classList.contains("geometry-unknown") ||
+						el.classList.contains("geometry-unknown-show")) &&
+					!unknownRemoved.current.has(el)
+				) {
+					pendingUnknownRemovals.current.add(el);
+				}
 			}
+			scheduleUnknownRemovals();
 		});
 	};
 
@@ -158,16 +196,8 @@ export const ChonkitProvider: React.FC<ChonkitProviderProps> = ({
 		}
 		set.add(cb);
 
-		if (opts?.immediate !== false && rootAncestor.current) {
-			const rootBox = rootAncestor.current.getBoundingClientRect();
-			const box = element.getBoundingClientRect();
-			cb({
-				width: box.width,
-				height: box.height,
-				x: box.left - rootBox.left,
-				y: box.top - rootBox.top,
-			});
-		}
+		// Don't read geometry synchronously on mount - let ResizeObserver handle it
+		// This avoids thousands of blocking layout reads during page navigation
 
 		return () => {
 			const s = subscribersByEl.current.get(element);

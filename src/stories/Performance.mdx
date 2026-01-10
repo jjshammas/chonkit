@@ -1,0 +1,48 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Performance" />
+
+# Performance
+
+This page outlines strategies and props that help scale the `Box` component to thousands of instances without layout thrashing or visual flash.
+
+## Geometry Observation
+
+Chonkit uses a shared `ResizeObserver` in the provider to observe all elements and broadcast geometry updates in a single `requestAnimationFrame` tick. This avoids per-instance observers and reduces layout reads to once per element per frame.
+
+- Shared observer: one RO for the app, many targets
+- Batched broadcasts: dirty elements coalesced to a single rAF
+- First update: delivered by RO (no synchronous layout reads by default)
+
+## Placeholder Visibility
+
+By default, `Box` adds a `geometry-unknown` class to its container and removes it on the first geometry update. You can style this state to avoid a flash of unstyled content:
+
+- Container selector: `.container.geometry-unknown { visibility: hidden; }`
+- Prop: `showWhileGeometryUnknown` controls visibility until geometry is known
+
+## Opt-in Immediate Geometry
+
+For critical elements, you can opt into a synchronous geometry read via `immediateGeometry`. Use this sparingly—synchronous reads can cause layout thrashing if many elements opt-in at once.
+
+- Prop: `immediateGeometry` (boolean) performs an immediate read in the hook
+- Recommendation: keep this to a small number of important elements
+
+## Usage Examples
+
+```tsx
+import { Box } from '@/components/Box/Box';
+
+// Hide until geometry settles (prevents flash)
+<Box showWhileGeometryUnknown sx={{ width: 120, height: 80 }} />
+
+// Opt-in immediate geometry for a critical header
+<Box immediateGeometry sx={{ width: 240, height: 120 }} />
+```
+
+## Best Practices
+
+- Prefer RO-driven first updates; only use `immediateGeometry` where necessary.
+- Avoid opting-in on large lists; batch updates via the provider.
+- Keep DOM styles clean: Box filters hook-consumed props from inline styles and media queries.
+- Use shared theming and breakpoints to avoid per-instance style recomputation.

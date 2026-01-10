@@ -79,9 +79,9 @@ export interface BoxProps
 	containerProps?: React.HTMLAttributes<HTMLDivElement> & {
 		[key: `data-${string}`]: any;
 	};
-
-	// snap?: boolean;
-	// snapMethod?: "transform" | "padding";
+	showWhileGeometryUnknown?: boolean;
+	/** Opt-in: Read geometry synchronously on mount. Use only for boxes needing immediate geometry (animations, layout). Default false for performance. */
+	immediateGeometry?: boolean;
 
 	[key: `data-${string}`]: any;
 }
@@ -259,6 +259,8 @@ export const Box: React.FC<BoxProps> = (props) => {
 		containerProps,
 		className,
 		style,
+		showWhileGeometryUnknown,
+		immediateGeometry,
 		...rest
 		// color resolution should already happen in the visual style
 		// } = useResolvedColorProps(nonVisualRest);
@@ -358,8 +360,12 @@ export const Box: React.FC<BoxProps> = (props) => {
 	const shouldFabricateBorder =
 		borderWidth && borderRadius && !innerBorderWidth;
 
-	const geometry = useGeometryObserver(ref);
-	useRoundedCornerClip(innerRef, { borderRadius }, geometry);
+	const geometry = useGeometryObserver(ref, { immediateGeometry });
+	useRoundedCornerClip(
+		innerRef,
+		{ borderRadius, showWhileGeometryUnknown },
+		geometry
+	);
 	const { fabricatedBorderEl } = useFabricatedBorder(
 		ref,
 		{
@@ -446,6 +452,10 @@ export const Box: React.FC<BoxProps> = (props) => {
 			className: clsx(
 				styles.container,
 				instanceId,
+				!immediateGeometry &&
+					(showWhileGeometryUnknown
+						? "geometry-unknown-show"
+						: "geometry-unknown"),
 				containerProps?.className
 			),
 			style: {
