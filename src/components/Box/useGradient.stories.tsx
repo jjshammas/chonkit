@@ -1,17 +1,16 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
 import {
-	Title,
-	Subtitle,
 	Description,
 	Primary,
 	// ArgsTable,
 	Stories,
-	PRIMARY_STORY,
+	Subtitle,
+	Title,
 } from "@storybook/addon-docs";
 
-import { Box } from "./Box";
 import React from "react";
+import { Box } from "./Box";
 
 /**
  * Pixel art often uses dithering to create gradients and shading.
@@ -123,8 +122,7 @@ export const Size: Story = {
 				/>
 				<Box
 					sx={{
-						backgroundGradient:
-							"0deg, #888, #999 10%, #aaa 20%, #bbb 30%, #ccc 70%, #ddd 100%",
+						backgroundGradient: "0deg, #888, #ddd",
 						height: `200px`,
 						width: `${size}px`,
 					}}

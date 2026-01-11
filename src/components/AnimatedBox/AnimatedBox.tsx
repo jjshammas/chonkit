@@ -1,18 +1,18 @@
+import { Box, BoxProps } from "@/components/Box/Box";
+import { useChonkit } from "@/core/ChonkitProvider/ChonkitProvider";
 import React, {
+	createContext,
+	useContext,
 	useEffect,
+	useLayoutEffect,
+	useMemo,
 	useRef,
 	useState,
-	useMemo,
-	useContext,
-	createContext,
-	useLayoutEffect,
 } from "react";
-import { Box, BoxProps } from "@/components/Box/Box";
 import {
 	DynamicKeyframe,
 	createAnimatedProperties,
 } from "./createAnimationFrames";
-import { useChonkit } from "@/core/ChonkitProvider/ChonkitProvider";
 import { animationManager } from "./createAnimationManager";
 
 /**
@@ -150,6 +150,7 @@ type AnimatedBoxProps = {
 	isVisible?: boolean;
 	children?: React.ReactNode;
 	skipEnterAnimation?: boolean; // Explicitly skip enter animation (useful as escape hatch)
+	animateDuringRouteTransition?: boolean; // If true, always animate even during route transitions
 };
 
 export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
@@ -158,6 +159,7 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 	isVisible = true,
 	children,
 	skipEnterAnimation: explicitSkipEnterAnimation,
+	animateDuringRouteTransition = false,
 }) => {
 	const ref = useRef<HTMLDivElement>(null);
 	const [shouldRender, setShouldRender] = useState(isVisible);
@@ -186,7 +188,8 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 
 		return (
 			explicitSkipEnterAnimation ||
-			routeTransition?.isTransitioning ||
+			(routeTransition?.isTransitioning &&
+				!animateDuringRouteTransition) ||
 			false
 		);
 	}, [

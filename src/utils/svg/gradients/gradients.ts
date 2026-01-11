@@ -1,5 +1,4 @@
-import { svgToDataURL } from "../svgToDataURL";
-import patterns from "./dither-patterns";
+import { generateDitherPattern } from "./dither-patterns";
 
 const SVG_URL = "http://www.w3.org/2000/svg";
 
@@ -99,35 +98,75 @@ export const calculateCenters = (
 	);
 };
 
-function selectPattern(width: number, height: number): string[] {
-	return (
-		patterns
-			.sort((a, b) => b.length - a.length)
-			.find((pattern) => pattern.length <= height) || []
-	);
-}
-
 function drawTransition(
-	transition: string[],
+	transitionHeight: number,
+	patternWidthBlocks: number,
 	color1: string,
 	color2: string,
 	blockSize: number
 ) {
 	const g = document.createElementNS(SVG_URL, "g");
-	for (let row = 0; row < transition.length; row++) {
-		for (let col = 0; col < transition[row].length; col++) {
-			const rect = document.createElementNS(SVG_URL, "rect");
-			rect.setAttribute("x", col * blockSize + "px");
-			rect.setAttribute("y", row * blockSize + "px");
-			rect.setAttribute("width", blockSize + "px");
-			rect.setAttribute("height", blockSize + "px");
-			rect.setAttribute(
-				"fill",
-				transition[row][col] === "1" ? color2 : color1
-			);
-			g.appendChild(rect);
+
+	// Generate dither patterns in blocks with size adaptive to transition height
+	// Aim for 3-4 distinct dither patterns across the transition for good quality
+	let blockRowSize = 8;
+	if (transitionHeight < 32)
+		blockRowSize = Math.max(2, Math.floor(transitionHeight / 3));
+	else if (transitionHeight < 64) blockRowSize = 4;
+
+	const totalIntensitySteps = Math.ceil(transitionHeight / blockRowSize);
+	const rects: SVGRectElement[] = [];
+
+	for (let blockRow = 0; blockRow < totalIntensitySteps; blockRow++) {
+		const rowStart = blockRow * blockRowSize;
+		const rowEnd = Math.min(rowStart + blockRowSize, transitionHeight);
+		const rowsInBlock = rowEnd - rowStart;
+
+		// Calculate intensity for this block: start dithering immediately
+		// by centering the block intensity in its range position
+		const blockIntensity = Math.round(
+			((blockRow + 0.5) / totalIntensitySteps) * 255
+		);
+
+		// Generate dither pattern - only one tile unit, SVG pattern will handle repetition
+		// Determine appropriate Bayer matrix size for the pattern width
+		let bayerMatrixSize = 8;
+		if (patternWidthBlocks < 4) bayerMatrixSize = 2;
+		else if (patternWidthBlocks < 8) bayerMatrixSize = 4;
+		else if (patternWidthBlocks >= 16) bayerMatrixSize = 16;
+		else if (patternWidthBlocks >= 32) bayerMatrixSize = 32;
+
+		// Generate one repeating tile
+		const blockPattern = generateDitherPattern(
+			bayerMatrixSize,
+			blockRowSize,
+			blockIntensity
+		);
+
+		// Pre-calculate y position to avoid repeated calculations
+		const baseY = rowStart * blockSize;
+
+		for (let row = 0; row < rowsInBlock; row++) {
+			const patternRow = blockPattern[row];
+			const y = baseY + row * blockSize;
+			// Only render the repeating tile unit, not the entire width
+			for (let col = 0; col < patternRow.length; col++) {
+				const rect = document.createElementNS(SVG_URL, "rect");
+				rect.setAttribute("x", col * blockSize + "px");
+				rect.setAttribute("y", y + "px");
+				rect.setAttribute("width", blockSize + "px");
+				rect.setAttribute("height", blockSize + "px");
+				rect.setAttribute(
+					"fill",
+					patternRow[col] === 1 ? color2 : color1
+				);
+				rects.push(rect);
+			}
 		}
 	}
+
+	// Batch append all rects at once for better performance
+	rects.forEach((rect) => g.appendChild(rect));
 	return g;
 }
 
@@ -190,54 +229,95 @@ export const createGradientSVG = (
 	for (let i = 1; i < gradientSteps.length; i++) {
 		const step = gradientSteps[i];
 		const prevStep = gradientSteps[i - 1];
-		const nextStep = gradientSteps[i + 1];
 
 		const transitionMaxSize =
 			step.center - (prevStep ? prevStep.center : 0);
-		const transitionMaxBlocks = Math.floor(transitionMaxSize / blockSize);
 
-		const transitionPattern = selectPattern(100, transitionMaxBlocks);
-		const transitionBlocks = transitionPattern.length;
-		const transitionSize = transitionBlocks * blockSize;
-		const transitionRepeatBlocks = transitionPattern[0]?.length || 0;
-		const transitionRepeatSize = transitionRepeatBlocks * blockSize;
-		const transitionStartYUnrounded =
-			(prevStep.center + step.center) / 2 - transitionSize / 2;
-		const transitionStartY = Math.round(
-			Math.round(transitionStartYUnrounded / blockSize) * blockSize
+		// Guard against invalid transition sizes
+		if (transitionMaxSize <= 0) continue;
+
+		const transitionMaxBlocks = Math.max(
+			1,
+			Math.floor(transitionMaxSize / blockSize)
 		);
+
+		// Calculate pattern width in blocks
+		const patternWidthBlocks = Math.floor(patternWidth / blockSize);
+
+		// Generate a gradient dither transition where intensity increases from 0 to 255
 		const transitionGroup = drawTransition(
-			transitionPattern,
+			transitionMaxBlocks,
+			patternWidthBlocks,
 			prevStep.color,
 			step.color,
 			blockSize
 		);
-		const pattern = document.createElementNS(SVG_URL, "pattern");
-		pattern.setAttribute("patternUnits", "userSpaceOnUse");
-		pattern.setAttribute("width", transitionRepeatSize + "px");
-		pattern.setAttribute("height", transitionSize + "px");
-		pattern.setAttribute("x", "0");
-		pattern.setAttribute("y", transitionStartY + "px");
-		pattern.appendChild(transitionGroup);
+
+		// Pattern width for the SVG pattern element - use the Bayer matrix tile size
+		let bayerMatrixSize = 8;
+		if (patternWidthBlocks < 4) bayerMatrixSize = 2;
+		else if (patternWidthBlocks < 8) bayerMatrixSize = 4;
+		else if (patternWidthBlocks >= 16) bayerMatrixSize = 16;
+		else if (patternWidthBlocks >= 32) bayerMatrixSize = 32;
+
+		const patternTileWidth = bayerMatrixSize * blockSize;
+
+		const transitionStartY = Math.round(
+			Math.round(
+				((prevStep.center + step.center) / 2 - transitionMaxSize / 2) /
+					blockSize
+			) * blockSize
+		);
+
+		// Clamp transition position to valid range
+		const clampedTransitionStartY = Math.max(
+			0,
+			Math.min(transitionStartY, patternHeight)
+		);
+		const clampedTransitionSize = Math.min(
+			transitionMaxSize,
+			patternHeight - clampedTransitionStartY
+		);
+
+		const svgPattern = document.createElementNS(SVG_URL, "pattern");
+		svgPattern.setAttribute("patternUnits", "userSpaceOnUse");
+		svgPattern.setAttribute("width", patternTileWidth + "px");
+		svgPattern.setAttribute("height", clampedTransitionSize + "px");
+		svgPattern.setAttribute("x", "0");
+		svgPattern.setAttribute("y", clampedTransitionStartY + "px");
+		svgPattern.appendChild(transitionGroup);
 		const patternID = "pattern-" + Math.random().toString(36).substr(2, 9);
-		pattern.setAttribute("id", patternID);
+		svgPattern.setAttribute("id", patternID);
+
 		const repeatingTransition = document.createElementNS(SVG_URL, "rect");
 		repeatingTransition.setAttribute("x", "0");
-		repeatingTransition.setAttribute("y", transitionStartY + "px");
+		repeatingTransition.setAttribute("y", clampedTransitionStartY + "px");
 		repeatingTransition.setAttribute("width", patternWidth + "px");
-		repeatingTransition.setAttribute("height", transitionSize + "px");
+		repeatingTransition.setAttribute(
+			"height",
+			clampedTransitionSize + "px"
+		);
 		repeatingTransition.setAttribute("fill", `url(#${patternID})`);
 
-		const rect = document.createElementNS(SVG_URL, "rect");
-		rect.setAttribute("x", "0");
-		rect.setAttribute("y", transitionStartY + "px");
-		rect.setAttribute("width", patternWidth + "px");
-		rect.setAttribute("height", patternHeight - transitionStartY + "px");
-		rect.setAttribute("fill", step.color);
-		g.appendChild(rect);
+		const remainingHeight = Math.max(
+			0,
+			patternHeight - clampedTransitionStartY - clampedTransitionSize
+		);
+		if (remainingHeight > 0) {
+			const rect = document.createElementNS(SVG_URL, "rect");
+			rect.setAttribute("x", "0");
+			rect.setAttribute(
+				"y",
+				clampedTransitionStartY + clampedTransitionSize + "px"
+			);
+			rect.setAttribute("width", patternWidth + "px");
+			rect.setAttribute("height", remainingHeight + "px");
+			rect.setAttribute("fill", step.color);
+			g.appendChild(rect);
+		}
 
 		if (prevStep.color !== step.color) {
-			g.appendChild(pattern);
+			g.appendChild(svgPattern);
 			g.appendChild(repeatingTransition);
 		}
 	}
