@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { ChonkitProvider } from "./ChonkitProvider";
 import { Box } from "@/components/Box/Box";
 import { Button } from "@/components/Button/Button";
+import { ChonkitProvider } from "./ChonkitProvider";
 
 /**
  * The wrapping component for the Chonkit library. It provides the context for the
@@ -27,7 +27,6 @@ export const Default: Story = {
 		children: (
 			<>
 				<Box
-					snap
 					style={{
 						padding: "40px",
 						margin: "20px",
@@ -48,7 +47,6 @@ export const Default: Story = {
 					esse cillum
 				</Box>
 				<Box
-					snap
 					style={{
 						padding: "40px",
 						margin: "20px",

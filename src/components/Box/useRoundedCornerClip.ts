@@ -3,7 +3,7 @@ import {
 	convertPointsToPathString,
 	generateRoundedCornerPoints,
 } from "@/utils/svg/circle-generator/circle-generator";
-import { useEffect, useLayoutEffect } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import type { GeometryObserver } from "./useGeometryObserver";
 
 export type RoundedCornerClipProps = {
@@ -17,6 +17,7 @@ export function useRoundedCornerClip(
 	geometry: GeometryObserver
 ) {
 	const { blockSize } = useChonkit();
+	const hadBorderRadius = useRef<boolean>(false);
 
 	useLayoutEffect(() => {
 		// this applies a non-pixelated border radius only while geometry is not yet known. This looks better than no border radius at all.
@@ -36,7 +37,13 @@ export function useRoundedCornerClip(
 	}, []);
 
 	useEffect(() => {
-		if (!options.borderRadius || !element.current) return;
+		if (!element.current) return;
+		if (!options.borderRadius && hadBorderRadius.current) {
+			element.current.style.clipPath = "none";
+			hadBorderRadius.current = false;
+			return;
+		}
+		if (!options.borderRadius) return;
 
 		const apply = ({
 			width,
@@ -47,6 +54,7 @@ export function useRoundedCornerClip(
 		}) => {
 			if (!element.current) return;
 			if (options.borderRadius) {
+				hadBorderRadius.current = true;
 				element.current.style.clipPath = `path('${convertPointsToPathString(
 					generateRoundedCornerPoints(
 						options.borderRadius!,

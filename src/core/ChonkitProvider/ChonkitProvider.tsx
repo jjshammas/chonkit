@@ -103,6 +103,23 @@ export const ChonkitProvider: React.FC<ChonkitProviderProps> = ({
 	const unknownRemoved = useRef<WeakSet<HTMLElement>>(new WeakSet());
 	const unknownRafIdRef = useRef<number | null>(null);
 
+	// Queue for batching subscription geometry reads via rAF
+	const pendingSubscriptionReads = useRef<
+		Array<{
+			el: HTMLElement;
+			cb: (g: {
+				width: number;
+				height: number;
+				x: number;
+				y: number;
+			}) => void;
+		}>
+	>([]);
+	const subscriptionReadRafRef = useRef<number | null>(null);
+
+	// Track elements we've ever observed, to distinguish first observation from re-subscriptions
+	const elementsEverObserved = useRef<WeakSet<HTMLElement>>(new WeakSet());
+
 	const scheduleUnknownRemovals = () => {
 		if (unknownRafIdRef.current != null) return;
 		unknownRafIdRef.current = requestAnimationFrame(() => {
@@ -123,6 +140,30 @@ export const ChonkitProvider: React.FC<ChonkitProviderProps> = ({
 			// If work remains, schedule next frame
 			if (pendingUnknownRemovals.current.size > 0) {
 				scheduleUnknownRemovals();
+			}
+		});
+	};
+
+	const scheduleSubscriptionReads = () => {
+		if (subscriptionReadRafRef.current != null) return;
+		subscriptionReadRafRef.current = requestAnimationFrame(() => {
+			subscriptionReadRafRef.current = null;
+			const root = rootAncestor.current;
+			if (!root) {
+				pendingSubscriptionReads.current = [];
+				return;
+			}
+			const rootBox = root.getBoundingClientRect();
+			const reads = pendingSubscriptionReads.current;
+			pendingSubscriptionReads.current = [];
+			for (const { el, cb } of reads) {
+				const box = el.getBoundingClientRect();
+				cb({
+					width: box.width,
+					height: box.height,
+					x: box.left - rootBox.left,
+					y: box.top - rootBox.top,
+				});
 			}
 		});
 	};
@@ -188,6 +229,8 @@ export const ChonkitProvider: React.FC<ChonkitProviderProps> = ({
 		opts?: { immediate?: boolean }
 	) => {
 		ensureRO();
+		const isInitialMount = !elementsEverObserved.current.has(element);
+		elementsEverObserved.current.add(element);
 		let set = subscribersByEl.current.get(element);
 		if (!set) {
 			set = new Set();
@@ -196,8 +239,14 @@ export const ChonkitProvider: React.FC<ChonkitProviderProps> = ({
 		}
 		set.add(cb);
 
-		// Don't read geometry synchronously on mount - let ResizeObserver handle it
-		// This avoids thousands of blocking layout reads during page navigation
+		// Queue geometry read for new subscription via batched rAF
+		// If element is being observed for the first time, batch via RO (initial mount case)
+		// If element was already observed before, deliver immediately (prop change case)
+		const shouldQueue = opts?.immediate !== false && !isInitialMount;
+		if (shouldQueue) {
+			pendingSubscriptionReads.current.push({ el: element, cb });
+			scheduleSubscriptionReads();
+		}
 
 		return () => {
 			const s = subscribersByEl.current.get(element);
@@ -208,8 +257,15 @@ export const ChonkitProvider: React.FC<ChonkitProviderProps> = ({
 				try {
 					roRef.current?.unobserve(element);
 				} catch {}
+				// Clear element from unknownRemoved set so that if new subscribers are added later,
+				// the class removal logic will work again
+				unknownRemoved.current.delete(element);
 			}
 		};
+	};
+
+	const geometryObserver = {
+		subscribe: geometrySubscribe,
 	};
 
 	const [viewportWidth, setViewportWidth] = useState<number>(
@@ -254,7 +310,7 @@ export const ChonkitProvider: React.FC<ChonkitProviderProps> = ({
 				theme,
 				viewportWidth,
 				stepRateHz,
-				geometryObserver: { subscribe: geometrySubscribe },
+				geometryObserver,
 			}}
 		>
 			<div

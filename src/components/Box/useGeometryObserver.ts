@@ -70,7 +70,7 @@ export function useGeometryObserver(
 	) => {
 		subscribers.current.add(cb);
 
-		// Lazily create/attach provider subscription on first subscriber
+		// Ensure provider subscription is set up
 		ensureProviderSubscription();
 
 		// If immediateGeometry is enabled at hook level, read synchronously on first subscription

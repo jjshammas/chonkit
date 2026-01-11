@@ -49,6 +49,7 @@ const defaultTheme: Theme = {
 		bevelHighlightSize: 2,
 		bevelShadowSize: 1,
 		backgroundColor: "secondary",
+
 		color: "secondary.fg",
 		dropShadow: "1 1 rgba(0,0,0,0.2)",
 		padding: "8px 16px 6px",
@@ -67,7 +68,10 @@ const defaultTheme: Theme = {
 				backgroundColor: "negative",
 				color: "negative.fg",
 			},
-			disabled: {},
+			disabled: {
+				bevelHighlightSize: 0,
+				bevelShadowSize: 0,
+			},
 		},
 	},
 	ScrollAreaTrack: {

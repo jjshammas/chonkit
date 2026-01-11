@@ -1,14 +1,14 @@
-import { useEffect, useRef } from "react";
-import {
-	generateRoundedCornerPoints,
-	convertPointsToPathString,
-} from "@/utils/svg/circle-generator/circle-generator";
-import type { GeometryObserver } from "./useGeometryObserver";
 import { useChonkit } from "@/core/ChonkitProvider/ChonkitProvider";
-import type { RoundedCornerClipProps } from "./useRoundedCornerClip";
-import type { FabricatedBorderProps } from "./useFabricatedBorder";
 import { useLighting } from "@/core/LightingProvider/LightingProvider";
+import {
+	convertPointsToPathString,
+	generateRoundedCornerPoints,
+} from "@/utils/svg/circle-generator/circle-generator";
+import { useEffect, useRef } from "react";
 import styles from "./Box.module.css";
+import type { FabricatedBorderProps } from "./useFabricatedBorder";
+import type { GeometryObserver } from "./useGeometryObserver";
+import type { RoundedCornerClipProps } from "./useRoundedCornerClip";
 
 export type EmbossProps = {
 	highlightSize?: number;
@@ -31,6 +31,8 @@ export function useEmboss(
 	const elementShadow = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
+		if (!highlightSize && !shadowSize) return;
+
 		const unsubscribe = geometry.subscribe(({ width, height }) => {
 			if (highlightSize) {
 				const highlightPath = `path('${convertPointsToPathString(

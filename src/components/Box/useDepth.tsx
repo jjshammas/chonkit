@@ -1,12 +1,12 @@
-import { useEffect, useRef } from "react";
-import {
-	generateRoundedCornerPoints,
-	convertPointsToPathString,
-} from "@/utils/svg/circle-generator/circle-generator";
-import type { GeometryObserver } from "./useGeometryObserver";
 import { useChonkit } from "@/core/ChonkitProvider/ChonkitProvider";
-import type { RoundedCornerClipProps } from "./useRoundedCornerClip";
+import {
+	convertPointsToPathString,
+	generateRoundedCornerPoints,
+} from "@/utils/svg/circle-generator/circle-generator";
+import { useEffect, useRef } from "react";
 import styles from "./Box.module.css";
+import type { GeometryObserver } from "./useGeometryObserver";
+import type { RoundedCornerClipProps } from "./useRoundedCornerClip";
 
 export type DepthProps = {
 	depth?: number;
@@ -25,6 +25,8 @@ export function useDepth(
 	const elementDepth = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
+		if (!depth) return;
+
 		const unsubscribe = geometry.subscribe(({ width, height }) => {
 			if (depth) {
 				const depthPath = `path('${convertPointsToPathString(

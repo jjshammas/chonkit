@@ -117,6 +117,8 @@ const cssAttributesToMoveToInner = [
 	"backgroundOrigin",
 	"backgroundClip",
 	"backgroundAttachment",
+	"backgroundColor",
+	"background",
 ];
 
 // Use a Set for O(1) membership checks when splitting styles
@@ -360,6 +362,18 @@ export const Box: React.FC<BoxProps> = (props) => {
 	const shouldFabricateBorder =
 		borderWidth && borderRadius && !innerBorderWidth;
 
+	// Determine if this box will need geometry for any effects
+	const needsGeometry = !!(
+		bevelHighlightSize ||
+		bevelShadowSize ||
+		embossHighlightSize ||
+		embossShadowSize ||
+		dropShadow ||
+		depth ||
+		borderRadius ||
+		dropShadow
+	);
+
 	const geometry = useGeometryObserver(ref, { immediateGeometry });
 	useRoundedCornerClip(
 		innerRef,
@@ -452,7 +466,8 @@ export const Box: React.FC<BoxProps> = (props) => {
 			className: clsx(
 				styles.container,
 				instanceId,
-				!immediateGeometry &&
+				needsGeometry &&
+					!immediateGeometry &&
 					(showWhileGeometryUnknown
 						? "geometry-unknown-show"
 						: "geometry-unknown"),
