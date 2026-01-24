@@ -1,11 +1,11 @@
+import { createComponentVariantThemeTypes } from "@/core/themes/createComponentThemeTypes";
+import { createComponentVisualTypes } from "@/core/themes/createComponentVisualTypes";
+import { useComponentTheme } from "@/hooks/useComponentTheme";
+import clsx from "clsx";
 import React from "react";
 import { Box, BoxProps, boxVisual } from "../Box/Box";
 import { Text } from "../Text/Text";
-import { useComponentTheme } from "@/hooks/useComponentTheme";
 import styles from "./Button.module.css";
-import { createComponentVisualTypes } from "@/core/themes/createComponentVisualTypes";
-import { createComponentVariantThemeTypes } from "@/core/themes/createComponentThemeTypes";
-import clsx from "clsx";
 
 const buttonVisual = createComponentVisualTypes({
 	style: {
@@ -41,7 +41,7 @@ export const Button: React.FC<ButtonProps> = (props) => {
 
 	return (
 		<Box
-			as="a"
+			as={as || "a"}
 			className={clsx(styles.button, size && styles[size])}
 			containerProps={{
 				className: styles.buttonContainer,

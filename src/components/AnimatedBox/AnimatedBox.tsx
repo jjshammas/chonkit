@@ -169,6 +169,7 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 	const currentAnimationRef = useRef<"enter" | "exit" | "transition" | null>(
 		null
 	);
+	const pendingAnimationCompleteRef = useRef<(() => void) | null>(null);
 	const previousTriggerRef = useRef<any>(animation?.transition?.trigger);
 	const cachedKeyframeStringsRef = useRef<string[]>([]);
 	// Track if we've already decided to skip/play on mount - don't change the decision
@@ -392,8 +393,12 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 					...finalStyles,
 				};
 			}
+			pendingAnimationCompleteRef.current = null;
 			el.removeEventListener("animationend", handleEnd);
 		};
+
+		// Store the completion handler so it can be manually triggered if a transition starts
+		pendingAnimationCompleteRef.current = handleEnd;
 
 		el.addEventListener("animationend", handleEnd);
 
@@ -434,6 +439,13 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 		}
 
 		previousTriggerRef.current = trigger;
+
+		// If an enter or exit animation is still pending, force-complete it first
+		// This ensures its final styles are applied before the transition starts
+		if (pendingAnimationCompleteRef.current) {
+			pendingAnimationCompleteRef.current();
+			pendingAnimationCompleteRef.current = null;
+		}
 
 		const {
 			frames: rawFrames,

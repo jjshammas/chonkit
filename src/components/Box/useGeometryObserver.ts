@@ -18,6 +18,10 @@ export function useGeometryObserver(
 	const providerUnsubRef = useRef<(() => void) | null>(null);
 	const currentElRef = useRef<HTMLElement | null>(null);
 	const firstNotificationRef = useRef<boolean>(true);
+	const lastGeometryRef = useRef<Geometry | null>(null);
+	const pendingCachedRafRef = useRef<Map<GeometryCallback, number>>(
+		new Map()
+	);
 	const { geometryObserver, rootAncestor } = useChonkit();
 
 	const providerCallback = (geometry: Geometry) => {
@@ -25,6 +29,7 @@ export function useGeometryObserver(
 		if (firstNotificationRef.current) {
 			firstNotificationRef.current = false;
 		}
+		lastGeometryRef.current = geometry;
 		subscribers.current.forEach((cb) => cb(geometry));
 	};
 
@@ -34,6 +39,9 @@ export function useGeometryObserver(
 		if (currentElRef.current === el && providerUnsubRef.current) return;
 
 		// Resubscribe to provider if element changed
+		if (currentElRef.current && currentElRef.current !== el) {
+			lastGeometryRef.current = null;
+		}
 		if (providerUnsubRef.current) {
 			providerUnsubRef.current();
 			providerUnsubRef.current = null;
@@ -74,6 +82,7 @@ export function useGeometryObserver(
 		ensureProviderSubscription();
 
 		// If immediateGeometry is enabled at hook level, read synchronously on first subscription
+		let deliveredImmediate = false;
 		if (subscribeOpts?.immediate !== false && opts?.immediateGeometry) {
 			const el = ref.current;
 			const root = rootAncestor.current;
@@ -86,16 +95,36 @@ export function useGeometryObserver(
 					x: box.left - rootBox.left,
 					y: box.top - rootBox.top,
 				});
+				deliveredImmediate = true;
 			}
+		}
+		if (
+			subscribeOpts?.immediate !== false &&
+			!deliveredImmediate &&
+			lastGeometryRef.current
+		) {
+			const rafId = requestAnimationFrame(() => {
+				pendingCachedRafRef.current.delete(cb);
+				if (!subscribers.current.has(cb) || !lastGeometryRef.current)
+					return;
+				cb(lastGeometryRef.current);
+			});
+			pendingCachedRafRef.current.set(cb, rafId);
 		}
 
 		return () => {
 			subscribers.current.delete(cb);
+			const pendingRaf = pendingCachedRafRef.current.get(cb);
+			if (pendingRaf != null) {
+				cancelAnimationFrame(pendingRaf);
+				pendingCachedRafRef.current.delete(cb);
+			}
 			// If no subscribers remain, unsubscribe from provider
 			if (subscribers.current.size === 0 && providerUnsubRef.current) {
 				providerUnsubRef.current();
 				providerUnsubRef.current = null;
 				currentElRef.current = null;
+				lastGeometryRef.current = null;
 			}
 		};
 	};

@@ -2,6 +2,7 @@ import { ChonkitProvider } from "@/core/ChonkitProvider/ChonkitProvider";
 import { render, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Box } from "./Box";
+import styles from "./Box.module.css";
 
 /**
  * Tests for the Box geometry observer system
@@ -221,6 +222,45 @@ describe("Box Geometry Observer", () => {
 					expect(box?.classList.contains("geometry-unknown")).toBe(
 						false
 					);
+				},
+				{ timeout: 100 }
+			);
+		});
+
+		it("should deliver cached geometry to new subscribers without resize", async () => {
+			const { container, rerender } = render(
+				<ChonkitProvider blockSize={8}>
+					<Box sx={{ borderRadius: 2 }}>Rounded Box</Box>
+				</ChonkitProvider>
+			);
+
+			const root = container.querySelector(".chonkit-root");
+			const box = root?.firstElementChild as HTMLElement | null;
+
+			await waitFor(
+				() => {
+					expect(box?.classList.contains("geometry-unknown")).toBe(
+						false
+					);
+				},
+				{ timeout: 100 }
+			);
+
+			rerender(
+				<ChonkitProvider blockSize={8}>
+					<Box sx={{ borderRadius: 2, bevelHighlightSize: 1 }}>
+						Bevel Box
+					</Box>
+				</ChonkitProvider>
+			);
+
+			await waitFor(
+				() => {
+					const highlight = box?.querySelector(
+						`.${styles.highlight}`
+					) as HTMLElement | null;
+					expect(highlight).toBeTruthy();
+					expect(highlight?.style.clipPath).toMatch(/path\('/);
 				},
 				{ timeout: 100 }
 			);

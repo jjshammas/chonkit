@@ -1,6 +1,6 @@
+import type { Theme } from "@/core/themes";
 import { resolveColor } from "@/hooks/useResolvedColor";
 import { convertJSVariableNameToCSSVariableName } from "@/utils/cssVar";
-import type { Theme } from "@/core/themes";
 
 export const STATE_KEYS = ["_hover", "_active", "_focus", "_disabled"] as const;
 export type InteractionState = (typeof STATE_KEYS)[number];
@@ -24,6 +24,11 @@ const exemptKeysFromNormalization = [
 	"flexShrink",
 	"opacity",
 	"zIndex",
+	"gridRow",
+	"gridColumn",
+	"grid",
+	"order",
+	"gridArea",
 ];
 export function createVisualStyle<T extends Record<string, VisualValue>>(args: {
 	style: VisualStyle<T>;
