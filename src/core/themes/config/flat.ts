@@ -7,6 +7,10 @@ const defaultTheme: ThemePartial = {
 		bevelHighlightSize: 0,
 		bevelShadowSize: 0,
 	},
+	TextInput: {
+		borderWidth: 0,
+		borderRadius: 2,
+	},
 };
 
 export default defaultTheme;

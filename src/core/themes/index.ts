@@ -2,6 +2,7 @@ import { convertJSVariableNameToCSSVariableName } from "@/utils/cssVar";
 import type { InteractionState } from "@/components/Box/createVisualStyle";
 
 import type { ButtonTheme } from "@/components/Button/Button";
+import type { TextInputTheme } from "@/components/TextInput/TextInput";
 import type {
 	ScrollAreaTrackTheme,
 	ScrollAreaThumbTheme,
@@ -36,6 +37,7 @@ export type Theme = {
 		shadowBlendMode: string;
 	};
 	Button: ButtonTheme;
+	TextInput: TextInputTheme;
 	ScrollAreaTrack: ScrollAreaTrackTheme;
 	ScrollAreaThumb: ScrollAreaThumbTheme;
 };

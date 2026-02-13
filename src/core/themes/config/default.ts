@@ -74,6 +74,30 @@ const defaultTheme: Theme = {
 			},
 		},
 	},
+	TextInput: {
+		defaultVariant: "default",
+		borderWidth: 1,
+		borderRadius: 4,
+		borderColor: "rgba(0,0,0,0.3)",
+		backgroundColor: "secondary",
+		color: "secondary.fg",
+		padding: "8px 10px 6px",
+
+		_focus: {
+			backgroundColor: "bg",
+			borderColor: "primary",
+		},
+
+		_disabled: {
+			backgroundColor: "disabled",
+			color: "disabled.fg",
+			borderColor: "rgba(0,0,0,0.2)",
+		},
+
+		variants: {
+			default: {},
+		},
+	},
 	ScrollAreaTrack: {
 		borderRadius: 2,
 		borderColor: "#ccc",

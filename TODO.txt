@@ -1,9 +1,7 @@
-all values should work for snapping not just px (% etc)
 border radius should still work even if no border
 icons
-limit geometry observer updates
 faux box shadow if no blur
 make gradient interactable
-animations supporting x,y instead of blocks
 tooltip
 modal
+test border with pixel width; border radius with px size

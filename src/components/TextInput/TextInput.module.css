@@ -1,0 +1,112 @@
+.textInputContainer {
+	display: inline-block;
+	--ck-textinput-background: var(--ck-background-color);
+	--ck-textinput-color: var(--ck-color);
+	--ck-textinput-border: var(--ck-border-color);
+	--ck-textinput-inner-border: var(--ck-inner-border-color);
+	--ck-textinput-depth: var(--ck-depth);
+}
+
+.textInputInner {
+	display: flex;
+	align-items: center;
+	width: 100%;
+}
+
+.textInputContainer:focus-within .textInputInner {
+	--ck-background-color: var(
+		--ck-background-color-focus,
+		var(--ck-textinput-background)
+	);
+	--ck-color: var(--ck-color-focus, var(--ck-textinput-color));
+	--ck-border-color: var(--ck-border-color-focus, var(--ck-textinput-border));
+	--ck-inner-border-color: var(
+		--ck-inner-border-color-focus,
+		var(--ck-textinput-inner-border)
+	);
+	--ck-depth: var(--ck-depth-focus, var(--ck-textinput-depth));
+	--ck-background-color-hover: var(
+		--ck-background-color-focus,
+		var(--ck-textinput-background)
+	);
+	--ck-color-hover: var(--ck-color-focus, var(--ck-textinput-color));
+	--ck-border-color-hover: var(
+		--ck-border-color-focus,
+		var(--ck-textinput-border)
+	);
+	--ck-inner-border-color-hover: var(
+		--ck-inner-border-color-focus,
+		var(--ck-textinput-inner-border)
+	);
+	--ck-depth-hover: var(--ck-depth-focus, var(--ck-textinput-depth));
+}
+
+.textInputContainer[data-disabled="true"] .textInputInner {
+	--ck-background-color: var(
+		--ck-background-color-disabled,
+		var(--ck-textinput-background)
+	);
+	--ck-color: var(--ck-color-disabled, var(--ck-textinput-color));
+	--ck-border-color: var(
+		--ck-border-color-disabled,
+		var(--ck-textinput-border)
+	);
+	--ck-inner-border-color: var(
+		--ck-inner-border-color-disabled,
+		var(--ck-textinput-inner-border)
+	);
+	--ck-depth: var(--ck-depth-disabled, var(--ck-textinput-depth));
+	--ck-background-color-hover: var(
+		--ck-background-color-disabled,
+		var(--ck-textinput-background)
+	);
+	--ck-color-hover: var(--ck-color-disabled, var(--ck-textinput-color));
+	--ck-border-color-hover: var(
+		--ck-border-color-disabled,
+		var(--ck-textinput-border)
+	);
+	--ck-inner-border-color-hover: var(
+		--ck-inner-border-color-disabled,
+		var(--ck-textinput-inner-border)
+	);
+	--ck-depth-hover: var(--ck-depth-disabled, var(--ck-textinput-depth));
+}
+
+.input {
+	flex: 1;
+	min-width: 0;
+	border: 0;
+	outline: 0;
+	padding: 0;
+	margin: 0;
+	background: transparent;
+	color: inherit;
+	font: inherit;
+	line-height: var(--ck-text-line-height);
+	font-size: var(--ck-text-font-size);
+	font-family: var(--ck-text-font-family);
+	text-indent: 1px;
+	position: relative;
+	left: var(--ck-text-adjustment-left, 0);
+	top: var(--ck-text-adjustment-top, 0);
+	appearance: none;
+}
+
+.input::placeholder {
+	opacity: 0.6;
+}
+
+.input:disabled {
+	cursor: not-allowed;
+}
+
+.sm {
+	left: var(--ck-text-adjustment-left-sm, 0);
+	top: var(--ck-text-adjustment-top-sm, 0);
+	font-size: var(--ck-text-font-size-sm);
+	font-family: var(--ck-text-font-family-sm);
+	line-height: var(--ck-text-line-height-sm);
+}
+
+.lg {
+}

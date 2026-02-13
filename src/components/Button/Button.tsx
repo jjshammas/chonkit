@@ -49,7 +49,11 @@ export const Button: React.FC<ButtonProps> = (props) => {
 			}}
 			{...rest}
 		>
-			<Text size={size}>{children}</Text>
+			{typeof children === "string" ? (
+				<Text size={size}>{children}</Text>
+			) : (
+				children
+			)}
 		</Box>
 	);
 };
