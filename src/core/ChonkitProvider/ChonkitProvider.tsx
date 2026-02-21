@@ -22,6 +22,7 @@ interface ChonkitContextValue {
 	rootAncestor: React.RefObject<HTMLDivElement | null>;
 	theme: Theme;
 	viewportWidth: number;
+	breakpoint: BreakpointKey;
 	stepRateHz?: number;
 	geometryObserver: {
 		subscribe: (
@@ -49,6 +50,8 @@ export interface ChonkitProviderProps
 	theme?: Theme | ThemePartial | keyof typeof themes;
 	stepRateHz?: number;
 }
+
+type BreakpointKey = keyof Theme["breakpoints"];
 
 const Grid = ({ blockSize }: { blockSize: number }) => {
 	return (
@@ -293,6 +296,15 @@ export const ChonkitProvider: React.FC<ChonkitProviderProps> = ({
 				? mergeThemes(themes.default, rawTheme)
 				: themes.default;
 
+	const breakpoint = React.useMemo(() => {
+		const order: BreakpointKey[] = ["xs", "sm", "md", "lg", "xl", "2xl"];
+		let current: BreakpointKey = "xs";
+		for (const bp of order) {
+			if (viewportWidth >= theme.breakpoints[bp]) current = bp;
+		}
+		return current;
+	}, [theme.breakpoints, viewportWidth]);
+
 	const addlStyle = {
 		"--ck-block-size": `${blockSize}px`,
 		...createCSSVariables(theme),
@@ -309,6 +321,7 @@ export const ChonkitProvider: React.FC<ChonkitProviderProps> = ({
 				rootAncestor: rootAncestor,
 				theme,
 				viewportWidth,
+				breakpoint,
 				stepRateHz,
 				geometryObserver,
 			}}
@@ -335,4 +348,9 @@ export const useChonkit = (): ChonkitContextValue => {
 		throw new Error("useChonkit must be used within a ChonkitProvider");
 	}
 	return context;
+};
+
+export const useBreakpoint = (): BreakpointKey => {
+	const { breakpoint } = useChonkit();
+	return breakpoint;
 };
