@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 
 import { ScrollArea } from "./ScrollArea";
 import { Box } from "../Box/Box";
+import { useState } from "react";
 
 /**
  * A scrollable area with a custom scrollbar to match the rest of the design system.
@@ -111,4 +112,72 @@ export const HorizontalScroll: Story = {
 			</div>
 		),
 	],
+};
+
+export const Callbacks: Story = {
+	render: () => {
+		const [scrollCount, setScrollCount] = useState(0);
+		const [scrollStartCount, setScrollStartCount] = useState(0);
+		const [scrollStopCount, setScrollStopCount] = useState(0);
+		const [lastTop, setLastTop] = useState(0);
+		const [lastLeft, setLastLeft] = useState(0);
+
+		return (
+			<div
+				style={{
+					display: "flex",
+					flexDirection: "row",
+					alignItems: "stretch",
+					justifyContent: "center",
+					height: "300px",
+					backgroundColor: "#ddd",
+					gap: "20px",
+					padding: "20px",
+				}}
+			>
+				<ScrollArea
+					onScroll={(values) => {
+						setScrollCount((count) => count + 1);
+						setLastTop(values.scrollTop);
+						setLastLeft(values.scrollLeft);
+					}}
+					onScrollStart={() => {
+						setScrollStartCount((count) => count + 1);
+					}}
+					onScrollStop={() => {
+						setScrollStopCount((count) => count + 1);
+					}}
+				>
+					<>
+						{Array(20).fill(
+							<p>
+								Scroll to fire callbacks. Lorem ipsum Lorem
+								ipsumLorem ipsumLorem ipsumLorem ipsumLorem
+								ipsumLorem ipsumLorem ipsumLorem ipsumLorem
+								ipsumLorem ipsumLorem ipsumLorem ipsumLorem
+								ipsumLorem ipsumLorem ipsumLorem ipsum Lorem
+								ipsumLorem ipsumLorem ipsumLorem ipsumLorem
+								ipsumLorem ipsumLorem ipsumLorem ipsum
+							</p>
+						)}
+					</>
+				</ScrollArea>
+				<div
+					style={{
+						width: "220px",
+						backgroundColor: "#bbb",
+						padding: "12px",
+						fontSize: "12px",
+						lineHeight: 1.4,
+					}}
+				>
+					<div>onScroll: {scrollCount}</div>
+					<div>onScrollStart: {scrollStartCount}</div>
+					<div>onScrollStop: {scrollStopCount}</div>
+					<div>scrollTop: {Math.round(lastTop)}</div>
+					<div>scrollLeft: {Math.round(lastLeft)}</div>
+				</div>
+			</div>
+		);
+	},
 };

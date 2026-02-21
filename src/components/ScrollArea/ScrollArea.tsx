@@ -1,10 +1,10 @@
-import React, { ReactNode } from "react";
-import { Box, BoxProps, boxVisual } from "../Box/Box";
-import { useComponentTheme } from "@/hooks/useComponentTheme";
 import type { WithoutInteractionStates } from "@/core/themes";
-import { createComponentVisualTypes } from "@/core/themes/createComponentVisualTypes";
 import { createComponentThemeTypes } from "@/core/themes/createComponentThemeTypes";
+import { createComponentVisualTypes } from "@/core/themes/createComponentVisualTypes";
+import { useComponentTheme } from "@/hooks/useComponentTheme";
+import React, { ReactNode } from "react";
 import { Scrollbar } from "react-scrollbars-custom";
+import { Box, BoxProps, boxVisual } from "../Box/Box";
 import { normalizeVisualValue } from "../Box/createVisualStyle";
 
 const scrollAreaTrackVisual = createComponentVisualTypes({
@@ -37,6 +37,39 @@ const scrollAreaThumbThemeTypes = createComponentThemeTypes({
 
 export type ScrollAreaThumbTheme = typeof scrollAreaThumbThemeTypes.types.Theme;
 
+export type ScrollAreaScrollState = {
+	scrollTop: number;
+	scrollLeft: number;
+	scrollHeight: number;
+	scrollWidth: number;
+	clientHeight: number;
+	clientWidth: number;
+};
+
+const isScrollAreaScrollState = (
+	value: unknown
+): value is ScrollAreaScrollState => {
+	if (!value || typeof value !== "object") return false;
+	const candidate = value as Record<string, unknown>;
+	return (
+		typeof candidate.scrollTop === "number" &&
+		typeof candidate.scrollLeft === "number" &&
+		typeof candidate.scrollHeight === "number" &&
+		typeof candidate.scrollWidth === "number" &&
+		typeof candidate.clientHeight === "number" &&
+		typeof candidate.clientWidth === "number"
+	);
+};
+
+export type ScrollAreaOnScroll = (
+	scrollValues: ScrollAreaScrollState,
+	prevScrollState: ScrollAreaScrollState
+) => void;
+
+export type ScrollAreaOnScrollEdge = (
+	scrollValues: ScrollAreaScrollState
+) => void;
+
 export interface ScrollAreaProps extends WithoutInteractionStates<BoxProps> {
 	children?: ReactNode;
 	noScrollX?: boolean;
@@ -45,6 +78,9 @@ export interface ScrollAreaProps extends WithoutInteractionStates<BoxProps> {
 	permanentTrackX?: boolean;
 	permanentTrackY?: boolean;
 	permanentTracks?: boolean;
+	onScroll?: ScrollAreaOnScroll;
+	onScrollStart?: ScrollAreaOnScrollEdge;
+	onScrollStop?: ScrollAreaOnScrollEdge;
 }
 
 export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
@@ -61,6 +97,34 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
 	if (!trackTheme.size) trackTheme.size = "10px";
 	if (!thumbTheme.size) thumbTheme.size = "10px";
 	const trackGap = trackTheme.size;
+
+	const handleScroll = rest.onScroll
+		? ((eventOrValues: unknown, prevValues?: unknown) => {
+				if (!rest.onScroll) return;
+				if (isScrollAreaScrollState(eventOrValues)) {
+					const prevScrollState = isScrollAreaScrollState(prevValues)
+						? prevValues
+						: eventOrValues;
+					rest.onScroll(eventOrValues, prevScrollState);
+				}
+		  }) as React.UIEventHandler<HTMLDivElement> & ScrollAreaOnScroll
+		: undefined;
+
+	const handleScrollStart = rest.onScrollStart
+		? ((values: unknown) => {
+				if (isScrollAreaScrollState(values)) {
+					rest.onScrollStart?.(values);
+				}
+		  }) as ScrollAreaOnScrollEdge
+		: undefined;
+
+	const handleScrollStop = rest.onScrollStop
+		? ((values: unknown) => {
+				if (isScrollAreaScrollState(values)) {
+					rest.onScrollStop?.(values);
+				}
+		  }) as ScrollAreaOnScrollEdge
+		: undefined;
 
 	// This code snaps the scroll position to the block size.
 	// It works, but makes it feel very unnatural.
@@ -99,6 +163,9 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
 			permanentTrackX={rest.permanentTrackX}
 			permanentTrackY={rest.permanentTrackY}
 			permanentTracks={rest.permanentTracks}
+			onScroll={handleScroll}
+			onScrollStart={handleScrollStart}
+			onScrollStop={handleScrollStop}
 			/*ref={scrollRef}*/ style={{ flex: 1 }}
 			trackYProps={{
 				renderer: (props) => {
