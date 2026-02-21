@@ -1,0 +1,78 @@
+import { ChonkitProvider } from "@/core/ChonkitProvider/ChonkitProvider";
+import { render, waitFor } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { AnimatedBox } from "./AnimatedBox";
+import { animationManager } from "./createAnimationManager";
+
+describe("AnimatedBox", () => {
+	afterEach(() => {
+		animationManager.clear();
+		vi.restoreAllMocks();
+	});
+
+	// Not sure if we want this. If you change the entry animation, do you expect it to replay or just snap to the new values?
+	it.skip("does not replay enter animation when animation config changes while visible", () => {
+		const cacheSpy = vi.spyOn(animationManager, "cacheKeyframes");
+
+		const { rerender } = render(
+			<ChonkitProvider blockSize={8}>
+				<AnimatedBox
+					animation={{
+						enter: {
+							from: { opacity: 0 },
+							to: { opacity: 1 },
+							duration: 200,
+						},
+					}}
+				>
+					Animated
+				</AnimatedBox>
+			</ChonkitProvider>
+		);
+
+		expect(cacheSpy).toHaveBeenCalledTimes(1);
+
+		rerender(
+			<ChonkitProvider blockSize={8}>
+				<AnimatedBox
+					animation={{
+						enter: {
+							from: { opacity: 0 },
+							to: { opacity: 1 },
+							duration: 350,
+						},
+					}}
+				>
+					Animated
+				</AnimatedBox>
+			</ChonkitProvider>
+		);
+
+		expect(cacheSpy).toHaveBeenCalledTimes(1);
+	});
+
+	it("applies enter end styles when skipping the enter animation", async () => {
+		const { container } = render(
+			<ChonkitProvider blockSize={8}>
+				<AnimatedBox
+					skipEnterAnimation
+					animation={{
+						enter: {
+							from: { opacity: 0 },
+							to: { opacity: 1 },
+						},
+					}}
+				>
+					Animated
+				</AnimatedBox>
+			</ChonkitProvider>
+		);
+
+		const root = container.querySelector(".chonkit-root");
+		const box = root?.firstElementChild as HTMLElement | null;
+
+		await waitFor(() => {
+			expect(box?.style.opacity).toBe("1");
+		});
+	});
+});

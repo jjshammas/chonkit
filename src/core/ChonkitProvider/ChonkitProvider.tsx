@@ -24,6 +24,7 @@ interface ChonkitContextValue {
 	viewportWidth: number;
 	breakpoint: BreakpointKey;
 	stepRateHz?: number;
+	disableAnimationBlockSnapping?: boolean;
 	geometryObserver: {
 		subscribe: (
 			element: HTMLElement,
@@ -49,6 +50,7 @@ export interface ChonkitProviderProps
 	showGrid?: boolean;
 	theme?: Theme | ThemePartial | keyof typeof themes;
 	stepRateHz?: number;
+	disableAnimationBlockSnapping?: boolean;
 }
 
 type BreakpointKey = keyof Theme["breakpoints"];
@@ -79,6 +81,7 @@ export const ChonkitProvider: React.FC<ChonkitProviderProps> = ({
 	style,
 	theme: rawTheme,
 	stepRateHz = DEFAULT_STEP_RATE_HZ,
+	disableAnimationBlockSnapping = false,
 	...rest
 }) => {
 	const rootAncestor = useRef<HTMLDivElement>(null);
@@ -323,6 +326,7 @@ export const ChonkitProvider: React.FC<ChonkitProviderProps> = ({
 				viewportWidth,
 				breakpoint,
 				stepRateHz,
+				disableAnimationBlockSnapping,
 				geometryObserver,
 			}}
 		>

@@ -12,6 +12,7 @@ import React, {
 import {
 	DynamicKeyframe,
 	createAnimatedProperties,
+	toCSSTimingFunction,
 } from "./createAnimationFrames";
 import { animationManager } from "./createAnimationManager";
 
@@ -163,7 +164,11 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 }) => {
 	const ref = useRef<HTMLDivElement>(null);
 	const [shouldRender, setShouldRender] = useState(isVisible);
-	const { blockSize, stepRateHz: globalStepRateHz } = useChonkit();
+	const {
+		blockSize,
+		stepRateHz: globalStepRateHz,
+		disableAnimationBlockSnapping,
+	} = useChonkit();
 	const routeTransition = useContext(RouteTransitionContext);
 
 	const currentAnimationRef = useRef<"enter" | "exit" | "transition" | null>(
@@ -199,19 +204,6 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 		isVisible,
 	]);
 
-	// Compute initial styles from "from" animation to prevent flash
-	const initialStyles = useMemo(() => {
-		if (
-			!animation?.enter?.from ||
-			shouldSkipEnterDecision ||
-			hasEverBeenVisibleRef.current
-		) {
-			return {};
-		}
-
-		return computeAnimationStyles(animation.enter.from, blockSize);
-	}, [animation?.enter?.from, shouldSkipEnterDecision, blockSize]);
-
 	// Apply initial "from" styles synchronously on first layout to prevent flash
 	useLayoutEffect(() => {
 		const el = ref.current;
@@ -240,10 +232,6 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 		() => serializeAnimationPhase(animation?.exit),
 		[animation?.exit]
 	);
-	const serializedTransitionPhase = useMemo(
-		() => serializeAnimationPhase(animation?.transition),
-		[animation?.transition]
-	);
 
 	// Mount or unmount based on isVisible
 	useEffect(() => {
@@ -256,7 +244,6 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 	useLayoutEffect(() => {
 		const el = ref.current;
 		if (!el || !animation) return;
-
 		const phase = isVisible ? animation.enter : animation.exit;
 		if (!phase) return;
 
@@ -300,6 +287,11 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 			onBeforeStart,
 			onAfterEnd,
 		} = phase;
+		const timingFunction =
+			disableAnimationBlockSnapping &&
+			(phase.stepRateHz ?? globalStepRateHz) === Infinity
+				? toCSSTimingFunction(easing)
+				: "linear";
 
 		onBeforeStart?.();
 
@@ -313,6 +305,7 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 				easing,
 				durationMs: duration,
 				stepRateHz: effectiveStepRateHz,
+				disableAnimationBlockSnapping,
 			});
 
 			// Apply "from" styles directly to ensure they're visible during animation delay
@@ -364,7 +357,7 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 		void el.offsetHeight; // Force reflow
 
 		// Use linear timing since easing is already baked into keyframe positions
-		el.style.animation = `${keyframeName} ${duration}ms linear ${delay}ms forwards`;
+		el.style.animation = `${keyframeName} ${duration}ms ${timingFunction} ${delay}ms forwards`;
 
 		const handleEnd = () => {
 			// Ensure this is still the correct animation phase
@@ -420,6 +413,7 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 		shouldRender,
 		blockSize,
 		globalStepRateHz,
+		disableAnimationBlockSnapping,
 	]);
 
 	// Handle transition animations triggered by value changes
@@ -428,17 +422,19 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 		if (!el || !animation?.transition) return;
 
 		const { trigger } = animation.transition;
+		const normalizedTrigger =
+			trigger === undefined ? undefined : String(trigger);
 
 		// Check if trigger has changed (skip on initial mount)
 		if (
-			previousTriggerRef.current === trigger ||
+			previousTriggerRef.current === normalizedTrigger ||
 			previousTriggerRef.current === undefined
 		) {
-			previousTriggerRef.current = trigger;
+			previousTriggerRef.current = normalizedTrigger;
 			return;
 		}
 
-		previousTriggerRef.current = trigger;
+		previousTriggerRef.current = normalizedTrigger;
 
 		// If an enter or exit animation is still pending, force-complete it first
 		// This ensures its final styles are applied before the transition starts
@@ -457,6 +453,11 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 			onBeforeStart,
 			onAfterEnd,
 		} = animation.transition;
+		const timingFunction =
+			disableAnimationBlockSnapping &&
+			(animation.transition.stepRateHz ?? globalStepRateHz) === Infinity
+				? toCSSTimingFunction(easing)
+				: "linear";
 
 		onBeforeStart?.();
 
@@ -471,6 +472,7 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 				easing,
 				durationMs: duration,
 				stepRateHz: effectiveStepRateHz,
+				disableAnimationBlockSnapping,
 			});
 		}
 
@@ -499,7 +501,7 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 		void el.offsetHeight; // Force reflow
 
 		// Use linear timing since easing is already baked into keyframe positions
-		el.style.animation = `${keyframeName} ${duration}ms linear ${delay}ms forwards`;
+		el.style.animation = `${keyframeName} ${duration}ms ${timingFunction} ${delay}ms forwards`;
 
 		const handleEnd = () => {
 			// Ensure this is still the correct animation phase
@@ -537,9 +539,9 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 		};
 	}, [
 		animation?.transition?.trigger,
-		serializedTransitionPhase,
 		blockSize,
 		globalStepRateHz,
+		disableAnimationBlockSnapping,
 	]);
 
 	if (!shouldRender) return null;

@@ -138,6 +138,67 @@ export const mergeKeyframeStyle = (style: string): string => {
 		.join(" ");
 };
 
+export const toCSSTimingFunction = (timing: string): string => {
+	const trimmed = timing.trim();
+	if (cssTimingMap[trimmed]) {
+		const [x1, y1, x2, y2] = cssTimingMap[trimmed];
+		return `cubic-bezier(${x1}, ${y1}, ${x2}, ${y2})`;
+	}
+
+	if (/^cubic-bezier\(([^)]+)\)$/i.test(trimmed)) return trimmed;
+	if (/^steps\((\d+),?\s*(start|end)?\)$/i.test(trimmed)) return trimmed;
+	return trimmed;
+};
+
+const buildStyleString = (
+	values: Record<string, any>,
+	blockSize: number
+): string => {
+	const styleMap: Record<string, string> = {};
+
+	Object.entries(values).forEach(([key, value]) => {
+		if (
+			key === "xBlocks" ||
+			key === "yBlocks" ||
+			key === "x" ||
+			key === "y"
+		) {
+			return;
+		}
+		if (typeof value === "number" || typeof value === "string") {
+			styleMap[key] = String(value);
+		}
+	});
+
+	let xPx = 0;
+	let yPx = 0;
+
+	if (values.xBlocks !== undefined) {
+		xPx = values.xBlocks * blockSize;
+	} else if (values.x !== undefined) {
+		xPx = parseFloat(String(values.x));
+	}
+
+	if (values.yBlocks !== undefined) {
+		yPx = values.yBlocks * blockSize;
+	} else if (values.y !== undefined) {
+		yPx = parseFloat(String(values.y));
+	}
+
+	if (
+		values.xBlocks !== undefined ||
+		values.yBlocks !== undefined ||
+		values.x !== undefined ||
+		values.y !== undefined
+	) {
+		styleMap.transform = `translate(${xPx}px, ${yPx}px)`;
+	}
+
+	return Object.entries(styleMap)
+		.map(([key, value]) => `${key}: ${value};`)
+		.join(" ");
+};
+
 export const mergeAnimationFrames = (
 	frames: DynamicKeyframe[]
 ): DynamicKeyframe[] => {
@@ -168,8 +229,10 @@ export const insertSteppedAnimationFrames = (
 		if (index === frames.length - 1) return;
 		steppedFrames.push(frame);
 		const nextFrame = frames[index + 1];
+		const delta = nextFrame.percent - frame.percent;
+		const epsilon = delta > 0 ? Math.min(0.01, delta / 2) : 0;
 		steppedFrames.push({
-			percent: nextFrame.percent - 0.01,
+			percent: nextFrame.percent - epsilon,
 			styles: frame.styles,
 		});
 	});
@@ -184,6 +247,7 @@ export type createAnimationTranslationFramesOptions = {
 	startPercent?: number;
 	endPercent?: number;
 	easing?: string;
+	disableAnimationBlockSnapping?: boolean;
 };
 
 export const createAnimationTranslationFrames = ({
@@ -193,6 +257,7 @@ export const createAnimationTranslationFrames = ({
 	startPercent = 0,
 	endPercent = 100,
 	easing = "ease-in-out",
+	disableAnimationBlockSnapping = false,
 }: createAnimationTranslationFramesOptions) => {
 	const frames: DynamicKeyframe[] = [];
 
@@ -247,7 +312,9 @@ export const createAnimationTranslationFrames = ({
 		}
 	}
 
-	return insertSteppedAnimationFrames(mergeAnimationFrames(frames));
+	const mergedFrames = mergeAnimationFrames(frames);
+	if (disableAnimationBlockSnapping) return mergedFrames;
+	return insertSteppedAnimationFrames(mergedFrames);
 };
 
 export type createAnimationPropertyFramesOptions = {
@@ -260,6 +327,7 @@ export type createAnimationPropertyFramesOptions = {
 	endPercent?: number;
 	easing?: string;
 	sharedSteps?: number;
+	disableAnimationBlockSnapping?: boolean;
 };
 
 export const createAnimationPropertyFrames = ({
@@ -272,6 +340,7 @@ export const createAnimationPropertyFrames = ({
 	endPercent = 100,
 	easing = "ease-in-out",
 	sharedSteps,
+	disableAnimationBlockSnapping = false,
 }: createAnimationPropertyFramesOptions) => {
 	const frames: DynamicKeyframe[] = [];
 
@@ -325,7 +394,9 @@ export const createAnimationPropertyFrames = ({
 			});
 		}
 
-		return insertSteppedAnimationFrames(mergeAnimationFrames(frames));
+		const mergedFrames = mergeAnimationFrames(frames);
+		if (disableAnimationBlockSnapping) return mergedFrames;
+		return insertSteppedAnimationFrames(mergedFrames);
 	}
 
 	const fromStr = String(from);
@@ -344,7 +415,9 @@ export const createAnimationPropertyFrames = ({
 			frames.push({ percent, styles: `${property}: ${value};` });
 		}
 
-		return insertSteppedAnimationFrames(mergeAnimationFrames(frames));
+		const mergedFrames = mergeAnimationFrames(frames);
+		if (disableAnimationBlockSnapping) return mergedFrames;
+		return insertSteppedAnimationFrames(mergedFrames);
 	}
 
 	const totalDifference = Math.abs(toNum - fromNum);
@@ -372,7 +445,9 @@ export const createAnimationPropertyFrames = ({
 		});
 	}
 
-	return insertSteppedAnimationFrames(mergeAnimationFrames(frames));
+	const mergedFrames = mergeAnimationFrames(frames);
+	if (disableAnimationBlockSnapping) return mergedFrames;
+	return insertSteppedAnimationFrames(mergedFrames);
 };
 
 export type createAnimatedPropertiesOptions = {
@@ -384,6 +459,7 @@ export type createAnimatedPropertiesOptions = {
 	easing?: string;
 	durationMs?: number;
 	stepRateHz?: number;
+	disableAnimationBlockSnapping?: boolean;
 };
 
 export const createAnimatedProperties = ({
@@ -395,7 +471,22 @@ export const createAnimatedProperties = ({
 	easing = "ease-in-out",
 	durationMs,
 	stepRateHz,
+	disableAnimationBlockSnapping = false,
 }: createAnimatedPropertiesOptions) => {
+	if (disableAnimationBlockSnapping && stepRateHz === Infinity) {
+		const fromStyles = buildStyleString(from, blockSize);
+		const toStyles = buildStyleString(to, blockSize);
+		return mergeAnimationFrames([
+			{
+				percent: startPercent,
+				styles: mergeKeyframeStyle(fromStyles),
+			},
+			{
+				percent: endPercent,
+				styles: mergeKeyframeStyle(toStyles),
+			},
+		]);
+	}
 	const frames: DynamicKeyframe[] = [];
 
 	// Convert x/y to xBlocks/yBlocks
@@ -446,7 +537,11 @@ export const createAnimatedProperties = ({
 	});
 
 	let hertzSteps: number | undefined;
-	if (stepRateHz && durationMs) {
+	if (
+		durationMs &&
+		stepRateHz !== undefined &&
+		Number.isFinite(stepRateHz)
+	) {
 		hertzSteps = Math.max(1, Math.floor((stepRateHz * durationMs) / 1000));
 	}
 
@@ -468,6 +563,7 @@ export const createAnimatedProperties = ({
 			endPercent,
 			easing,
 			sharedSteps,
+			disableAnimationBlockSnapping,
 		});
 
 		frames.push(...propertyFrames);

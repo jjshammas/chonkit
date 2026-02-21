@@ -2,6 +2,8 @@ import { describe, it, expect } from "vitest";
 
 import {
 	createAnimationTranslationFrames,
+	createAnimatedProperties,
+	toCSSTimingFunction,
 	mergeAnimationFrames,
 	mergeKeyframeStyle,
 	mergeTransformValues,
@@ -121,5 +123,69 @@ describe("createAnimationTranslationFrames", () => {
 			endPercent: 100,
 		});
 		expect(result).toEqual([]);
+	});
+
+	it("should skip stepped frames when block snapping is disabled", () => {
+		const result = createAnimationTranslationFrames({
+			from: { yBlocks: 0 },
+			to: { yBlocks: 2 },
+			blockSize: 10,
+			startPercent: 0,
+			endPercent: 100,
+			disableAnimationBlockSnapping: true,
+		});
+		expect(result).toEqual([
+			{ percent: 0, styles: "transform: translateY(0px);" },
+			{ percent: 50, styles: "transform: translateY(10px);" },
+			{ percent: 100, styles: "transform: translateY(20px);" },
+		]);
+	});
+});
+
+describe("createAnimatedProperties", () => {
+	it("should not cap steps when stepRateHz is Infinity", () => {
+		const result = createAnimatedProperties({
+			from: { xBlocks: 0 },
+			to: { xBlocks: 4 },
+			blockSize: 10,
+			durationMs: 1000,
+			stepRateHz: Infinity,
+			disableAnimationBlockSnapping: true,
+		});
+		expect(result).toHaveLength(5);
+	});
+
+	it("should cap steps when stepRateHz is finite", () => {
+		const result = createAnimatedProperties({
+			from: { xBlocks: 0 },
+			to: { xBlocks: 4 },
+			blockSize: 10,
+			durationMs: 1000,
+			stepRateHz: 2,
+			disableAnimationBlockSnapping: true,
+		});
+		expect(result).toHaveLength(3);
+	});
+});
+
+describe("toCSSTimingFunction", () => {
+	it("should map custom keywords to cubic-bezier", () => {
+		expect(toCSSTimingFunction("ease-out-cubic")).toBe(
+			"cubic-bezier(0.215, 0.61, 0.355, 1)"
+		);
+	});
+
+	it("should pass through valid CSS timing functions", () => {
+		expect(toCSSTimingFunction("cubic-bezier(0, 0, 1, 1)")).toBe(
+			"cubic-bezier(0, 0, 1, 1)"
+		);
+		expect(toCSSTimingFunction("steps(4, end)")).toBe("steps(4, end)");
+	});
+
+	it("should return unknown keywords unchanged", () => {
+		expect(toCSSTimingFunction("ease-in-out")).toBe(
+			"cubic-bezier(0.42, 0, 0.58, 1)"
+		);
+		expect(toCSSTimingFunction("custom-ease")).toBe("custom-ease");
 	});
 });

@@ -110,6 +110,14 @@ Set a global hertz rate via `ChonkitProvider` that applies to all animations:
 </ChonkitProvider>
 ```
 
+To remove the hertz-based step cap while still using grid snapping, set `stepRateHz` to `Infinity`:
+
+```tsx
+<ChonkitProvider blockSize={2} stepRateHz={Infinity}>
+	<YourApp />
+</ChonkitProvider>
+```
+
 ### Per-Animation Override
 
 Individual animations can override the global rate:
@@ -131,6 +139,26 @@ Common hertz rates and their effects:
 - **24 Hz**: Smooth enough for most movements, retro aesthetic
 - **30 Hz**: Balanced between smooth and stepped
 - **60 Hz**: Maximum smoothness while maintaining steps
+- **Infinity**: No hertz-based cap; uses natural step counts per property
+
+## Disabling Stepped Frames
+
+If you want animations to look like standard CSS animations (no stair stepping),
+disable block snapping globally. This keeps the same keyframe timing but removes
+the extra "hold" frames that create the stepped effect.
+
+```tsx
+<ChonkitProvider
+	blockSize={2}
+	stepRateHz={Infinity}
+	disableAnimationBlockSnapping
+>
+	<YourApp />
+</ChonkitProvider>
+```
+
+For fully smooth animations, use `disableAnimationBlockSnapping` and set
+`stepRateHz={Infinity}` so timing is not capped by hertz steps.
 
 ## Transition Animations
 
