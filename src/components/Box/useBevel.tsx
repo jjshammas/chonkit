@@ -49,7 +49,8 @@ export function useBevel(
 						height
 					)
 				)}')`;
-				elementHighlight.current!.style.clipPath = highlightPath;
+				if (elementHighlight.current)
+					elementHighlight.current.style.clipPath = highlightPath;
 			}
 			if (shadowSize) {
 				const shadowPath = `path('${convertPointsToPathString(
@@ -63,7 +64,8 @@ export function useBevel(
 						height
 					)
 				)}')`;
-				elementShadow.current!.style.clipPath = shadowPath;
+				if (elementShadow.current)
+					elementShadow.current.style.clipPath = shadowPath;
 			}
 		});
 

@@ -21,7 +21,9 @@ type DropShadow =
 	  };
 
 export const parseCSSShadowString = (shadow: string): DropShadow => {
-	const matches = shadow.match(/((\d+(px)?\s+){1,3})(.+)/);
+	const matches = shadow.match(
+		/(((-?\d+(?:\.\d+)?)(px)?\s+){1,3})(.+)/
+	);
 	if (!matches) {
 		throw new Error("Invalid shadow string format. Shadow: " + shadow);
 	}
