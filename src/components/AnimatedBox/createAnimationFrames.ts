@@ -147,7 +147,11 @@ export const toCSSTimingFunction = (timing: string): string => {
 
 	if (/^cubic-bezier\(([^)]+)\)$/i.test(trimmed)) return trimmed;
 	if (/^steps\((\d+),?\s*(start|end)?\)$/i.test(trimmed)) return trimmed;
-	return trimmed;
+
+	console.warn(
+		`Unknown easing "${timing}", falling back to linear.`
+	);
+	return "linear";
 };
 
 const buildStyleString = (

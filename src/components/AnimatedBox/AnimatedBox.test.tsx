@@ -75,4 +75,107 @@ describe("AnimatedBox", () => {
 			expect(box?.style.opacity).toBe("1");
 		});
 	});
+
+	it("starts the loop animation after enter completes", async () => {
+		const { container } = render(
+			<ChonkitProvider blockSize={8}>
+				<AnimatedBox
+					animation={{
+						enter: {
+							from: { opacity: 0 },
+							to: { opacity: 1 },
+							duration: 100,
+						},
+						loop: {
+							from: { opacity: 1 },
+							to: { opacity: 0.5 },
+							duration: 200,
+						},
+					}}
+				>
+					Animated
+				</AnimatedBox>
+			</ChonkitProvider>
+		);
+
+		const root = container.querySelector(".chonkit-root");
+		const box = root?.firstElementChild as HTMLElement | null;
+
+		expect(box?.style.animation).not.toContain("infinite");
+
+		box?.dispatchEvent(new Event("animationend"));
+
+		await waitFor(() => {
+			expect(box?.style.animation).toContain("infinite");
+		});
+	});
+
+	it("stops the loop animation when an exit animation starts", async () => {
+		const { container, rerender } = render(
+			<ChonkitProvider blockSize={8}>
+				<AnimatedBox
+					isVisible
+					animation={{
+						enter: {
+							from: { opacity: 0 },
+							to: { opacity: 1 },
+							duration: 100,
+						},
+						exit: {
+							from: { opacity: 1 },
+							to: { opacity: 0 },
+							duration: 200,
+						},
+						loop: {
+							from: { opacity: 1 },
+							to: { opacity: 0.6 },
+							duration: 300,
+						},
+					}}
+				>
+					Animated
+				</AnimatedBox>
+			</ChonkitProvider>
+		);
+
+		const root = container.querySelector(".chonkit-root");
+		const box = root?.firstElementChild as HTMLElement | null;
+
+		box?.dispatchEvent(new Event("animationend"));
+
+		await waitFor(() => {
+			expect(box?.style.animation).toContain("infinite");
+		});
+
+		rerender(
+			<ChonkitProvider blockSize={8}>
+				<AnimatedBox
+					isVisible={false}
+					animation={{
+						enter: {
+							from: { opacity: 0 },
+							to: { opacity: 1 },
+							duration: 100,
+						},
+						exit: {
+							from: { opacity: 1 },
+							to: { opacity: 0 },
+							duration: 200,
+						},
+						loop: {
+							from: { opacity: 1 },
+							to: { opacity: 0.6 },
+							duration: 300,
+						},
+					}}
+				>
+					Animated
+				</AnimatedBox>
+			</ChonkitProvider>
+		);
+
+		await waitFor(() => {
+			expect(box?.style.animation).not.toContain("infinite");
+		});
+	});
 });

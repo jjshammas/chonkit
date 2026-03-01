@@ -146,6 +146,7 @@ type AnimatedBoxProps = {
 		transition?: AnimationPhaseConfig & {
 			trigger?: any; // Value that triggers the transition animation
 		};
+		loop?: AnimationPhaseConfig;
 	};
 	baseProps?: BoxProps;
 	isVisible?: boolean;
@@ -171,18 +172,20 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 	} = useChonkit();
 	const routeTransition = useContext(RouteTransitionContext);
 
-	const currentAnimationRef = useRef<"enter" | "exit" | "transition" | null>(
-		null
-	);
+	const currentAnimationRef = useRef<
+		"enter" | "exit" | "transition" | "loop" | null
+	>(null);
 	const pendingAnimationCompleteRef = useRef<(() => void) | null>(null);
 	const previousTriggerRef = useRef<any>(animation?.transition?.trigger);
-	const cachedKeyframeStringsRef = useRef<string[]>([]);
 	// Track if we've already decided to skip/play on mount - don't change the decision
 	const animationDecisionMadeRef = useRef(false);
 	const lastVisibleStateRef = useRef(isVisible);
 	const hasEverBeenVisibleRef = useRef(false); // Always start as false, set to true only after first visibility
 	// Track persistent inline styles from completed animations
 	const persistentStylesRef = useRef<React.CSSProperties>({});
+	const loopKeyframeStringRef = useRef<string | null>(null);
+	const loopAnimationNameRef = useRef<string | null>(null);
+	const loopActiveRef = useRef(false);
 
 	// Capture the skip decision once per visibility transition
 	const shouldSkipEnterDecision = useMemo(() => {
@@ -232,6 +235,118 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 		() => serializeAnimationPhase(animation?.exit),
 		[animation?.exit]
 	);
+	const serializedLoopPhase = useMemo(
+		() => serializeAnimationPhase(animation?.loop),
+		[animation?.loop]
+	);
+
+	const stopLoopAnimation = (el: HTMLDivElement) => {
+		if (!loopActiveRef.current) return;
+
+		const loopAnimationName = loopAnimationNameRef.current;
+		if (
+			loopAnimationName &&
+			el.style.animation.includes(loopAnimationName)
+		) {
+			el.style.animation = "";
+		}
+
+		if (loopKeyframeStringRef.current) {
+			animationManager.releaseKeyframes(loopKeyframeStringRef.current);
+		}
+
+		loopKeyframeStringRef.current = null;
+		loopAnimationNameRef.current = null;
+		loopActiveRef.current = false;
+	};
+
+	const startLoopAnimation = (
+		el: HTMLDivElement,
+		phase: AnimationPhaseConfig
+	) => {
+		stopLoopAnimation(el);
+
+		const {
+			frames: rawFrames,
+			from,
+			to,
+			duration = 500,
+			delay = 0,
+			easing = "ease",
+		} = phase;
+		const timingFunction =
+			disableAnimationBlockSnapping &&
+			(phase.stepRateHz ?? globalStepRateHz) === Infinity
+				? toCSSTimingFunction(easing)
+				: "linear";
+
+		let frames: DynamicKeyframe[] = rawFrames || [];
+		if (from && to) {
+			const effectiveStepRateHz = phase.stepRateHz ?? globalStepRateHz;
+			const forwardFrames = createAnimatedProperties({
+				from,
+				to,
+				blockSize,
+				easing,
+				durationMs: duration,
+				stepRateHz: effectiveStepRateHz,
+				disableAnimationBlockSnapping,
+			});
+			const backwardFrames = createAnimatedProperties({
+				from: to,
+				to: from,
+				blockSize,
+				easing,
+				durationMs: duration,
+				stepRateHz: effectiveStepRateHz,
+				disableAnimationBlockSnapping,
+			});
+
+			frames = [
+				...forwardFrames.map((frame) => ({
+					...frame,
+					percent: frame.percent * 0.5,
+				})),
+				...backwardFrames.map((frame) => ({
+					...frame,
+					percent: 50 + frame.percent * 0.5,
+				})),
+			];
+		}
+
+		const keyframeString = buildKeyframeString(frames);
+		const keyframeName = animationManager.cacheKeyframes(keyframeString);
+		loopKeyframeStringRef.current = keyframeString;
+		loopAnimationNameRef.current = keyframeName;
+		loopActiveRef.current = true;
+
+		if (from) {
+			const fromStyles = computeAnimationStyles(from, blockSize);
+			const mergedStyles = {
+				...persistentStylesRef.current,
+				...fromStyles,
+			};
+			Object.entries(mergedStyles).forEach(([key, value]) => {
+				if (value !== undefined) {
+					(el.style as any)[key] = value;
+				}
+			});
+		}
+
+		el.style.animation = "none";
+		void el.offsetHeight; // Force reflow
+
+		const animationValue = [
+			keyframeName,
+			`${duration}ms`,
+			timingFunction,
+			`${delay}ms`,
+			"infinite",
+			"both",
+		].join(" ");
+		el.style.animation = animationValue;
+		currentAnimationRef.current = "loop";
+	};
 
 	// Mount or unmount based on isVisible
 	useEffect(() => {
@@ -272,8 +387,17 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 				Object.entries(styles).forEach(([key, value]) => {
 					(el.style as any)[key] = value;
 				});
+				persistentStylesRef.current = {
+					...persistentStylesRef.current,
+					...styles,
+				};
 			}
 			enterPhase?.onAfterEnd?.();
+			if (animation.loop) {
+				startLoopAnimation(el, animation.loop);
+			} else {
+				currentAnimationRef.current = null;
+			}
 			return;
 		}
 
@@ -295,6 +419,7 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 
 		onBeforeStart?.();
 
+		const keyframeStrings: string[] = [];
 		let frames: DynamicKeyframe[] = rawFrames || [];
 		if (from && to) {
 			const effectiveStepRateHz = phase.stepRateHz ?? globalStepRateHz;
@@ -347,10 +472,14 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 
 		const keyframeString = buildKeyframeString(frames);
 		const keyframeName = animationManager.cacheKeyframes(keyframeString);
-		cachedKeyframeStringsRef.current.push(keyframeString);
+		keyframeStrings.push(keyframeString);
 
 		// Track the current animation phase
 		currentAnimationRef.current = isVisible ? "enter" : "exit";
+
+		if (!isVisible) {
+			stopLoopAnimation(el);
+		}
 
 		// Reset animation state before applying new one
 		el.style.animation = "none";
@@ -385,6 +514,12 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 					...persistentStylesRef.current,
 					...finalStyles,
 				};
+
+				if (isVisible && animation.loop) {
+					startLoopAnimation(el, animation.loop);
+				} else {
+					currentAnimationRef.current = null;
+				}
 			}
 			pendingAnimationCompleteRef.current = null;
 			el.removeEventListener("animationend", handleEnd);
@@ -397,14 +532,18 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 
 		// Cleanup
 		return () => {
-			el.style.animation = "";
-			currentAnimationRef.current = null;
+			if (
+				currentAnimationRef.current === "enter" ||
+				currentAnimationRef.current === "exit"
+			) {
+				el.style.animation = "";
+				currentAnimationRef.current = null;
+			}
 			el.removeEventListener("animationend", handleEnd);
 			// Release cached keyframes when animation ends
-			cachedKeyframeStringsRef.current.forEach((keyframeString) => {
+			keyframeStrings.forEach((keyframeString) => {
 				animationManager.releaseKeyframes(keyframeString);
 			});
-			cachedKeyframeStringsRef.current = [];
 		};
 	}, [
 		serializedEnterPhase,
@@ -459,8 +598,11 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 				? toCSSTimingFunction(easing)
 				: "linear";
 
+		stopLoopAnimation(el);
+
 		onBeforeStart?.();
 
+		const keyframeStrings: string[] = [];
 		let frames: DynamicKeyframe[] = rawFrames || [];
 		if (from && to) {
 			const effectiveStepRateHz =
@@ -478,7 +620,7 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 
 		const keyframeString = buildKeyframeString(frames);
 		const keyframeName = animationManager.cacheKeyframes(keyframeString);
-		cachedKeyframeStringsRef.current.push(keyframeString);
+		keyframeStrings.push(keyframeString);
 
 		// Track the current animation phase
 		currentAnimationRef.current = "transition";
@@ -522,6 +664,12 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 
 				// Update persistent styles with the new final state
 				persistentStylesRef.current = mergedStyles;
+
+				if (animation.loop) {
+					startLoopAnimation(el, animation.loop);
+				} else {
+					currentAnimationRef.current = null;
+				}
 			}
 			el.removeEventListener("animationend", handleEnd);
 		};
@@ -532,13 +680,37 @@ export const AnimatedBox: React.FC<AnimatedBoxProps> = ({
 		return () => {
 			el.removeEventListener("animationend", handleEnd);
 			// Release cached keyframes when animation ends
-			cachedKeyframeStringsRef.current.forEach((keyframeString) => {
+			keyframeStrings.forEach((keyframeString) => {
 				animationManager.releaseKeyframes(keyframeString);
 			});
-			cachedKeyframeStringsRef.current = [];
 		};
 	}, [
 		animation?.transition?.trigger,
+		blockSize,
+		globalStepRateHz,
+		disableAnimationBlockSnapping,
+	]);
+
+	useLayoutEffect(() => {
+		const el = ref.current;
+		if (!el) return;
+		if (!animation?.loop || !isVisible || !shouldRender) {
+			stopLoopAnimation(el);
+		} else if (
+			currentAnimationRef.current !== "enter" &&
+			currentAnimationRef.current !== "exit" &&
+			currentAnimationRef.current !== "transition" &&
+			!loopActiveRef.current
+		) {
+			startLoopAnimation(el, animation.loop);
+		}
+		return () => {
+			stopLoopAnimation(el);
+		};
+	}, [
+		serializedLoopPhase,
+		isVisible,
+		shouldRender,
 		blockSize,
 		globalStepRateHz,
 		disableAnimationBlockSnapping,

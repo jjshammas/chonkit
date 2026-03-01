@@ -208,6 +208,65 @@ export const Transition: Story = {
 	},
 };
 
+export const LoopingAnimation: Story = {
+	args: {
+		baseProps: {
+			sx: {
+				backgroundColor: "#339af0",
+				width: "120px",
+				height: "60px",
+				display: "flex",
+				alignItems: "center",
+				justifyContent: "center",
+				color: "white",
+				fontWeight: "bold",
+			},
+		},
+	},
+	render: (args) => {
+		const [trigger, setTrigger] = useState("0");
+
+		return (
+			<div>
+				<button
+					onClick={() =>
+						setTrigger((prev) => String(Number(prev) + 1))
+					}
+					style={{ marginBottom: "20px" }}
+				>
+					Trigger Transition
+				</button>
+				<AnimatedBox
+					{...args}
+					animation={{
+						enter: {
+							from: { yBlocks: -3, opacity: 0 },
+							to: { yBlocks: 0, opacity: 1 },
+							duration: 300,
+							easing: "ease-out",
+						},
+						transition: {
+							trigger,
+							from: { xBlocks: 0 },
+							to: { xBlocks: 6 },
+							duration: 500,
+							easing: "ease-in-out",
+						},
+						loop: {
+							from: { opacity: 1 },
+							to: { opacity: 0.6 },
+							duration: 700,
+							easing: "ease-in-out",
+						},
+					}}
+				>
+					Looping
+				</AnimatedBox>
+			</div>
+		);
+	},
+};
+
 export const CombinedEnterExitTransition: Story = {
 	args: {
 		baseProps: {
