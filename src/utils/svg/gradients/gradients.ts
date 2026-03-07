@@ -30,7 +30,8 @@ export const getIndexOfNextKnownCenter = (
 	index: number
 ): number => {
 	for (let i = index + 1; i < centers.length; i++) {
-		if (centers[i].center) return i;
+		if (centers[i].center !== null && centers[i].center !== undefined)
+			return i;
 	}
 	return -1;
 };
@@ -51,13 +52,18 @@ export const calculateCenters = (
 				: null,
 		};
 	});
-	if (!centers[0].center) centers[0].center = 0;
-	if (!centers[centers.length - 1].center)
+	if (centers.length === 0) return [];
+	if (centers[0].center === null || centers[0].center === undefined)
+		centers[0].center = 0;
+	if (
+		centers[centers.length - 1].center === null ||
+		centers[centers.length - 1].center === undefined
+	)
 		centers[centers.length - 1].center = size;
 
 	for (let i = 1; i < centers.length - 1; i++) {
 		const thisStep = centers[i];
-		if (thisStep.center) continue;
+		if (thisStep.center !== null && thisStep.center !== undefined) continue;
 		const prevStep = centers[i - 1];
 		const prevCenter = prevStep.center;
 		if (typeof prevCenter !== "number")
@@ -68,8 +74,14 @@ export const calculateCenters = (
 			);
 
 		const nextKnownCenterIndex = getIndexOfNextKnownCenter(centers, i);
+		if (nextKnownCenterIndex === -1)
+			throw new Error(
+				"Could not process gradient. Missing center on next known center step (" +
+					nextKnownCenterIndex +
+					")"
+			);
 		const nextKnownCenter = centers[nextKnownCenterIndex].center;
-		if (!nextKnownCenter)
+		if (nextKnownCenter === null || nextKnownCenter === undefined)
 			throw new Error(
 				"Could not proces gradient. Missing center on next known center step (" +
 					nextKnownCenterIndex +
@@ -82,7 +94,7 @@ export const calculateCenters = (
 	}
 
 	for (const center of centers) {
-		if (center.center === null)
+		if (center.center === null || center.center === undefined)
 			throw new Error(
 				"Could not process gradient. Missing center for color " +
 					center.color
@@ -202,6 +214,7 @@ export const createGradientSVG = (
 		isHorizontal ? width : height,
 		blockSize
 	);
+	if (gradientSteps.length === 0) return svg;
 
 	const g = document.createElementNS(SVG_URL, "g");
 	g.setAttribute("transform-origin", "0 0");

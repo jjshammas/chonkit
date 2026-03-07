@@ -1,12 +1,12 @@
-import { convertJSVariableNameToCSSVariableName } from "@/utils/cssVar";
 import type { InteractionState } from "@/components/Box/createVisualStyle";
+import { convertJSVariableNameToCSSVariableName } from "@/utils/cssVar";
 
 import type { ButtonTheme } from "@/components/Button/Button";
-import type { TextInputTheme } from "@/components/TextInput/TextInput";
 import type {
-	ScrollAreaTrackTheme,
 	ScrollAreaThumbTheme,
+	ScrollAreaTrackTheme,
 } from "@/components/ScrollArea/ScrollArea";
+import type { TextInputTheme } from "@/components/TextInput/TextInput";
 
 export type ColorDefinition = {
 	main: string;
@@ -62,7 +62,9 @@ export const mergeThemes = <T>(base: T, partial: DeepPartial<T>): T => {
 		typeof partial !== "object" ||
 		partial === null
 	) {
-		return partial !== undefined ? (partial as T) : base;
+		// return partial !== undefined ? (partial as T) : base;
+		// This was changed to support overriding non-object values with undefined (e.g. to remove a shadow)
+		return partial as T;
 	}
 
 	const result: any = Array.isArray(base) ? [...base] : { ...base };

@@ -26,6 +26,7 @@ export function useDepth(
 
 	useEffect(() => {
 		if (!depth) return;
+		if (!elementDepth.current) return;
 
 		const unsubscribe = geometry.subscribe(({ width, height }) => {
 			if (depth) {
@@ -51,7 +52,9 @@ export function useDepth(
 						Math.floor(height / 2) + depth * blockSize
 					)
 				)}')`;
-				elementDepth.current!.style.clipPath = depthPath;
+				if (elementDepth.current) {
+					elementDepth.current.style.clipPath = depthPath;
+				}
 			}
 		});
 

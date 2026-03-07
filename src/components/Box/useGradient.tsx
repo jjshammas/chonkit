@@ -50,6 +50,7 @@ export function useGradient(
 
 		const unsubscribe = geometry.subscribe(({ width, height }) => {
 			if (!gradientString || !elementGradient.current) return;
+			if (width <= 0 || height <= 0) return;
 			const svg = createGradientSVG(
 				gradientString,
 				blockSize,

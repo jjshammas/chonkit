@@ -4,7 +4,7 @@ import clsx from "clsx";
 import React, {
 	ReactNode,
 	useCallback,
-	useEffect,
+	useInsertionEffect,
 	useMemo,
 	useRef,
 } from "react";
@@ -193,51 +193,119 @@ export const Box: React.FC<BoxProps> = (props) => {
 		return value as V;
 	}
 
+	// toBlockUnits and toBlockRadius were added to extract the value back out of the computed strings for use cases like: I put in "6px" as my borderRadius but the borderRadius hook needs the value in block units. We may want to instead modify resolveComponentVisualStyle to return both the raw value and the computed CSS variable, but this felt less invasive for now.
+	type BlockUnitValue = number | string;
+
+	const toBlockUnits = (
+		value: BlockUnitValue | undefined,
+		currentBlockSize: number
+	): number | undefined => {
+		if (value == null) return undefined;
+		if (typeof value === "number") return value;
+		const match = value.trim().match(/^(-?\d+(?:\.\d+)?)px$/);
+		if (!match) return undefined;
+		const pxValue = Number(match[1]);
+		if (Number.isNaN(pxValue) || currentBlockSize <= 0) return undefined;
+		return Math.round(pxValue / currentBlockSize);
+	};
+
+	const toBlockRadius = (
+		value:
+			| RoundedCornerClipProps["borderRadius"]
+			| string
+			| BlockUnitValue[]
+			| undefined,
+		currentBlockSize: number
+	): RoundedCornerClipProps["borderRadius"] | undefined => {
+		if (value == null) return undefined;
+		if (Array.isArray(value)) {
+			const normalized = value.map((entry) =>
+				toBlockUnits(entry, currentBlockSize)
+			);
+			if (normalized.some((entry) => entry == null)) return undefined;
+			return normalized as number[];
+		}
+		return toBlockUnits(value, currentBlockSize);
+	};
+
 	const pickedValues = useMemo(() => {
 		return {
-			borderRadius: pickBreakpointValue<
-				RoundedCornerClipProps["borderRadius"]
-			>(resolved.renderValues.borderRadius as any, viewportWidth),
-			borderWidth: pickBreakpointValue<
-				FabricatedBorderProps["borderWidth"]
-			>(resolved.renderValues.borderWidth as any, viewportWidth),
+			borderRadius: toBlockRadius(
+				pickBreakpointValue<RoundedCornerClipProps["borderRadius"]>(
+					resolved.renderValues.borderRadius as any,
+					viewportWidth
+				),
+				blockSize
+			),
+			borderWidth: toBlockUnits(
+				pickBreakpointValue<FabricatedBorderProps["borderWidth"]>(
+					resolved.renderValues.borderWidth as any,
+					viewportWidth
+				),
+				blockSize
+			),
 			borderColor: pickBreakpointValue<
 				FabricatedBorderProps["borderColor"]
 			>(resolved.renderValues.borderColor as any, viewportWidth),
 			innerBorderColor: pickBreakpointValue<
 				FabricatedBorderProps["innerBorderColor"]
 			>(resolved.renderValues.innerBorderColor as any, viewportWidth),
-			innerBorderWidth: pickBreakpointValue<
-				FabricatedBorderProps["innerBorderWidth"]
-			>(resolved.renderValues.innerBorderWidth as any, viewportWidth),
-			bevelHighlightSize: pickBreakpointValue<
-				BevelProps["highlightSize"]
-			>(resolved.renderValues.bevelHighlightSize as any, viewportWidth),
-			bevelShadowSize: pickBreakpointValue<BevelProps["shadowSize"]>(
-				resolved.renderValues.bevelShadowSize as any,
-				viewportWidth
+			innerBorderWidth: toBlockUnits(
+				pickBreakpointValue<FabricatedBorderProps["innerBorderWidth"]>(
+					resolved.renderValues.innerBorderWidth as any,
+					viewportWidth
+				),
+				blockSize
 			),
-			embossHighlightSize: pickBreakpointValue<
-				EmbossProps["highlightSize"]
-			>(resolved.renderValues.embossHighlightSize as any, viewportWidth),
-			embossShadowSize: pickBreakpointValue<EmbossProps["shadowSize"]>(
-				resolved.renderValues.embossShadowSize as any,
-				viewportWidth
+			bevelHighlightSize: toBlockUnits(
+				pickBreakpointValue<BevelProps["highlightSize"]>(
+					resolved.renderValues.bevelHighlightSize as any,
+					viewportWidth
+				),
+				blockSize
+			),
+			bevelShadowSize: toBlockUnits(
+				pickBreakpointValue<BevelProps["shadowSize"]>(
+					resolved.renderValues.bevelShadowSize as any,
+					viewportWidth
+				),
+				blockSize
+			),
+			embossHighlightSize: toBlockUnits(
+				pickBreakpointValue<EmbossProps["highlightSize"]>(
+					resolved.renderValues.embossHighlightSize as any,
+					viewportWidth
+				),
+				blockSize
+			),
+			embossShadowSize: toBlockUnits(
+				pickBreakpointValue<EmbossProps["shadowSize"]>(
+					resolved.renderValues.embossShadowSize as any,
+					viewportWidth
+				),
+				blockSize
 			),
 			dropShadow: pickBreakpointValue<ShadowProps["dropShadow"]>(
 				resolved.renderValues.dropShadow as any,
 				viewportWidth
 			),
-			depth: pickBreakpointValue<DepthProps["depth"]>(
-				resolved.renderValues.depth as any,
-				viewportWidth
+			depth: toBlockUnits(
+				pickBreakpointValue<DepthProps["depth"]>(
+					resolved.renderValues.depth as any,
+					viewportWidth
+				),
+				blockSize
 			),
 			depthColor: pickBreakpointValue<DepthProps["depthColor"]>(
 				resolved.renderValues.depthColor as any,
 				viewportWidth
 			),
+			backgroundGradient: pickBreakpointValue<GradientProps["gradient"]>(
+				(props.sx as any)?.backgroundGradient,
+				viewportWidth
+			),
 		};
-	}, [resolved.renderValues, viewportWidth]);
+	}, [resolved.renderValues, viewportWidth, blockSize]);
 
 	const {
 		borderRadius,
@@ -252,6 +320,7 @@ export const Box: React.FC<BoxProps> = (props) => {
 		dropShadow,
 		depth,
 		depthColor,
+		backgroundGradient,
 	} = pickedValues;
 
 	const {
@@ -342,7 +411,7 @@ export const Box: React.FC<BoxProps> = (props) => {
 	}, [mediaQueryStyles, instanceId, theme.breakpoints]);
 
 	// Inject media query styles and clean up on unmount
-	useEffect(() => {
+	useInsertionEffect(() => {
 		if (!mediaQueryContent) return;
 		const styleId = `${instanceId}-media-queries`;
 		let styleEl = document.getElementById(
@@ -371,7 +440,8 @@ export const Box: React.FC<BoxProps> = (props) => {
 		dropShadow ||
 		depth ||
 		borderRadius ||
-		dropShadow
+		dropShadow ||
+		backgroundGradient
 	);
 
 	const geometry = useGeometryObserver(ref, { immediateGeometry });
@@ -422,10 +492,7 @@ export const Box: React.FC<BoxProps> = (props) => {
 	const { gradientEl } = useGradient(
 		ref,
 		{
-			gradient: pickBreakpointValue<GradientProps["gradient"]>(
-				(props.sx as any)?.backgroundGradient,
-				viewportWidth
-			),
+			gradient: backgroundGradient,
 		},
 		geometry
 	);
