@@ -1,8 +1,15 @@
 import type { StorybookConfig } from "@storybook/react-vite";
+import { existsSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const storyAssetsDir = resolve(__dirname, "../src/stories/assets");
+const staticDirs = existsSync(storyAssetsDir) ? ["../src/stories/assets"] : [];
 
 const config: StorybookConfig = {
 	stories: ["../src/**/*.mdx", "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"],
-	staticDirs: ["../src/stories/assets"],
+	staticDirs,
 	addons: ["@storybook/addon-a11y", "@storybook/addon-docs"],
 	framework: {
 		name: "@storybook/react-vite",
