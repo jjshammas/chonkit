@@ -1,10 +1,10 @@
 import {
-	Meta,
-	Title,
-	Subtitle,
-	Story,
 	Canvas,
 	Controls,
+	Meta,
+	Story,
+	Subtitle,
+	Title,
 } from "@storybook/addon-docs/blocks";
 import * as StylingStories from "./Styling.stories";
 
@@ -147,3 +147,17 @@ Responsive values work for **all** properties in the `sx` prop, including:
 - Interaction states can also use responsive values
 
 ## Fonts
+
+Chonkit does not ship with any default fonts. Use traditional CSS properties in the `sx` prop to apply fonts to your components, or set a font globally:
+
+```csss
+.chonkit-root {
+	--ck-text-font-family: "Habit Compact", monospace;
+	--ck-text-font-size: 24px;
+	--ck-text-line-height: 16px;
+	--ck-text-adjustment-top: 0;
+	--ck-text-adjustment-left: 0;
+}
+```
+
+The `-text-adjustment` properties can be used to fine-tune the vertical and horizontal alignment of text to ensure pixel-perfect rendering. This is often necessary when using custom fonts that may not align perfectly to the pixel grid by default.

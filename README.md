@@ -1,55 +1,66 @@
-# React Component Kit
+# chonkit
 
-This is a React component kit built with TypeScript. It provides reusable components that can be easily integrated into your projects.
+Chonkit is a React UI library for building chonky pixel art interfaces
+without losing the power of CSS.
+
+## Features
+
+- **Pixel-perfect layouts**: Design with blocks instead of pixels to ensure pixel grid alignment
+- **Dynamic lighting**: Easily add dynamic lighting effects to your components
+- **Theming support**: Customize colors and styles with theming capabilities
+- **Dithering effects**: Apply dithering to your components for authentic pixel art aesthetics
+
+## Live preview
+
+Visit the Github Pages site.
 
 ## Installation
 
-To install the component kit, you can use npm or yarn. Run one of the following commands in your terminal:
-
-```bash
-npm install react-component-kit
-```
-
-or
-
-```bash
-yarn add react-component-kit
-```
-
-## Dependencies
-
-This project requires the following dependencies:
-
-- `react`: The core React library.
-- `react-dom`: The package for DOM-related rendering methods.
-- `typescript`: The TypeScript compiler.
-- `@types/react`: TypeScript definitions for React.
-- `@types/react-dom`: TypeScript definitions for React DOM.
-
-Additionally, for development purposes, you may want to install:
-
-- `eslint`: A tool for identifying and fixing problems in your JavaScript code.
-- `eslint-plugin-react`: An ESLint plugin for React.
-- `prettier`: A code formatter for consistent styling.
+Chonkit is not yet hosted on npm. Check the Building section below to build locally.
 
 ## Usage
 
-To use the components in your project, you can import them as follows:
+Use `ChonkitProvider` and `LightingProvider` to set up your app, then use components like `Button` inside:
 
 ```tsx
-import { ExampleComponent } from 'react-component-kit';
+import { ChonkitProvider, LightingProvider, Button } from "chonkit";
+import "node_modules/chonkit/dist/chonkit.css";
+
+export function Example() {
+	return (
+		<ChonkitProvider blockSize={5} showGrid={false}>
+			<LightingProvider direction={135}>
+				<Button>Launch</Button>
+			</LightingProvider>
+		</ChonkitProvider>
+	);
+}
 ```
 
-Then, you can use the component in your JSX:
+Importing the `chonkit.css file` is required, however, no styles will be applied to your webpage outside of the components you wrap in `ChonkitProvider`. This means you can safely use Chonkit alongside other CSS frameworks and libraries without worrying about style conflicts.
 
-```tsx
-<ExampleComponent prop1="value" />
+## Where should I use Chonkit?
+
+Pixel graphic effects (like pixelated corners or gradients) are normally achieved using bitmap images or canvas rendering. Chonkit allows you to build pixel art interfaces using normal CSS. This means you can do things like:
+
+- Use CSS layout techniques like Flexbox and Grid
+- Create completely responsive pixel art designs
+- Utilize CSS interaction states like `:hover` and `:active`
+
+In short:
+
+✅ **If you are making a website or webapp with a pixel art style,** Chonkit gives you perfect pixel art effects without sacrificing the power of CSS.
+
+❌ **If you are making a game,** Chonkit is probably not the right tool, unless you are already using React for your game UI.
+
+## Building
+
+Checkout the repo and run:
+
+```
+npm install
+npm run build
+npm run storybook
 ```
 
-## Contributing
-
-If you would like to contribute to this project, please fork the repository and submit a pull request. 
-
-## License
-
-This project is licensed under the MIT License. See the LICENSE file for more details.
+This will open a storybook server to watch for changes.
