@@ -1,16 +1,19 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import {
-	Description,
-	Primary,
-	// ArgsTable,
-	Stories,
-	Subtitle,
-	Title,
-} from "@storybook/addon-docs/blocks";
-
+import { Box } from "@/components/Box/Box";
 import React from "react";
-import { Box } from "./Box";
+
+const EmptyComponent = ({ children }: { children: React.ReactNode }) =>
+	children;
+
+const meta = {
+	title: "Gradients",
+	component: EmptyComponent,
+	tags: ["!autodocs", "!dev"],
+} satisfies Meta<typeof EmptyComponent>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 /**
  * Pixel art often uses dithering to create gradients and shading.
@@ -27,79 +30,58 @@ import { Box } from "./Box";
  * 90deg, #ff0000 20%, pink, primary 80%
  * ```
  */
-const meta = {
-	title: "Render/Gradients",
-	component: () => null,
-	parameters: {
-		controls: {
-			exclude: "children",
-		},
-		docs: {
-			page: () => (
-				<>
-					<Title />
-					<Subtitle />
-					<Description />
-					<Primary />
-					{/* <ArgsTable story={PRIMARY_STORY} /> */}
-					<Stories includePrimary={false} />
-				</>
-			),
-		},
-	},
-} satisfies Meta<typeof Box>;
-
-export default meta;
-type Story = StoryObj<typeof meta>;
-
 export const Default: Story = {
-	render: () => (
-		<Box
-			sx={{
-				backgroundGradient: "90deg, #ff0000, pink, primary",
-				width: "200px",
-				height: "200px",
-			}}
-		/>
-	),
+	args: {
+		children: (
+			<Box
+				sx={{
+					backgroundGradient: "90deg, #ff0000, pink, primary",
+					width: "200px",
+					height: "200px",
+				}}
+			/>
+		),
+	},
 };
 
 /**
  * Only the 4 cardinal directions are supported: 0deg, 90deg, 180deg, and 270deg.
  */
 export const Directional: Story = {
-	render: () => (
-		<div style={{ display: "flex", gap: "10px", flexDirection: "row" }}>
-			<Box
-				sx={{
-					backgroundGradient: "90deg, #ff0000, pink, primary",
-					width: "100px",
-					height: "100px",
-				}}
-			/>
-			<Box
-				sx={{
-					backgroundGradient: "180deg, #ff0000, pink, primary",
-					width: "100px",
-					height: "100px",
-				}}
-			/>
-			<Box
-				sx={{
-					backgroundGradient: "270deg, #ff0000, pink, primary",
-					width: "100px",
-					height: "100px",
-				}}
-			/>
-			<Box
-				sx={{
-					backgroundGradient: "0deg, #ff0000, pink, primary",
-					width: "100px",
-					height: "100px",
-				}}
-			/>
-		</div>
-	),
+	args: {
+		children: (
+			<div style={{ display: "flex", gap: "10px", flexDirection: "row" }}>
+				<Box
+					sx={{
+						backgroundGradient: "90deg, #ff0000, pink, primary",
+						width: "100px",
+						height: "100px",
+					}}
+				/>
+				<Box
+					sx={{
+						backgroundGradient: "180deg, #ff0000, pink, primary",
+						width: "100px",
+						height: "100px",
+					}}
+				/>
+				<Box
+					sx={{
+						backgroundGradient: "270deg, #ff0000, pink, primary",
+						width: "100px",
+						height: "100px",
+					}}
+				/>
+				<Box
+					sx={{
+						backgroundGradient: "0deg, #ff0000, pink, primary",
+						width: "100px",
+						height: "100px",
+					}}
+				/>
+			</div>
+		),
+	},
 };
 
 /**
@@ -108,6 +90,9 @@ export const Directional: Story = {
  * Drag the below slider to see the content change width, and the dithering pattern between each color stop change.
  */
 export const Size: Story = {
+	args: {
+		children: null,
+	},
 	render: () => {
 		const [size, setSize] = React.useState(100);
 		return (
@@ -116,14 +101,14 @@ export const Size: Story = {
 					type="range"
 					value={size}
 					min={10}
-					max={300}
+					max={500}
 					step={10}
 					onChange={(e) => setSize(Number(e.target.value))}
 				/>
 				<Box
 					sx={{
 						backgroundGradient: "0deg, #888, #ddd",
-						height: `200px`,
+						height: "200px",
 						width: `${size}px`,
 					}}
 				/>

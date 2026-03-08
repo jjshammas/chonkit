@@ -1,0 +1,32 @@
+import { Canvas, Meta, Subtitle, Title } from "@storybook/addon-docs/blocks";
+import * as GradientStories from "./Gradients.stories";
+
+<Meta title="Gradients" />
+
+<Title>Gradients</Title>
+<Subtitle>Pixel dithering and directional gradient patterns with Box</Subtitle>
+
+Pixel art often uses dithering to create gradients and shading. Unlike standard CSS gradients,
+Box gradients are intentionally pixelated and step between colors to keep a retro visual style.
+
+Gradients are defined as strings, similar to CSS gradients:
+
+```javascript
+90deg, #ff0000 20%, pink, primary 80%
+```
+
+## Basic gradient
+
+<Canvas of={GradientStories.Default} />
+
+## Directional gradients
+
+Only the 4 cardinal directions are supported: `0deg`, `90deg`, `180deg`, and `270deg`.
+
+<Canvas of={GradientStories.Directional} />
+
+## Responsive dithering pattern
+
+Resize with the slider to see how the dither steps adjust as width changes.
+
+<Canvas of={GradientStories.Size} />

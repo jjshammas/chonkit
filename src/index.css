@@ -1,13 +1,5 @@
-@import url("https://fonts.googleapis.com/css2?family=Jersey+10&family=Tiny5&display=swap");
-
 @import "./reset.css";
 @import "./variables.css";
-
-@font-face {
-	font-family: "NF Pixels";
-	src: url("/fonts/NFPixels-regular.otf"),
-		url("/fonts/NFPixels-regular.ttf") format("truetype");
-}
 
 .chonkit-root {
 	image-rendering: pixelated;
@@ -16,42 +8,15 @@
 	font-size: var(--ck-text-font-size);
 	font-family: var(--ck-text-font-family);
 
-	/* use block size 2 */
-	/* font-family: "Jersey 10", monospace;
-	font-weight: 400;
-	font-style: normal;
-	font-size: 37.32px; */
-
-	/* use block size 2 */
-	/* font-family: "Tiny5", monospace;
-	font-weight: 400;
-	font-style: normal;
-	font-size: 16px;
-	line-height: 22px; */
-
-	/* use block size 1.5 */
-	--ck-text-font-family: "NF Pixels", monospace;
-	--ck-text-font-size: 15px;
-	--ck-text-line-height: 18px;
-	--ck-text-adjustment-top: -1.3px;
+	--ck-text-font-family: monospace;
+	--ck-text-font-size: 16px;
+	--ck-text-line-height: 16px;
+	--ck-text-adjustment-top: 0;
 	--ck-text-adjustment-left: 0;
 
-	--ck-text-font-family-sm: "Tiny5", monospace;
-	--ck-text-font-size-sm: 12px;
-	--ck-text-line-height-sm: 13px;
+	--ck-text-font-family-sm: monospace;
+	--ck-text-font-size-sm: 16px;
+	--ck-text-line-height-sm: 16px;
 	--ck-text-adjustment-top-sm: 0;
 	--ck-text-adjustment-left-sm: 0;
-
-	/* use block size 2 */
-	/* --ck-text-font-family: "NF Pixels", monospace;
-	--ck-text-font-size: 20px;
-	--ck-text-line-height: 26px;
-	--ck-text-adjustment-top: -1px;
-	--ck-text-adjustment-left: 0;
-
-	--ck-text-font-family-sm: "Tiny5", monospace;
-	--ck-text-font-size-sm: 16px;
-	--ck-text-line-height-sm: 20px;
-	--ck-text-adjustment-top-sm: 0;
-	--ck-text-adjustment-left-sm: 0; */
 }

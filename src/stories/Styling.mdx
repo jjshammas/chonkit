@@ -152,12 +152,24 @@ Chonkit does not ship with any default fonts. Use traditional CSS properties in 
 
 ```csss
 .chonkit-root {
-	--ck-text-font-family: "Habit Compact", monospace;
-	--ck-text-font-size: 24px;
+	--ck-text-font-family: "Habit", monospace;
+	--ck-text-font-size: 16px;
+	--ck-text-line-height: 16px;
+	--ck-text-adjustment-top: 0;
+	--ck-text-adjustment-left: 0;
+
+	--ck-text-font-family-sm: "Habit Compact", monospace;
+	--ck-text-font-size: 16px;
 	--ck-text-line-height: 16px;
 	--ck-text-adjustment-top: 0;
 	--ck-text-adjustment-left: 0;
 }
 ```
 
+Fonts that are designed for pixel use cases typically expect to be rendered at a 16px font size, hence this is the default font size for both the regular and "small" font variables. However, you can adjust these values as needed for your design.
+
 The `-text-adjustment` properties can be used to fine-tune the vertical and horizontal alignment of text to ensure pixel-perfect rendering. This is often necessary when using custom fonts that may not align perfectly to the pixel grid by default.
+
+This Storybook documentation uses "Tiny5" as a default font, which is a free pixel font available on Google Fonts.
+
+If you are using a grid size greater than 1.5, you may find that most pixel fonts are designed for much smaller block grids and can look too large. In this case, you may want to choose to use a font that does not perfectly map to the grid.

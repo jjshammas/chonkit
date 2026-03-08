@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { ChonkitProvider } from "@/core/ChonkitProvider/ChonkitProvider";
+import { AnimatedBox } from "@/components/AnimatedBox/AnimatedBox";
 import { Box } from "@/components/Box/Box";
 import { Button } from "@/components/Button/Button";
-import { AnimatedBox } from "@/components/AnimatedBox/AnimatedBox";
-import { useState, useEffect } from "react";
+import { ChonkitProvider } from "@/core/ChonkitProvider/ChonkitProvider";
+import { useEffect, useState } from "react";
 
 const EmptyComponent = ({ children }: { children: React.ReactNode }) =>
 	children;
@@ -51,9 +51,7 @@ const InnerExample = () => {
 					sx={{
 						padding: "10px",
 						backgroundGradient:
-							"90deg, #dedfe8, #b8b9c7 10%, #b8b9c7 40%, #9596a5",
-						bevelHighlightSize: 1,
-						bevelShadowSize: 1,
+							"90deg, #dedfe8, #b8b9c7 20%, #b8b9c7 60%, #9596a5",
 					}}
 				>
 					<Box
@@ -68,14 +66,15 @@ const InnerExample = () => {
 							sx={{
 								background: "#2a409a",
 								color: "#fff",
-								padding: "6px 10px",
 								borderRadius: 3,
 								embossHighlightSize: 1,
 								embossShadowSize: 1,
 								borderWidth: 1,
-								borderColor: "#000",
+								borderColor: "#0f1c4f",
 								display: "inline-block",
-								letterSpacing: 1,
+								padding: "10px 20px",
+								backgroundGradient:
+									"90deg, #213587, #2a409a 30%",
 							}}
 						>
 							Welcome to Chonkit
@@ -87,9 +86,6 @@ const InnerExample = () => {
 								gap: "2px",
 							}}
 						>
-							<Box sx={{ fontSize: "12px", color: "#333" }}>
-								Grid size
-							</Box>
 							<Box sx={{ display: "flex", gap: "2px" }}>
 								{sizes.map((s) => {
 									const selected = s === blockSize;
@@ -105,20 +101,25 @@ const InnerExample = () => {
 												color: selected
 													? "#fff"
 													: "#333",
-												borderRadius: 2,
+												borderRadius: 3,
 												borderWidth: 1,
 												borderColor: selected
-													? "#000"
+													? "#13225c"
 													: "#888",
-												embossHighlightSize: selected
-													? 1
-													: 0,
-												embossShadowSize: selected
-													? 1
-													: 0,
+												depth: selected ? 0 : 2,
+												depthColor: "#666666",
+												bevelHighlightSize: selected
+													? 0
+													: 1,
+												bevelShadowSize: selected
+													? 0
+													: 1,
+												_active: {
+													depth: 0,
+												},
 											}}
 										>
-											{s} px
+											{s}px
 										</Button>
 									);
 								})}
@@ -129,7 +130,7 @@ const InnerExample = () => {
 
 				<Box
 					sx={{
-						backgroundGradient: "90deg, #3f404f, #6b6c7e",
+						backgroundGradient: "90deg, #3f404f, #6b6c7e 40",
 						padding: "10px",
 						display: "flex",
 						flexDirection: "column",

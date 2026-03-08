@@ -1,10 +1,9 @@
 import {
-	Meta,
-	Title,
-	Subtitle,
-	Story,
 	Canvas,
 	Controls,
+	Meta,
+	Subtitle,
+	Title,
 } from "@storybook/addon-docs/blocks";
 import * as AnimationsStories from "./Animations.stories";
 
@@ -142,7 +141,11 @@ Common hertz rates and their effects:
 - **60 Hz**: Maximum smoothness while maintaining steps
 - **Infinity**: No hertz-based cap; uses natural step counts per property
 
-## Disabling Stepped Frames
+<Canvas of={AnimationsStories.HertzComparison} />
+
+## Block Snapping
+
+By default, Chonkit snaps animation values to the nearest block to ensure grid alignment. This means that even in motion, your components will always land on whole block positions, preserving the pixel-perfect look.
 
 If you want animations to look like standard CSS animations (no stair stepping),
 disable block snapping globally. This keeps the same keyframe timing but removes
@@ -160,6 +163,8 @@ the extra "hold" frames that create the stepped effect.
 
 For fully smooth animations, use `disableAnimationBlockSnapping` and set
 `stepRateHz={Infinity}` so timing is not capped by hertz steps.
+
+<Canvas of={AnimationsStories.BlockSnappingComparison} />
 
 ## Transition Animations
 

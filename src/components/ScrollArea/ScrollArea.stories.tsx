@@ -7,6 +7,8 @@ import { ScrollArea } from "./ScrollArea";
 /**
  * A scrollable area with a custom scrollbar to match the rest of the design system.
  *
+ * The ScrollArea uses native browser scrolling behavior, so it supports all the usual features like momentum scrolling on iOS and scroll chaining.
+ *
  * To customize the scrollbar design, use the `ScrollAreaTrack` and `ScrollAreaThumb` theme properties. These elements are rendered as Box components, meaning you can use familiar properties like borderRadius, backgroundColor, and depth.
  *
  * Note that the thumb is rendered as a child of the track, and the track hides all overflow. This means that some visual effects may not be possible, such as thumbs that are larger than the track or thumbs with drop shadows. This design decision was chosen because on platforms with "overscroll" (Mac, iOS), the thumb would be rendered outside of the track if overflow was visible.

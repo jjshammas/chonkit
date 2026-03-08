@@ -231,6 +231,16 @@ export const HertzComparison: Story = {
 	},
 };
 
+export const BlockSnappingComparison: Story = {
+	args: {
+		children: (
+			<div style={{ padding: "20px" }}>
+				<BlockSnappingComparisonDemo />
+			</div>
+		),
+	},
+};
+
 function HertzComparisonDemo() {
 	const [trigger, setTrigger] = useState(0);
 
@@ -279,7 +289,7 @@ function HertzComparisonDemo() {
 									transition: {
 										trigger,
 										from: { xBlocks: 0 },
-										to: { xBlocks: 30 },
+										to: { xBlocks: 100 },
 										duration: 1000,
 									},
 								}}
@@ -289,6 +299,88 @@ function HertzComparisonDemo() {
 						</ChonkitProvider>
 					</div>
 				))}
+			</div>
+		</div>
+	);
+}
+
+function BlockSnappingComparisonDemo() {
+	const [trigger, setTrigger] = useState(0);
+
+	return (
+		<div>
+			<button
+				onClick={() => setTrigger((prev) => prev + 1)}
+				style={{ marginBottom: "20px" }}
+			>
+				Move Both Boxes
+			</button>
+			<div
+				style={{
+					display: "flex",
+					flexDirection: "column",
+					gap: "20px",
+				}}
+			>
+				<div>
+					<div style={{ marginBottom: "8px", fontWeight: "bold" }}>
+						Block Snapping On (default)
+					</div>
+					<ChonkitProvider
+						blockSize={4}
+						stepRateHz={Infinity}
+						showGrid
+					>
+						<AnimatedBox
+							baseProps={{
+								sx: {
+									backgroundColor: "#0b7285",
+									width: "48px",
+									height: "48px",
+								},
+							}}
+							animation={{
+								transition: {
+									trigger,
+									from: { xBlocks: 0 },
+									to: { xBlocks: 13 },
+									duration: 900,
+									easing: "linear",
+								},
+							}}
+						/>
+					</ChonkitProvider>
+				</div>
+				<div>
+					<div style={{ marginBottom: "8px", fontWeight: "bold" }}>
+						Block Snapping Off
+					</div>
+					<ChonkitProvider
+						blockSize={4}
+						stepRateHz={Infinity}
+						disableAnimationBlockSnapping
+						showGrid
+					>
+						<AnimatedBox
+							baseProps={{
+								sx: {
+									backgroundColor: "#d9480f",
+									width: "48px",
+									height: "48px",
+								},
+							}}
+							animation={{
+								transition: {
+									trigger,
+									from: { xBlocks: 0 },
+									to: { xBlocks: 13 },
+									duration: 900,
+									easing: "linear",
+								},
+							}}
+						/>
+					</ChonkitProvider>
+				</div>
 			</div>
 		</div>
 	);

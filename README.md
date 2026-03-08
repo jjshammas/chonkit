@@ -12,7 +12,7 @@ without losing the power of CSS.
 
 ## Live preview
 
-Visit the Github Pages site.
+View previews on the **[documentation site](https://jjshammas.github.io/chonkit)**.
 
 ## Installation
 

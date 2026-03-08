@@ -6,6 +6,7 @@ import {
 	LightingProvider,
 } from "../src/core/LightingProvider/LightingProvider";
 import "../src/index.css";
+import "./storybook.css";
 
 const CK_GLOBAL_TYPES = {
 	gridVisible: {
