@@ -15,6 +15,47 @@ const meta = {
 	parameters: {
 		disableWrapper: true,
 	},
+	argTypes: {
+		blockSize: {
+			description: "Pixel size for the grid system and block units.",
+			control: { type: "number", min: 1 },
+		},
+		showGrid: {
+			description: "Renders the grid overlay for debugging layout.",
+			control: "boolean",
+		},
+		theme: {
+			description:
+				"Theme name or partial theme object; defaults to the built-in theme.",
+			control: "object",
+		},
+		stepRateHz: {
+			description:
+				"Animation step rate in Hz for time-based effects.",
+			control: { type: "number", min: 1 },
+		},
+		disableAnimationBlockSnapping: {
+			description:
+				"Disables snapping animation frames to the block grid.",
+			control: "boolean",
+		},
+		treatClicksAsTouch: {
+			description:
+				"Treats all Box onClick handlers as onClickOrTouch.",
+			control: "boolean",
+		},
+		children: {
+			description: "Content rendered within the provider root.",
+		},
+		style: {
+			description: "Inline styles applied to the provider root.",
+			control: "object",
+		},
+		className: {
+			description: "Class name applied to the provider root.",
+			control: "text",
+		},
+	},
 } satisfies Meta<typeof ChonkitProvider>;
 
 export default meta;

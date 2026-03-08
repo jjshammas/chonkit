@@ -76,6 +76,12 @@ export interface BoxProps
 	ref?: React.Ref<HTMLDivElement>;
 	as?: React.ElementType | string;
 	children?: ReactNode;
+	onClickOrTouch?: (
+		event:
+			| React.MouseEvent<HTMLDivElement>
+			| React.TouchEvent<HTMLDivElement>
+			| React.PointerEvent<HTMLDivElement>
+	) => void;
 	containerProps?: React.HTMLAttributes<HTMLDivElement> & {
 		[key: `data-${string}`]: any;
 	};
@@ -142,7 +148,13 @@ const hookConsumedProps = new Set([
 ]);
 
 export const Box: React.FC<BoxProps> = (props) => {
-	const { theme, blockSize, viewportWidth } = useChonkit();
+	const {
+		theme,
+		blockSize,
+		viewportWidth,
+		isTouchDevice,
+		treatClicksAsTouch,
+	} = useChonkit();
 
 	// this is specifically memoized so that the resulting variables
 	// like cssVariables don't change on every render
@@ -219,11 +231,17 @@ export const Box: React.FC<BoxProps> = (props) => {
 	): RoundedCornerClipProps["borderRadius"] | undefined => {
 		if (value == null) return undefined;
 		if (Array.isArray(value)) {
+			if (value.length !== 4) return undefined;
 			const normalized = value.map((entry) =>
 				toBlockUnits(entry, currentBlockSize)
 			);
 			if (normalized.some((entry) => entry == null)) return undefined;
-			return normalized as number[];
+			return [
+				normalized[0],
+				normalized[1],
+				normalized[2],
+				normalized[3],
+			] as [number, number, number, number];
 		}
 		return toBlockUnits(value, currentBlockSize);
 	};
@@ -330,6 +348,13 @@ export const Box: React.FC<BoxProps> = (props) => {
 		containerProps,
 		className,
 		style,
+		onClick,
+		onPointerDown,
+		onPointerMove,
+		onPointerUp,
+		onPointerCancel,
+		onTouchEnd,
+		onClickOrTouch,
 		showWhileGeometryUnknown,
 		immediateGeometry,
 		...rest
@@ -352,6 +377,129 @@ export const Box: React.FC<BoxProps> = (props) => {
 		[forwardedRef]
 	);
 	const innerRef = useRef<HTMLDivElement>(null);
+	const shouldTreatOnClickAsClickOrTouch =
+		!!treatClicksAsTouch && !!onClick && !onClickOrTouch;
+	const hasClickOrTouchHandler =
+		!!onClickOrTouch || (!!treatClicksAsTouch && !!onClick);
+	const pointerTrackingRef = useRef<{
+		id: number | null;
+		startX: number;
+		startY: number;
+		cancelled: boolean;
+	}>({
+		id: null,
+		startX: 0,
+		startY: 0,
+		cancelled: false,
+	});
+	const lastPointerTypeRef = useRef<React.PointerEvent["pointerType"] | null>(
+		null
+	);
+
+	const invokeClickOrTouch = useCallback(
+		(
+			event:
+				| React.MouseEvent<HTMLDivElement>
+				| React.TouchEvent<HTMLDivElement>
+				| React.PointerEvent<HTMLDivElement>
+		) => {
+			if (onClickOrTouch) {
+				onClickOrTouch(event);
+				return;
+			}
+			if (shouldTreatOnClickAsClickOrTouch && onClick) {
+				onClick(event as React.MouseEvent<HTMLDivElement>);
+			}
+		},
+		[onClick, onClickOrTouch, shouldTreatOnClickAsClickOrTouch]
+	);
+
+	const handleClick = useCallback(
+		(event: React.MouseEvent<HTMLDivElement>) => {
+			if (!shouldTreatOnClickAsClickOrTouch) {
+				onClick?.(event);
+			}
+			const lastPointerType = lastPointerTypeRef.current;
+			const shouldInvoke =
+				lastPointerType === "mouse" ||
+				(lastPointerType == null && !isTouchDevice);
+			if (shouldInvoke) {
+				invokeClickOrTouch(event);
+			}
+		},
+		[
+			isTouchDevice,
+			invokeClickOrTouch,
+			onClick,
+			shouldTreatOnClickAsClickOrTouch,
+		]
+	);
+
+	const handlePointerDown = useCallback(
+		(event: React.PointerEvent<HTMLDivElement>) => {
+			onPointerDown?.(event);
+			lastPointerTypeRef.current = event.pointerType;
+			if (event.pointerType === "mouse") return;
+			pointerTrackingRef.current = {
+				id: event.pointerId,
+				startX: event.clientX,
+				startY: event.clientY,
+				cancelled: false,
+			};
+		},
+		[onPointerDown]
+	);
+
+	const handlePointerMove = useCallback(
+		(event: React.PointerEvent<HTMLDivElement>) => {
+			onPointerMove?.(event);
+			const pointerData = pointerTrackingRef.current;
+			if (pointerData.id == null || event.pointerId !== pointerData.id) {
+				return;
+			}
+			const deltaX = event.clientX - pointerData.startX;
+			const deltaY = event.clientY - pointerData.startY;
+			const distance = Math.hypot(deltaX, deltaY);
+			if (distance > 10) {
+				pointerTrackingRef.current.cancelled = true;
+			}
+		},
+		[onPointerMove]
+	);
+
+	const handlePointerUp = useCallback(
+		(event: React.PointerEvent<HTMLDivElement>) => {
+			onPointerUp?.(event);
+			if (event.pointerType === "mouse") return;
+			const pointerData = pointerTrackingRef.current;
+			const shouldInvoke =
+				!pointerData.cancelled &&
+				(pointerData.id == null || event.pointerId === pointerData.id);
+			if (shouldInvoke) {
+				invokeClickOrTouch(event);
+			}
+			pointerTrackingRef.current = {
+				id: null,
+				startX: 0,
+				startY: 0,
+				cancelled: false,
+			};
+		},
+		[invokeClickOrTouch, onPointerUp]
+	);
+
+	const handlePointerCancel = useCallback(
+		(event: React.PointerEvent<HTMLDivElement>) => {
+			onPointerCancel?.(event);
+			pointerTrackingRef.current = {
+				id: null,
+				startX: 0,
+				startY: 0,
+				cancelled: true,
+			};
+		},
+		[onPointerCancel]
+	);
 
 	// Generate a unique ID for this instance to scope media queries
 	const instanceId = useMemo(
@@ -550,6 +698,34 @@ export const Box: React.FC<BoxProps> = (props) => {
 			<div
 				ref={innerRef}
 				{...rest}
+				onClick={
+					onClick || hasClickOrTouchHandler
+						? handleClick
+						: undefined
+				}
+				onTouchEnd={
+					onTouchEnd
+				}
+				onPointerDown={
+					onPointerDown || hasClickOrTouchHandler
+						? handlePointerDown
+						: undefined
+				}
+				onPointerMove={
+					onPointerMove || hasClickOrTouchHandler
+						? handlePointerMove
+						: undefined
+				}
+				onPointerUp={
+					onPointerUp || hasClickOrTouchHandler
+						? handlePointerUp
+						: undefined
+				}
+				onPointerCancel={
+					onPointerCancel || hasClickOrTouchHandler
+						? handlePointerCancel
+						: undefined
+				}
 				className={clsx(styles.inner, className)}
 				style={{
 					...cssBaseStyleInner,

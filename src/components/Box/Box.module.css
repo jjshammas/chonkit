@@ -29,7 +29,22 @@
 	display: block;
 	transform-origin: top left;
 
-	&:hover {
+	&:global(.geometry-unknown) {
+		visibility: hidden;
+	}
+
+	&:global(.geometry-unknown-show) {
+		visibility: visible;
+
+		> .fabricatedBorder,
+		> .fabricatedInnerBorder > .shadow > .highlight {
+			visibility: hidden;
+		}
+	}
+}
+
+@media (hover: hover) and (pointer: fine) {
+	.container:hover {
 		> .inner {
 			background-color: var(
 				--ck-background-color-hover,
@@ -53,8 +68,11 @@
 			);
 		}
 	}
+}
 
-	&:active {
+/* We use an all media query here to preserve specifity of the active styles, which should override hover styles. */
+@media all {
+	.container:active {
 		> .inner {
 			background-color: var(
 				--ck-background-color-active,
@@ -76,18 +94,6 @@
 				--ck-inner-border-color-active,
 				var(--ck-inner-border-color)
 			);
-		}
-	}
-
-	&:global(.geometry-unknown) {
-		visibility: hidden;
-	}
-
-	&:global(.geometry-unknown-show) {
-		visibility: visible;
-
-		> .fabricatedBorder, > .fabricatedInnerBorder > .shadow > .highlight {
-			visibility: hidden;
 		}
 	}
 }

@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { ScrollArea } from "./ScrollArea";
-import { Box } from "../Box/Box";
 import { useState } from "react";
+import { Box } from "../Box/Box";
+import { ScrollArea } from "./ScrollArea";
 
 /**
  * A scrollable area with a custom scrollbar to match the rest of the design system.
@@ -36,7 +36,7 @@ export const Default: Story = {
 						ipsumLorem ipsumLorem ipsumLorem ipsum Lorem ipsumLorem
 						ipsumLorem ipsumLorem ipsumLorem ipsumLorem ipsumLorem
 						ipsumLorem ipsumLorem ipsum
-					</p>
+					</p>,
 				)}
 			</>
 		),
@@ -79,13 +79,15 @@ export const HorizontalScroll: Story = {
 				>
 					{Array(20).fill(
 						<Box
-							backgroundColor="#ccc"
-							padding={5}
-							width={"200px"}
-							height="200px"
+							sx={{
+								backgroundColor: "#ccc",
+								padding: 5,
+								width: "200px",
+								height: "200px",
+							}}
 						>
 							I am Box
-						</Box>
+						</Box>,
 					)}
 				</div>
 			</div>
@@ -158,7 +160,7 @@ export const Callbacks: Story = {
 								ipsumLorem ipsumLorem ipsumLorem ipsum Lorem
 								ipsumLorem ipsumLorem ipsumLorem ipsumLorem
 								ipsumLorem ipsumLorem ipsumLorem ipsum
-							</p>
+							</p>,
 						)}
 					</>
 				</ScrollArea>

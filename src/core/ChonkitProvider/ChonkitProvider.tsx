@@ -23,6 +23,8 @@ interface ChonkitContextValue {
 	theme: Theme;
 	viewportWidth: number;
 	breakpoint: BreakpointKey;
+	isTouchDevice: boolean;
+	treatClicksAsTouch?: boolean;
 	stepRateHz?: number;
 	disableAnimationBlockSnapping?: boolean;
 	geometryObserver: {
@@ -51,6 +53,7 @@ export interface ChonkitProviderProps
 	theme?: Theme | ThemePartial | keyof typeof themes;
 	stepRateHz?: number;
 	disableAnimationBlockSnapping?: boolean;
+	treatClicksAsTouch?: boolean;
 }
 
 type BreakpointKey = keyof Theme["breakpoints"];
@@ -82,6 +85,7 @@ export const ChonkitProvider: React.FC<ChonkitProviderProps> = ({
 	theme: rawTheme,
 	stepRateHz = DEFAULT_STEP_RATE_HZ,
 	disableAnimationBlockSnapping = false,
+	treatClicksAsTouch,
 	...rest
 }) => {
 	const rootAncestor = useRef<HTMLDivElement>(null);
@@ -292,6 +296,14 @@ export const ChonkitProvider: React.FC<ChonkitProviderProps> = ({
 		};
 	}, []);
 
+	const isTouchDevice = React.useMemo(() => {
+		if (typeof window === "undefined") return false;
+		if (typeof window.matchMedia === "function") {
+			return window.matchMedia("(pointer: coarse)").matches;
+		}
+		return "ontouchstart" in window || navigator.maxTouchPoints > 0;
+	}, []);
+
 	const theme =
 		typeof rawTheme === "string"
 			? themes[rawTheme as keyof typeof themes]
@@ -325,6 +337,8 @@ export const ChonkitProvider: React.FC<ChonkitProviderProps> = ({
 				theme,
 				viewportWidth,
 				breakpoint,
+				isTouchDevice,
+				treatClicksAsTouch,
 				stepRateHz,
 				disableAnimationBlockSnapping,
 				geometryObserver,

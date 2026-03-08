@@ -1,0 +1,13 @@
+windows:
+    - name: chonkit
+      root: ~/Sites/chonkit-root/chonkit
+      layout: tiled
+      panes:
+          - commands:
+                - npm run storybook
+          - commands:
+                - npx tsc -b --watch
+          - commands:
+                - npx vitest --watch
+          - commands:
+                - clear

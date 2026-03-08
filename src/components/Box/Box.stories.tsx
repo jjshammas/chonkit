@@ -3,7 +3,9 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { Box } from "./Box";
 
 /**
- * This is just an example
+ * The core of Chonkit, all components use Box under the hood. Box is a highly versatile component that supports a wide variety of visual styles and effects, such as borders, shadows, gradients, and more. It also supports responsive design via breakpoint-based style objects.
+ *
+ * Box supports a `onClickOrTouch` prop to get fast tap handling on touch devices while still using `onClick` on non-touch devices. Alternatively, set the `treatClicksAsTouch` prop on the ChonkitProvider to have all Box onClick handlers use onClickOrTouch behavior.
  */
 const meta = {
 	component: Box,

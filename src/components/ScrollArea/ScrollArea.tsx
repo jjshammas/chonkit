@@ -70,7 +70,8 @@ export type ScrollAreaOnScrollEdge = (
 	scrollValues: ScrollAreaScrollState
 ) => void;
 
-export interface ScrollAreaProps extends WithoutInteractionStates<BoxProps> {
+export interface ScrollAreaProps
+	extends Omit<WithoutInteractionStates<BoxProps>, "onScroll"> {
 	children?: ReactNode;
 	noScrollX?: boolean;
 	noScrollY?: boolean;
@@ -85,18 +86,30 @@ export interface ScrollAreaProps extends WithoutInteractionStates<BoxProps> {
 
 export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
 	const { children, ...rest } = props;
-	const trackTheme = useComponentTheme<
-		"ScrollAreaTrack",
-		ScrollAreaTrackTheme
-	>("ScrollAreaTrack", {}).sx;
-	const thumbTheme = useComponentTheme<
-		"ScrollAreaThumb",
-		ScrollAreaThumbTheme
-	>("ScrollAreaThumb", {}).sx;
+	const trackTheme = (
+		useComponentTheme<
+			"ScrollAreaTrack",
+			ScrollAreaTrackTheme
+		>("ScrollAreaTrack", {}).sx
+	) as ScrollAreaTrackTheme;
+	const thumbTheme = (
+		useComponentTheme<
+			"ScrollAreaThumb",
+			ScrollAreaThumbTheme
+		>("ScrollAreaThumb", {}).sx
+	) as ScrollAreaThumbTheme;
 
-	if (!trackTheme.size) trackTheme.size = "10px";
-	if (!thumbTheme.size) thumbTheme.size = "10px";
-	const trackGap = trackTheme.size;
+	const {
+		size: trackSize = "10px",
+		...trackSxRest
+	} = trackTheme;
+	const {
+		size: thumbSize = "10px",
+		...thumbSxRest
+	} = thumbTheme;
+	const trackSx = trackSxRest as BoxProps["sx"];
+	const thumbSx = thumbSxRest as BoxProps["sx"];
+	const trackGap = trackSize;
 
 	const handleScroll = rest.onScroll
 		? ((eventOrValues: unknown, prevValues?: unknown) => {
@@ -175,8 +188,8 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
 							{...restProps}
 							ref={elementRef}
 							sx={{
-								...trackTheme,
-								width: trackTheme.size,
+								...trackSx,
+								width: trackSize,
 							}}
 							containerProps={{
 								style: {
@@ -197,8 +210,8 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
 							{...restProps}
 							ref={elementRef}
 							sx={{
-								...trackTheme,
-								height: trackTheme.size,
+								...trackSx,
+								height: trackSize,
 							}}
 							containerProps={{
 								style: {
@@ -219,8 +232,8 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
 							{...restProps}
 							ref={elementRef}
 							sx={{
-								...thumbTheme,
-								width: thumbTheme.size,
+								...thumbSx,
+								width: thumbSize,
 							}}
 							containerProps={{
 								style: {
@@ -242,8 +255,8 @@ export const ScrollArea: React.FC<ScrollAreaProps> = (props) => {
 							{...restProps}
 							ref={elementRef}
 							sx={{
-								...thumbTheme,
-								height: thumbTheme.size,
+								...thumbSx,
+								height: thumbSize,
 							}}
 							containerProps={{
 								style: {

@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
+import { Button } from "@/components/Button/Button";
 import { ChonkitProvider } from "../ChonkitProvider/ChonkitProvider";
 import { LightingProvider } from "./LightingProvider";
-import { Button } from "@/components/Button/Button";
 
 /**
  * A wrapping component that allows you to define the lighting direction for effects like emboss and bevels.<br />
@@ -53,17 +53,24 @@ export const Default: Story = {
 					}}
 				>
 					<span style={{ width: "90px" }}>Bevel:</span>
-					<Button borderRadius={2} bevelHighlightSize={1}>
+					<Button
+						sx={{
+							borderRadius: 2,
+							bevelHighlightSize: 1,
+						}}
+					>
 						Highlight 1
 					</Button>
 					<Button
-						borderRadius={2}
-						bevelHighlightSize={2}
-						bevelShadowSize={2}
+						sx={{
+							borderRadius: 2,
+							bevelHighlightSize: 2,
+							bevelShadowSize: 2,
+						}}
 					>
 						Highlight+Shadow 2
 					</Button>
-					<Button borderRadius={2} bevelShadowSize={3}>
+					<Button sx={{ borderRadius: 2, bevelShadowSize: 3 }}>
 						Shadow 3
 					</Button>
 				</div>
@@ -77,17 +84,19 @@ export const Default: Story = {
 					}}
 				>
 					<span style={{ width: "90px" }}>Emboss:</span>
-					<Button borderRadius={2} embossHighlightSize={1}>
+					<Button sx={{ borderRadius: 2, embossHighlightSize: 1 }}>
 						Highlight 1
 					</Button>
 					<Button
-						borderRadius={2}
-						embossHighlightSize={2}
-						embossShadowSize={2}
+						sx={{
+							borderRadius: 2,
+							embossHighlightSize: 2,
+							embossShadowSize: 2,
+						}}
 					>
 						Highlight+Shadow 2
 					</Button>
-					<Button borderRadius={2} embossShadowSize={3}>
+					<Button sx={{ borderRadius: 2, embossShadowSize: 3 }}>
 						Shadow 3
 					</Button>
 				</div>
@@ -101,9 +110,11 @@ export const Nested: Story = {
 		children: (
 			<>
 				<Button
-					borderRadius={2}
-					bevelHighlightSize={2}
-					bevelShadowSize={2}
+					sx={{
+						borderRadius: 2,
+						bevelHighlightSize: 2,
+						bevelShadowSize: 2,
+					}}
 				>
 					Controlled by provider 1
 				</Button>
@@ -116,9 +127,11 @@ export const Nested: Story = {
 						}}
 					>
 						<Button
-							borderRadius={2}
-							bevelHighlightSize={2}
-							bevelShadowSize={2}
+							sx={{
+								borderRadius: 2,
+								bevelHighlightSize: 2,
+								bevelShadowSize: 2,
+							}}
 						>
 							Controlled by provider 2 (static 225 degrees)
 						</Button>
