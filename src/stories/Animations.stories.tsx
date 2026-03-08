@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
 import { AnimatedBox } from "@/components/AnimatedBox/AnimatedBox";
 import { ChonkitProvider } from "@/core/ChonkitProvider/ChonkitProvider";

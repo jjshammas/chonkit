@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
 import { Box } from "./Box";
 
@@ -219,21 +219,6 @@ export const WithPositioningAttributes: Story = {
 	},
 };
 
-export const Ex: Story = {
-	args: {
-		sx: {
-			background: "#4865d8",
-			color: "#fff",
-			padding: "6px",
-			borderRadius: 3,
-			embossHighlightSize: 1,
-			embossShadowSize: 1,
-			borderWidth: 1,
-			borderColor: "#000",
-		},
-		children: "This Box has positioning attributes",
-	},
-};
 /**
  * The sx prop supports responsive design via breakpoint objects.
  * Provide an object with breakpoints (xs, sm, md, lg, xl, 2xl) as keys and values for each breakpoint.

@@ -10,7 +10,7 @@
 		"sourceMap": true, // Generate source maps.
 		"outDir": "dist", // Output directory for compiled code.
 		"strict": true, // Enable strict type checking options.
-		"moduleResolution": "node", // Use Node's module resolution.
+		"moduleResolution": "bundler", // Required for modern ESM package exports used by Storybook 10.
 		"resolveJsonModule": true, // Allow importing JSON files.
 		"isolatedModules": true, // Ensure each file can be transpiled independently.
 		"esModuleInterop": true, // Smooth interoperability with CommonJS modules.

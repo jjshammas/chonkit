@@ -1,12 +1,53 @@
-import React from "react";
-import type { Preview } from "@storybook/react";
+import type { Preview } from "@storybook/react-vite";
+import { STATE_KEYS } from "../src/components/Box/createVisualStyle";
 import { ChonkitProvider } from "../src/core/ChonkitProvider/ChonkitProvider";
 import {
 	LightingDirection,
 	LightingProvider,
 } from "../src/core/LightingProvider/LightingProvider";
-import { STATE_KEYS } from "../src/components/Box/createVisualStyle";
 import "../src/index.css";
+
+const CK_GLOBAL_TYPES = {
+	gridVisible: {
+		name: "Grid",
+		description: "Toggle the design grid overlay.",
+		toolbar: {
+			title: "Grid",
+			dynamicTitle: true,
+			icon: "grid",
+			items: [
+				{ value: "on", title: "On" },
+				{ value: "off", title: "Off" },
+			],
+		},
+	},
+	gridSize: {
+		name: "Grid Size",
+		description: "Set the global block size used by ChonkitProvider.",
+		toolbar: {
+			title: "Grid Size",
+			dynamicTitle: true,
+			icon: "ruler",
+			items: ["1", "1.5", "2", "3", "5", "10"],
+		},
+	},
+	lightingDirection: {
+		name: "Lighting",
+		description: "Set the global lighting direction.",
+		toolbar: {
+			title: "Lighting",
+			dynamicTitle: true,
+			icon: "sun",
+			items: ["0", "45", "90", "135", "180", "225", "270", "315"],
+		},
+	},
+} satisfies NonNullable<Preview["globalTypes"]>;
+
+const CK_DEFAULT_GLOBALS = {
+	gridVisible: "off",
+	gridSize: "2",
+	lightingDirection: "90",
+} as const;
 
 const preview: Preview = {
 	tags: ["autodocs"],
@@ -17,6 +58,16 @@ const preview: Preview = {
 				date: /Date$/i,
 			},
 		},
+
+		docs: {
+			codePanel: true,
+		},
+
+		options: {
+			storySort: {
+				order: ["Introduction", "*"],
+			},
+		},
 	},
 	argTypes: {
 		...STATE_KEYS.reduce((acc, key) => {
@@ -25,7 +76,7 @@ const preview: Preview = {
 					type: "object",
 				},
 				description: `A set of props to override when the component is in the "${key.substring(
-					1
+					1,
 				)}" state.`,
 				if: {
 					arg: key,
@@ -35,29 +86,8 @@ const preview: Preview = {
 			return acc;
 		}, {}),
 	},
-	globalTypes: {
-		gridVisible: {
-			toolbar: {
-				title: "Grid",
-				items: ["on", "off"],
-			},
-		},
-		gridSize: {
-			toolbar: {
-				title: "Grid Size",
-				items: ["1", "1.5", "2", "3", "5", "10"],
-			},
-		},
-		lightingDirection: {
-			toolbar: {
-				title: "Lighting",
-				items: ["0", "45", "90", "135", "180", "225", "270", "315"],
-			},
-		},
-	},
-	initialGlobals: {
-		gridVisible: "off",
-	},
+	globalTypes: CK_GLOBAL_TYPES,
+	initialGlobals: CK_DEFAULT_GLOBALS,
 	decorators: [
 		(Story, context) => {
 			const disableWrapper = context.parameters?.disableWrapper;
@@ -80,7 +110,7 @@ const preview: Preview = {
 						direction={
 							context.globals.lightingDirection
 								? (Number(
-										context.globals.lightingDirection
+										context.globals.lightingDirection,
 									) as LightingDirection)
 								: 90
 						}

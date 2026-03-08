@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
 import {
 	Description,
@@ -7,7 +7,7 @@ import {
 	Stories,
 	Subtitle,
 	Title,
-} from "@storybook/addon-docs";
+} from "@storybook/addon-docs/blocks";
 
 import React from "react";
 import { Box } from "./Box";
